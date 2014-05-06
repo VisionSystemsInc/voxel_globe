@@ -1,0 +1,3 @@
+[submodule "vxl_src"]
+	path = vxl_src
+	url = /home/andy/mnt/fileserver/projects/NGA_P2/NGA_P2.git
