@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}VSI Meta 4{% endblock %}
+
+{% block includes %}
+    <script src="/static/cesium/Cesium/Cesium.js"></script>
+    
+    <!-- Include the client side javascript code -->
+    <script src="/static/js/imageView.js"></script>
+    <script src="/static/js/mapView.js"></script>
+    <style>
+      @import url(/static/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css);
+      
+      #mainContainer {
+      	display:inline-block;
+      	position:relative;
+        height: 100%;
+        width: 100%;
+      }
+      
+      #mapContainer {
+      	vertical-align:top;
+/*        background-color: red; */
+      	display:inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+      #imageContainer {
+        vertical-align:top;
+      	display:inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+            
+      #imageToolbar  {
+      	height: 19%;
+      	width: 100%
+      }
+      
+      #mapToolbar {
+      	height: 19%;
+      	width: 100%
+      }   
+                               
+      #imageWidget {
+        position: relative;
+        text-align:center;        
+        height: 80%;
+        min-height: 80%;
+        width: 100%;
+        margin: 0;
+        overflow: auto;
+        padding: 0;
+      } 
+                         
+      #mapWidget {
+        position: relative;
+        height: 700px;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+
+    </style>
+{% endblock %}
+
+{% block javascript %}
+		$('#imageToolbar').html("Added some HTML using jquery!");
+		 var map = new Cesium.CesiumWidget('mapWidget');
+   
+   /*var widget = new Cesium.CesiumWidget('mapWidget', {
+    imageryProvider : new Cesium.ArcGisMapServerImageryProvider({
+        url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
+    })
+   });*/ 
+   
+   /*var map = new Cesium.CesiumWidget('mapWidget');
+   map.centralBody.terrainProvider = new Cesium.CesiumTerrainProvider({
+       url : 'http://cesiumjs.org/smallterrain'
+   });*/
+      
+   var scene = map.scene;
+   var ellipsoid = Cesium.Ellipsoid.WGS84;
+   var west = Cesium.Math.toRadians(-77.0);
+   var south = Cesium.Math.toRadians(38.0);
+   var east = Cesium.Math.toRadians(-72.0);
+   var north = Cesium.Math.toRadians(42.0);
+
+   var extent = new Cesium.Rectangle(west, south, east, north);
+   scene.camera.viewRectangle(extent, ellipsoid);
+   
+{% endblock %}
+
+{% block pageTitle %}VSI Meta 4{% endblock %}
+
+{% block content %}
+
+<div id="mainContainer">
+	<div id="imageContainer">
+		<div id="imageToolbar"></div>
+		<div id="imageWidget">
+			<div style="width:auto;height:auto;background-color:green;">
+			<img src="/static/images/eiffel-tower-day.jpg"><img>
+			</div>
+		</div>
+	</div>
+
+	<div id="mapContainer">
+		<div id="mapToolbar">Header stuff.....</div>
+		<div id="mapWidget">
+		<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas>
+		</div>
+	</div>
+</div>
+ 
+{% endblock %}
+
+
+
