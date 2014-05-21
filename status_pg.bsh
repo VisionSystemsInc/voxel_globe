@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source npr.env $1
+
+pg_isready -d ${DATABASE_NAME}

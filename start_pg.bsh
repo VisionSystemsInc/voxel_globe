@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source npr.env $1
+
+postgres ${POSTGRES_FLAGS} > ${DATABASE_LOG} 2>&1 &
+
+

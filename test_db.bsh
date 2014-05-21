@@ -1,0 +1,53 @@
+#!/bin/bash
+
+function print_head()
+{
+  n=${#1}
+  echo
+  echo $1
+  for q in {1..$n}; do
+    sleep 0
+  done
+}
+
+#set -xv
+set +e
+declare -i ERR=0
+
+source npr.env TEST
+
+mkdir -p ${DATABASE_DIR} ; ERR+=$?
+initdb ${INITDB_FLAGS} ; ERR+=$?
+postgres ${POSTGRES_FLAGS} > ${DATABASE_LOG} 2>&1 &
+#tail -f ${DATABASE_LOG} &
+until pg_isready ${PGREADY_FLAGS}; do
+  echo "Waiting for database to start"
+  sleep 0.1
+done
+
+createdb ${CREATEDB_FLAGS} ; ERR+=$?
+echo "Adding PostGIS Extentions"
+echo "-------------------------"
+psql ${PSQL_FLAGS} -c 'CREATE EXTENSION postgis;'; ERR+=$?
+psql ${PSQL_FLAGS} -c 'CREATE EXTENSION postgis_topology;'; ERR+=$?
+psql ${PSQL_FLAGS} -c 'CREATE EXTENSION fuzzystrmatch;'; ERR+=$?
+psql ${PSQL_FLAGS} -c 'CREATE EXTENSION postgis_tiger_geocoder;'; ERR+=$?
+echo
+echo "Listing table"
+echo "-------------"
+psql ${PSQL_FLAGS} -c '\d' | cat; ERR+=$?
+echo
+echo "Installed Extensions"
+echo "--------------------"
+psql ${PSQL_FLAGS} -c 'SELECT name, default_version,installed_version FROM pg_available_extensions'; ERR+=$?
+
+kill -INT `head -n 1 ${DATABASE_DIR}/postmaster.pid` ; ERR+=$?
+
+\grep -Hin -A 3 -B 3 --color error ${DATABASE_LOG}
+
+echo
+echo "Cleaning up"
+echo
+\rm -r ${DATABASE_DIR} ; ERR+=$?
+
+echo "Error count is $ERR (should be 0)"
