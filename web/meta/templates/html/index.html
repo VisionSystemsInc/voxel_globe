@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}VSI Meta 4{% endblock %}
+
+{% block includes %}
+    <script src="/static/cesium/Cesium/Cesium.js"></script>
+	<script src="/static/openseadragon/openseadragon.js"></script>
+{% endblock %}
+		
+{% block javascript %}
+	    var viewer = OpenSeadragon({
+	        id: "openseadragon1",
+	        prefixUrl: "/static/openseadragon/images/",
+	       	tileSources: 
+	            [{ 
+		     	/* Image:  {
+		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+		            Url: "http://cache.zoom.it/content/WwI0_files/",
+		            TileSize: "254", 
+		            Overlap: "1", 
+		            Format: "jpg", 
+		            ServerFormat: "Default",
+		            Size: { 
+		                Width: "5816",
+		                Height: "3961"
+		            } 
+		            Image:  {
+		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+		            Url: "http://cache.zoom.it/content/h_files/",
+		            TileSize: "254", 
+		            Overlap: "1", 
+		            Format: "jpg", 
+		            ServerFormat: "Default",
+		            Size: { 
+		                Width: "4013",
+		                Height: "2405"
+		            }
+		            */
+		            Image:  {
+		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
+		            Url: "http://cache.zoom.it/content/LfZn_files/",
+		            TileSize: "254", 
+		            Overlap: "1", 
+		            Format: "jpg", 
+		            ServerFormat: "Default",
+		            Size: { 
+		                Width: "2560",
+		                Height: "1600"
+		            }
+		        }
+		    }] 
+	       	//tileSources: "http://cache.zoom.it/content/h.dzi"
+	    });    
+{% endblock %}
+
+{% block pageTitle %}VSI Meta 4{% endblock %}
+
+{% block content %}
+  <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+{% endblock %}
+
+</html>
