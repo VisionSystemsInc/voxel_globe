@@ -10,8 +10,9 @@ _script="$(readlink -f ${BASH_SOURCE[0]})"
  
 #Delete the script name from $_script
 export META_HOME="$(dirname $_script)"
+export PYTHON_LOC=$META_HOME/../external/bin_Windows_x86_64/python
 
 echo Initializing environment Using NGA META HOME = $META_HOME
 
-export PATH=$PATH:$META_HOME/../external/src/django/django/bin
-export PYTHONPATH=$PYTHONPATH:$META_HOME/../external/src/django
+export PATH=$PYTHON_LOC:$PATH
+export PYTHONPATH=$PYTHON_LOC:$PYTHONPATH
