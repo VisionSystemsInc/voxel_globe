@@ -1,7 +1,9 @@
-from django.conf.urls import include, url
-from django.contrib import admin
+from django.conf.urls import patterns, include, url
 
-urlpatterns = [
+from django.contrib import admin
+admin.autodiscover()
+
+urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'nga.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
@@ -9,4 +11,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     #url(r'^meta/', include('meta.urls')),
     url(r'^$', include('meta.urls')),
-]
+
+)
