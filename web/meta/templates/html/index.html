@@ -5,11 +5,84 @@
 {% block includes %}
     <script src="/static/cesium/Cesium/Cesium.js"></script>
 	<script src="/static/openseadragon/openseadragon.js"></script>
+    
+    <!-- Include the client side javascript code -->
+    <script src="/static/js/imageView.js"></script>
+    <script src="/static/js/mapView.js"></script>
+    <style>
+      @import url(/static/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css);
+      
+      #mainContainer {
+        vertical-align:top;
+      	display:inline-block;
+      	position:relative;
+        height: 100%;
+        width: 100%;
+      }
+      
+      #mapContainer {
+      	vertical-align:top;
+/*        background-color: red; */
+      	display:inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+      #imageContainer {
+        vertical-align:top;
+      	display:inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0;
+        overflow: auto;
+        padding: 0;
+      }
+            
+      #imageToolbar  {
+        vertical-align:top;
+      	height: 19%;
+      	width: 100%
+      }
+      
+      #mapToolbar {
+        vertical-align:top;
+      	height: 19%;
+      	width: 100%
+      }   
+                               
+      #imageWidget {
+        /*background-color:red;*/
+        position: relative;
+        vertical-align:top;
+        /*text-align:center;*/
+        vertical-align:top;        
+        height: 600px;
+        width: 100%;
+        margin: 0;
+        overflow: auto;
+        padding: 0;
+      } 
+                         
+      #mapWidget {
+        vertical-align:top;
+        position: relative;
+        height: 700px;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+
+    </style>
 {% endblock %}
 		
 {% block javascript %}
 	    var viewer = OpenSeadragon({
-	        id: "openseadragon1",
+	        id: "imageWidget",
 	        prefixUrl: "/static/openseadragon/images/",
 	       	tileSources: 
 	            [{ 
@@ -51,12 +124,51 @@
 		    }] 
 	       	//tileSources: "http://cache.zoom.it/content/h.dzi"
 	    });    
+	    
+	    
+	    $('#imageToolbar').html("Added some HTML using jquery!");
+		 var map = new Cesium.CesiumWidget('mapWidget');
+   
+   /*var widget = new Cesium.CesiumWidget('mapWidget', {
+    imageryProvider : new Cesium.ArcGisMapServerImageryProvider({
+        url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
+    })
+   });*/ 
+   
+   /*var map = new Cesium.CesiumWidget('mapWidget');
+   map.centralBody.terrainProvider = new Cesium.CesiumTerrainProvider({
+       url : 'http://cesiumjs.org/smallterrain'
+   });*/
+      
+   var scene = map.scene;
+   var ellipsoid = Cesium.Ellipsoid.WGS84;
+   var west = Cesium.Math.toRadians(2.29);
+   var south = Cesium.Math.toRadians(48.855);
+   var east = Cesium.Math.toRadians(2.297);
+   var north = Cesium.Math.toRadians(48.86);
+
+   var extent = new Cesium.Rectangle(west, south, east, north);
+   scene.camera.viewRectangle(extent, ellipsoid);
+   
 {% endblock %}
 
 {% block pageTitle %}VSI Meta 4{% endblock %}
 
 {% block content %}
-  <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
-{% endblock %}
+  
+<div id="mainContainer">
+	<div id="imageContainer">
+		<div id="imageToolbar"></div>
+		<div id="imageWidget">
+		</div>
+	</div>
 
-</html>
+	<div id="mapContainer">
+		<div id="mapToolbar">Header stuff.....</div>
+		<div id="mapWidget">
+		<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas>
+		</div>
+	</div>
+</div>
+ 
+{% endblock %}
