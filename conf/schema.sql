@@ -1,9 +1,6 @@
 DROP DATABASE "spacedb";
 CREATE DATABASE "spacedb"
-/*  WITH OWNER "postgres"*/
-  ENCODING 'UTF8'
-  LC_COLLATE = 'en_US.UTF-8'
-  LC_CTYPE = 'en_US.UTF-8';
+/*  WITH OWNER "postgres"*/;
 /*!40100 DEFAULT CHARACTER SET utf8 */
 \c spacedb
 -- MySQL dump 10.13  Distrib 5.6.12, for Win64 (x86_64)

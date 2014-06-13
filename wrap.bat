@@ -15,7 +15,7 @@ if "%1"=="start_httpd" (
   set HOMEPATH=%CONF_PATH%
   rabbitmq-server  > %LOG_DIR%/rabbitmq_out.txt 2> %LOG_DIR%/rabbitmq_err.txt
 ) else if "%1"=="start_postgresql" (
-  postgresql > %LOG_DIR%/postgresql_out.txt 2> %LOG_DIR%/postgresql_err.txt
+  postgres -D %DATABASE_DIR% -p %DATABASE_PORT% > %LOG_DIR%/postgresql_out.txt 2> %LOG_DIR%/postgresql_err.txt
 ) else if "%1"=="start_flower" (
   flower > %LOG_DIR%/flower_out.txt 2> %LOG_DIR%/flower_err.txt
 ) else %INSTALL_DIR%/wrap.bat %*

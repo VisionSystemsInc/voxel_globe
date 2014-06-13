@@ -1,6 +1,6 @@
 @echo off
 
-set SERVICES=httpd flower celery rabbitmq
+set SERVICES=httpd flower celery rabbitmq postgresql
 
 setlocal
 
