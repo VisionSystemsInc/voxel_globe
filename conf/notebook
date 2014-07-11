@@ -1,0 +1,10 @@
+PID_FILE="${PID_DIR}/notebook.pid"
+LOCK_FILE="${LOCK_DIR}/notebook"
+
+PYTHON_BIN="${ROAM_DIR}/python"
+NOTEBOOK_BIN="${BINDIR}/ipython"
+NOTEBOOK_OPTIONS="notebook --pylab=inline --no-browser --port=${NOTEBOOK_PORT}"
+NOTEBOOK_BIN=${ROAM_DIR}/ipython
+
+NOTEBOOK_USER=andy
+NOTEBOOK_GROUP=andy

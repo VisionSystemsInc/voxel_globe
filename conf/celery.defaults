@@ -1,0 +1,18 @@
+if [ `id -u` == 0 ]; then
+  DEFAULT_USER=${CELERY_USER}
+  CELERYD_GROUP=${DAEMON_GROUP}
+else
+  DEFAULT_USER=`id -u -n`
+  CELERYD_GROUP=`id -g -n`
+fi
+
+DEFAULT_PID_FILE="${PID_DIR}/celery/%n_$(basename $0).pid"
+DEFAULT_LOG_FILE="${LOG_DIR}/celery_%n_$(basename $0).log"
+DEFAULT_LOG_LEVEL="DEBUG"
+DEFAULT_NODES="${CELERY_DEFAULT_NODES}"
+DEFAULT_CELERYD="-m celery worker --detach"
+
+PYTHON_BIN=${ROAM_DIR}/python
+CELERY_BIN=${BINDIR}/celery
+
+CELERY_CREATE_DIRS=1

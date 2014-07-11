@@ -1,0 +1,32 @@
+#!/bin/bash
+
+##HTTPD=/usr/sbin/httpd.worker
+#HTTPD=${INSTALL_DIR}/roam/httpd
+#OPTIONS="-f ${PROJECT_ROOT}/conf/httpd.conf"
+##HTTPD_LANG=C
+#PIDFILE=${INSTALL_DIR}/var/run/httpd.pid
+#LOCKFILE=${INSTALL_DIR}/var/lock/subsys/httpd
+#
+#if [ $(id -u) -ne 0 ]; then
+#  OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
+#  export HTTPD_PORT=HTTPD_UNPRIVLEDGED_PORT
+#  export HTTPD_SSL_PORT=HTTPD_UNPRIVLEDGED_SSL_PORT
+#fi
+
+APACHECTL=${ROAM_DIR}/apachectl
+HTTPD=${ROAM_DIR}/httpd.worker
+PIDFILE=${PID_DIR}/httpd.pid
+LOCKFILE=${LOCALSTATEDIR}/lock/subsys/http
+HTTPD_LANG="C"
+STOP_TIMEOUT=10
+OPTIONS="-d ${APACHE_DIR} -f ${HTTPD_CONF}"
+
+if [ $(id -u) -ne 0 ]; then
+  OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
+  export HTTPD_PORT=${HTTPD_UNPRIVLEDGED_PORT}
+  export HTTPD_SSL_PORT=${HTTPD_UNPRIVLEDGED_SSL_PORT}
+
+  HTTPD_USER=`id -u -n`
+  HTTPD_GROUP=`id -g -n`
+fi
+

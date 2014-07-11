@@ -1,0 +1,5 @@
+PID_FILE="${PID_DIR}/flower.pid"
+LOCK_FILE="${LOCK_DIR}/flower"
+
+PYTHON_BIN="${ROAM_DIR}/python"
+FLOWER_BIN="${BINDIR}/flower"
