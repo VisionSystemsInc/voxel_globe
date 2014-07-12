@@ -18,5 +18,7 @@ if "%1"=="start_httpd" (
   postgres -D %DATABASE_DIR% -p %DATABASE_PORT% > %LOG_DIR%/postgresql_out.txt 2> %LOG_DIR%/postgresql_err.txt
 ) else if "%1"=="start_flower" (
   flower > %LOG_DIR%/flower_out.txt 2> %LOG_DIR%/flower_err.txt
+) else if "%1"=="start_notebook" (
+  ipython notebook --no-browser --port=%NOTEBOOK_PORT% > %LOG_DIR%/notebook_out.txt 2> %LOG_DIR%/notebook_err.txt
 ) else %INSTALL_DIR%/wrap.bat %*
 
