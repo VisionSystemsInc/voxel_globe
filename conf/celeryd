@@ -6,8 +6,8 @@ else
   CELERYD_GROUP=`id -g -n`
 fi
 
-DEFAULT_PID_FILE="${PID_DIR}/celery/%n_$(basename $0).pid"
-DEFAULT_LOG_FILE="${LOG_DIR}/celery_%n_$(basename $0).log"
+DEFAULT_PID_FILE="${CELERY_PID_DIR}/%n_$(basename $0).pid"
+DEFAULT_LOG_FILE="${CELERY_LOG_DIR}/celery_%n_$(basename $0).log"
 DEFAULT_LOG_LEVEL="DEBUG"
 DEFAULT_NODES="${CELERY_DEFAULT_NODES}"
 DEFAULT_CELERYD="-m celery worker --detach"

@@ -4,10 +4,10 @@ PGPORT=${POSTGRESQL_PORT}
 PGDATA=${POSTGRESQL_DATABASE}
 PGLOG=${POSTGRESQL_LOG}
 # Log file for pg_upgrade
-PGUPLOG=${POSTGRESQL_LOG}.upgrade
+PGUPLOG=${POSTGRESQL_LOG_DIR}/upgrade.log
 
-pidfile=${PID_DIR}/postgresql.pid
-lockfile=${LOCALSTATEDIR}/lock/subsys/postgresql
+pidfile=${POSTGRESQL_PID_DIR}/postgresql.pid
+lockfile=${POSTGRESQL_LOCK_DIR}/postgresql
 
 PG_USER=${POSTGRESQL_USER}
 PG_GROUP=${DAEMON_GROUP}
