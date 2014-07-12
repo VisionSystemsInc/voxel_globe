@@ -21,7 +21,7 @@ export LOG_DIR=${HTTPD_LOG_DIR}
 
 HTTPD_LANG="C"
 STOP_TIMEOUT=10
-OPTIONS="-d ${APACHE_DIR} -f ${HTTPD_CONF}"
+OPTIONS="-DLinux -d ${APACHE_DIR} -f ${HTTPD_CONF}"
 
 if [ $(id -u) -ne 0 ]; then
   OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
