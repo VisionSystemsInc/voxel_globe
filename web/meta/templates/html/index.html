@@ -3,172 +3,245 @@
 {% block title %}VSI Meta 4{% endblock %}
 
 {% block includes %}
-    <script src="/static/cesium/Cesium/Cesium.js"></script>
-	<script src="/static/openseadragon/openseadragon.js"></script>
-    
-    <!-- Include the client side javascript code -->
-    <script src="/static/js/imageView.js"></script>
-    <script src="/static/js/mapView.js"></script>
-    <style>
-      @import url(/static/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css);
-      
-      #mainContainer {
-        vertical-align:top;
-      	display:inline-block;
-      	position:relative;
+<link rel="stylesheet" href="/static/OpenLayers-3.0.0-gamma.2/css/ol.css" type="text/css">
+
+<script src="/static/cesium/Cesium/Cesium.js"></script>
+<script src="/static/OpenLayers-3.0.0-gamma.2/build/ol.js"></script>
+
+<!-- Include the client side javascript code -->
+<script src="/static/js/imageView.js"></script>
+<script src="/static/js/mapView.js"></script>
+<style>
+    @import url(/static/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css);
+
+    #mainContainer {
+        vertical-align: top;
+        display: inline-block;
+        position: relative;
         height: 100%;
         width: 100%;
-      }
-      
-      #mapContainer {
-      	vertical-align:top;
-/*        background-color: red; */
-      	display:inline-block;
+    }
+
+    #mapContainer {
+        vertical-align: top;
+        /*        background-color: red; */
+        display: inline-block;
         position: relative;
         height: 98%;
         width: 49%;
         margin: 0;
         overflow: hidden;
         padding: 0;
-      }
-      #imageContainer {
-        vertical-align:top;
-      	display:inline-block;
+    }
+    #imageContainer {
+        vertical-align: top;
+        display: inline-block;
         position: relative;
         height: 98%;
         width: 49%;
         margin: 0;
         overflow: auto;
         padding: 0;
-      }
-            
-      #imageToolbar  {
-        vertical-align:top;
-      	height: 19%;
-      	width: 100%
-      }
-      
-      #mapToolbar {
-        vertical-align:top;
-      	height: 19%;
-      	width: 100%
-      }   
-                               
-      #imageWidget {
+    }
+
+    #imageToolbar {
+        vertical-align: top;
+        height: 19%;
+        width: 100%
+    }
+
+    #mapToolbar {
+        vertical-align: top;
+        height: 19%;
+        width: 100%
+    }
+
+    #imageWidget {
         /*background-color:red;*/
         position: relative;
-        vertical-align:top;
+        vertical-align: top;
         /*text-align:center;*/
-        vertical-align:top;        
+        vertical-align: top;
         height: 600px;
         width: 100%;
         margin: 0;
         overflow: auto;
         padding: 0;
-      } 
-                         
-      #mapWidget {
-        vertical-align:top;
+    }
+
+    #mapWidget {
+        vertical-align: top;
         position: relative;
-        height: 700px;
+        height: 600px;
         width: 100%;
         margin: 0;
         overflow: hidden;
         padding: 0;
-      }
+    }
 
-    </style>
+</style>
 {% endblock %}
-		
-{% block javascript %}
-	    var viewer = OpenSeadragon({
-	        id: "imageWidget",
-	        prefixUrl: "/static/openseadragon/images/",
-	       	tileSources: 
-	            [{ 
-		     	/* Image:  {
-		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
-		            Url: "http://cache.zoom.it/content/WwI0_files/",
-		            TileSize: "254", 
-		            Overlap: "1", 
-		            Format: "jpg", 
-		            ServerFormat: "Default",
-		            Size: { 
-		                Width: "5816",
-		                Height: "3961"
-		            } 
-		            Image:  {
-		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
-		            Url: "http://cache.zoom.it/content/h_files/",
-		            TileSize: "254", 
-		            Overlap: "1", 
-		            Format: "jpg", 
-		            ServerFormat: "Default",
-		            Size: { 
-		                Width: "4013",
-		                Height: "2405"
-		            }
-		            */
-		            Image:  {
-		            xmlns: "http://schemas.microsoft.com/deepzoom/2009",
-		            Url: "http://cache.zoom.it/content/LfZn_files/",
-		            TileSize: "254", 
-		            Overlap: "1", 
-		            Format: "jpg", 
-		            ServerFormat: "Default",
-		            Size: { 
-		                Width: "2560",
-		                Height: "1600"
-		            }
-		        }
-		    }] 
-	       	//tileSources: "http://cache.zoom.it/content/h.dzi"
-	    });    
-	    
-	    
-	    $('#imageToolbar').html("Added some HTML using jquery!");
-		 var map = new Cesium.CesiumWidget('mapWidget');
-   
-   /*var widget = new Cesium.CesiumWidget('mapWidget', {
-    imageryProvider : new Cesium.ArcGisMapServerImageryProvider({
-        url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
-    })
-   });*/ 
-   
-   /*var map = new Cesium.CesiumWidget('mapWidget');
-   map.centralBody.terrainProvider = new Cesium.CesiumTerrainProvider({
-       url : 'http://cesiumjs.org/smallterrain'
-   });*/
-      
-   var scene = map.scene;
-   var ellipsoid = Cesium.Ellipsoid.WGS84;
-   var west = Cesium.Math.toRadians(2.29);
-   var south = Cesium.Math.toRadians(48.855);
-   var east = Cesium.Math.toRadians(2.297);
-   var north = Cesium.Math.toRadians(48.86);
 
-   var extent = new Cesium.Rectangle(west, south, east, north);
-   scene.camera.viewRectangle(extent, ellipsoid);
-   
+{%block globalfunctions %}
+// Global functions defined outside of the jquery document ready function can be put here.
+{% endblock %}
+
+{% block javascript %}
+
+var imgWidth = 999;
+var imgHeight = 749;
+var url = 'http://localhost:8000/static/images/camelot-UK_2012OxfordUniversity-42/';
+var crossOrigin = 'anonymous';
+
+var imgCenter = [imgWidth / 2, - imgHeight / 2];
+
+// Maps always need a projection, but Zoomify layers are not geo-referenced, and
+// are only measured in pixels.  So, we create a fake projection that the map
+// can use to properly display the layer.
+var proj = new ol.proj.Projection({
+  code: 'ZOOMIFY',
+  units: 'pixels',
+  extent: [0, 0, imgWidth, imgHeight]
+});
+
+var imgsource = new ol.source.Zoomify({
+  url: url,
+  size: [imgWidth, imgHeight],
+  crossOrigin: crossOrigin
+});
+
+var imgtile = new ol.layer.Tile({
+      source: imgsource
+    });
+
+var drawsource = new ol.source.Vector();
+
+var vector = new ol.layer.Vector({
+  source: drawsource,
+  style: new ol.style.Style({
+    fill: new ol.style.Fill({
+      color: 'rgba(255, 255, 255, 0.2)'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#ffcc33',
+      width: 2
+    }),
+    image: new ol.style.Circle({
+      radius: 7,
+      fill: new ol.style.Fill({
+        color: '#ffcc33'
+      })
+    })
+  })
+});
+
+var select = new ol.interaction.Select();
+
+var modify = new ol.interaction.Modify({
+  features: select.getFeatures()
+});
+
+var map = new ol.Map({
+  interactions: ol.interaction.defaults().extend([select, modify]),
+  layers: [ imgtile, vector ],
+  target: 'imageWidget',
+  view: new ol.View({
+    projection: proj,
+    center: imgCenter,
+    zoom: 1
+  })
+});
+
+var typeSelect = document.getElementById('drawType');
+
+var draw; // global so we can remove it later
+function addInteraction() {
+  var value = typeSelect.value;
+  if (value !== 'None') {
+    draw = new ol.interaction.Draw({
+      source: drawsource,
+      type: /** @type {ol.geom.GeometryType} */ (value)
+    });
+    map.addInteraction(draw);
+  }
+}
+
+/**
+ * Let user change the geometry type.
+ * @param {Event} e Change event.
+ */
+typeSelect.onchange = function(e) {
+  map.removeInteraction(draw);
+  addInteraction();
+};
+
+addInteraction();
+
+/*var cesiummap = new Cesium.CesiumWidget('mapWidget');*/
+
+/*var widget = new Cesium.CesiumWidget('mapWidget', {
+imageryProvider : new Cesium.ArcGisMapServerImageryProvider({
+url : 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
+})
+});*/
+
+/*var map = new Cesium.CesiumWidget('mapWidget');
+map.centralBody.terrainProvider = new Cesium.CesiumTerrainProvider({
+url : 'http://cesiumjs.org/smallterrain'
+});*/
+
+/*var scene = cesiummap.scene;
+var ellipsoid = Cesium.Ellipsoid.WGS84;
+var west = Cesium.Math.toRadians(2.29);
+var south = Cesium.Math.toRadians(48.855);
+var east = Cesium.Math.toRadians(2.297);
+var north = Cesium.Math.toRadians(48.86);
+
+var extent = new Cesium.Rectangle(west, south, east, north);
+scene.camera.viewRectangle(extent, ellipsoid);*/
+
+
+$('#printDebugBtn').click(function(e) {
+   var text = "Feature Vector Contents<br>";
+   var farray = drawsource.getFeatures();
+   for (var i=0; i < farray.length; i++) {
+       text += farray[i].getGeometry().getCoordinates() + '<br>';
+   }
+   $('#debugInfo').html(text); 
+});
+
 {% endblock %}
 
 {% block pageTitle %}VSI Meta 4{% endblock %}
 
 {% block content %}
-  
-<div id="mainContainer">
-	<div id="imageContainer">
-		<div id="imageToolbar"></div>
-		<div id="imageWidget">
-		</div>
-	</div>
 
-	<div id="mapContainer">
-		<div id="mapToolbar">Header stuff.....</div>
-		<div id="mapWidget">
-		<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas>
-		</div>
-	</div>
+<div id="mainContainer">
+    <div id="imageContainer">
+        <div id="imageToolbar">
+            <label>Add Geometry &nbsp;</label>
+              <select id="drawType">
+                <option value="None">None</option>
+                <option value="Point">Point</option>
+                <option value="LineString">LineString</option>
+                <option value="Polygon">Polygon</option>
+              </select>
+              <span ></span>
+              <button id="printDebugBtn" style="margin:0px 200px;font-size:80%">Print Debug Info</button>
+        </div>
+        <div id="imageWidget"></div>
+    </div>
+
+    <div id="mapContainer">
+        <div id="mapToolbar">
+            The Map will be here
+        </div>
+        <div id="mapWidget">
+            <!--<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas> -->
+        </div>
+    </div>
 </div>
- 
+<div id="debugInfo">
+</div>
+
 {% endblock %}
