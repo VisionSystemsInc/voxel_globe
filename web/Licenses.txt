@@ -1,0 +1,40 @@
+
+Django:
+
+	https://www.djangoproject.com/
+
+	BSD License
+
+JQuery:
+
+	https://jquery.org/license/
+
+	MIT License
+
+Cesium:
+
+	http://cesiumjs.org/
+
+	Apache 2.0 license
+
+OpenLayers:
+
+	http://ol3js.org/
+
+	Code licensed under the 2-Clause BSD. All documentation CC BY 3.0. 
+
+ZoomifyImage:
+
+	http://sourceforge.net/projects/zoomifyimage/
+
+	GNU General Public License version 2.0 (GPLv2)
+
+Apache 2.4
+	
+	http://httpd.apache.org/docs/2.4/license.html	
+	
+	Apache 2.0 license
+
+
+
+
