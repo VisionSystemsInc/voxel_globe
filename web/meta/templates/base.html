@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/css/styles.css" />
     <title>{% block title %}NGA Meta4{% endblock %}</title>
     <script>
+    {% block globalfunctions %} {% endblock %}
     $(document).ready(function() {
     	$("button").button();
         $("select").addClass("ui-widget");
