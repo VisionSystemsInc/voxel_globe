@@ -32,3 +32,4 @@ if [ $(id -u) -ne 0 ]; then
   HTTPD_GROUP=`id -g -n`
 fi
 
+PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${CELERY_PROCESSORS}

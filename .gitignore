@@ -7,3 +7,4 @@ npr2.bat
 conf/.erlang.cookie
 conf/rabbit*
 np2r.bat
+np2r.env
