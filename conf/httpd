@@ -16,6 +16,7 @@
 APACHECTL=${ROAM_DIR}/apachectl
 HTTPD=${ROAM_DIR}/httpd.worker
 PIDFILE=${HTTPD_PID_DIR}/httpd.pid
+export PIDFILE
 LOCKFILE=${HTTPD_LOCK_DIR}/http
 export LOG_DIR=${HTTPD_LOG_DIR}
 
@@ -32,4 +33,3 @@ if [ $(id -u) -ne 0 ]; then
   HTTPD_GROUP=`id -g -n`
 fi
 
-PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${CELERY_PROCESSORS}

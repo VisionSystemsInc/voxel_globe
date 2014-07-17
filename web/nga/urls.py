@@ -3,6 +3,9 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
+#handler400 = 'world.views.error400page'
+#AEN: THIS doesn't work!
+
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'nga.views.home', name='home'),
@@ -10,6 +13,6 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     #url(r'^meta/', include('meta.urls')),
-    url(r'^$', include('meta.urls')),
-
+    url(r'^world/', include('world.urls', namespace='world')),
+    url(r'^$', include('meta.urls', namespace='meta')),
 )

@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+if 'LIBDIR' in os.environ:
+  GEOS_LIBRARY_PATH=os.path.join(os.environ['LIBDIR'],'libgeos_c.so')
+#Really only needed for Linux, I think
+#GDAL_LIBRARY_PATH='/opt/users/andy/projects/ngap2/code/external/bin_Linux_x86_64/lib/libgdal.so'
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -24,7 +29,7 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -36,7 +41,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'meta'
+    'django.contrib.gis',
+    'meta',
+    'world'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,8 +65,11 @@ WSGI_APPLICATION = 'nga.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'geodjango',
+        'USER': 'andy',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
     }
 }
 
@@ -80,4 +90,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = os.environ['NPR_DJANGO_STATIC_DIR'];
+STATIC_ROOT = os.environ['NPR_DJANGO_STATIC_ROOT'];
+MEDIA_ROOT = os.environ['NPR_DJANGO_MEDIA_ROOT'];
+
+TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]

@@ -36,5 +36,8 @@ Apache 2.4
 	Apache 2.0 license
 
 
+World Border Shapefile
 
+	http://thematicmapping.org/downloads/TM_WORLD_BORDERS-0.3.zip
 
+	Creatice Commons Attribution-Share Alike License 3.0 - http://creativecommons.org/licenses/by-sa/3.0/

@@ -19,8 +19,8 @@ CELERY_CREATE_DIRS=1
 
 CELERYD_CHDIR=${CELERY_PROCESSORS}
 CELERY_APP=tasks
-#CELERYD_OPTS="--time-limit=300 --concurrency=`nproc`"
-CELERYD_OPTS="--time-limit=300 --concurrency=3"
+CELERYD_OPTS="--time-limit=300 --concurrency=`nproc`"
+#CELERYD_OPTS="--time-limit=300 --concurrency=3"
 
-export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${NPR_DJANGO_SITE}
+export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${NPR_DJANGO_PROJECT}
 export DJANGO_SETTINGS_MODULE=${NPR_DJANGO_SETTINGS_MODULE}

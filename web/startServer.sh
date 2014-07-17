@@ -1,3 +1,4 @@
 #!/bin/bash
 
-python.exe manage.py runserver 0.0.0.0:8000
+./start_manage.bsh runserver 0.0.0.0:8000
+  
