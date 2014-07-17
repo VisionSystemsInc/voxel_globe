@@ -1,5 +1,0 @@
-#!/bin/bash
-
-source npr.env
-
-less +F ${DATABASE_LOG}

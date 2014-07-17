@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source npr.env $1
-
-mkdir -p ${DATABASE_DIR}
-initdb ${INITDB_FLAGS}
-

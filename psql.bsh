@@ -1,7 +1,0 @@
-#!/bin/bash
-
-source npr.env $1
-shift 1
-
-psql ${PSQL_FLAGS} "${@}"
-

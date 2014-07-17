@@ -1,6 +1,0 @@
-#!/bin/bash
-
-source npr.env $1
-
-createdb ${CREATEDB_FLAGS}
-
