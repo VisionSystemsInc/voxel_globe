@@ -1,6 +1,5 @@
 *~
 *.py[co]
-data
 logs
 *.lnk
 npr2.bat
