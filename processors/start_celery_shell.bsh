@@ -1,7 +1,16 @@
+#!/bin/bash
+
 . ../np2r.env
 
 export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${NPR_DJANGO_SITE}
 export DJANGO_SETTINGS_MODULE=${NPR_DJANGO_SETTINGS_MODULE}
 
-ipython "${@}"
+os=`uname`
+
+if [ "${os:0:5}" == "CYGWI" ]
+then
+  python.exe "${@}"
+else
+  ipython "${@}"
+end
 
