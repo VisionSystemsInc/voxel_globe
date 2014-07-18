@@ -1,5 +1,7 @@
 @echo off
 
+call %~dp0/np2r.bat
+
 set SERVICES=httpd flower celery rabbitmq postgresql notebook
 
 setlocal

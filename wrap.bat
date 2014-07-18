@@ -8,8 +8,7 @@ call %~dp0\np2r.bat %*
 
 if "%1"=="start_httpd" (
   set PIDFILE=%NPR_HTTPD_PID_DIR%/httpd.pid
-  httpd -f %NPR_HTTPD_CONF% > %NPR_LOG_DIR%/httpd_out.txt
-REM  2> %NPR_LOG_DIR%/httpd_err.txt
+  httpd -f %NPR_HTTPD_CONF% > %NPR_LOG_DIR%/httpd_out.txt 2> %NPR_LOG_DIR%/httpd_err.txt
 ) else if "%1"=="start_celery" (
   REM cd %NPR_CELERY_PROCESSORS%
   if "%PYTHONPATH%" == "%^PYTHONPATH%" (
@@ -22,8 +21,11 @@ REM  2> %NPR_LOG_DIR%/httpd_err.txt
   set GDAL_DATA=%GDAL_DATA%
   
   set DJANGO_SETTINGS_MODULE=%NPR_DJANGO_SETTINGS_MODULE%
-  celery worker -A tasks --logfile=%NPR_LOG_DIR%/celery_log.txt --loglevel=INFO 
-  REM> %NPR_LOG_DIR%/celery_out.txt 2> %NPR_LOG_DIR%/celery_err.txt
+  
+  pg_isready -p %NPR_POSTGRESQL_PORT%
+  REM This is NOT ENOUGH, I need a while loop waiting until true or a max, TIMEOUT DOENS'T WORK!
+
+  celery worker -A tasks --logfile=%NPR_LOG_DIR%/celery_log.txt --loglevel=INFO > %NPR_LOG_DIR%/celery_out.txt 2> %NPR_LOG_DIR%/celery_err.txt
 ) else if "%1"=="start_rabbitmq" (
   set RABBITMQ_BASE=%NPR_PROJECT_ROOT%
   set RABBITMQ_LOG_BASE=%NPR_RABBITMQ_SERVER_LOG_DIR%
