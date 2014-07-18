@@ -57,8 +57,7 @@ goto done
 :stop
 for %%t in (%TASKS%) do (
   schtasks /end /TN %%t_daemon
-  if /i "%%t"=="rabbitmq" taskkill /im epmd.exe /f
-  REM if "%%t"=="rabbitmq" %EMPD_IM% -kill
+  if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
 )
 goto done
 

@@ -67,7 +67,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'geodjango',
-        'USER': 'andy',
+        'USER': os.environ['NPR_POSTGRESQL_USER'],
         'PASSWORD': '',
         'HOST': '127.0.0.1',
     }
