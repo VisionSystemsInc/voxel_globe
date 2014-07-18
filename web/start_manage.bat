@@ -1,4 +1,7 @@
+@echo off
+
+call %~dp0..\np2r.bat %*
 
 set PYTHONPATH=%NPR_CELERY_PROCESSORS%
 
-..\wrap.bat python manage.py %*
+%~dp0..\wrap.bat python %~dp0manage.py %*

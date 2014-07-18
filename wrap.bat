@@ -1,10 +1,12 @@
 @echo off
 setlocal
-%~d0
-REM cd %~dp0
-REM AEN I hope I don't need this anymore
 
 call %~dp0\np2r.bat %*
+
+if "%argC%" == "0" (
+  %~d0
+  cd %~dp0
+)
 
 if "%1"=="start_httpd" (
   set PIDFILE=%NPR_HTTPD_PID_DIR%/httpd.pid
