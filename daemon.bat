@@ -40,11 +40,19 @@ if "%NEXT%"=="usage" goto usage
 :check_elevated
 net session >nul 2>&1
 if not %errorLevel% == 0 (
-  echo Elevated permissions...
-  ECHO Set UAC = CreateObject^("Shell.Application"^) > "%~dp0\OEgetPrivileges.vbs" 
-  ECHO UAC.ShellExecute "%~f0", "%*", "", "runas", 1 >> "%~dp0\OEgetPrivileges.vbs" 
-  "%~dp0\OEgetPrivileges.vbs" 
-  exit /B 1
+  if "%attemptElevate%" NEQ "1" (
+    set attemptElevate=1
+    echo Elevated permissions...
+    ECHO Set UAC = CreateObject^("Shell.Application"^) > "%~dp0\OEgetPrivileges.vbs" 
+    ECHO UAC.ShellExecute "%~f0", "%*", "", "runas", 1 >> "%~dp0\OEgetPrivileges.vbs" 
+    "%~dp0\OEgetPrivileges.vbs" 
+    exit /B 1
+  ) else (
+    echo ERROR: Elevation of permissinos FAILED. I will attempt to run the command anyway ^
+but it will probably fail. Please make sure you are running from an user account ^
+that has the capability of elevate ^(UAC permissions^), not neccesarily an ^
+admin account.
+  )
 )
 del %~dp0\OEgetPrivileges.vbs > NUL 2>&1
 
