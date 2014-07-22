@@ -39,4 +39,4 @@ if "%1"=="start_httpd" (
   ipython notebook --no-browser --port=%NPR_NOTEBOOK_PORT% > %NPR_LOG_DIR%/notebook_out.log 2> %NPR_LOG_DIR%/notebook_err.log
 ) else %NPR_INSTALL_DIR%/wrap.bat %*
 
-local
+endlocal
