@@ -32,7 +32,7 @@ if "%1"=="start_httpd" (
   set ERLANG_HOME=%NPR_RABBITMQ_ERLANG_HOME%
   rabbitmq-server  > %NPR_LOG_DIR%/rabbitmq_out.log 2> %NPR_LOG_DIR%/rabbitmq_err.log
 ) else if "%1"=="start_postgresql" (
-  postgres -D %NPR_POSTGRESQL_DATABASE% -p %NPR_POSTGRESQL_PORT% > %NPR_LOG_DIR%/postgresql_out.log 2> %NPR_LOG_DIR%/postgresql_err.log
+  postgres -D %NPR_POSTGRESQL_DATABASE% %NPR_POSTGRESQL_SERVER_CREDENTIALS% > %NPR_LOG_DIR%/postgresql_out.log 2> %NPR_LOG_DIR%/postgresql_err.log
 ) else if "%1"=="start_flower" (
   flower > %NPR_LOG_DIR%/flower_out.log 2> %NPR_LOG_DIR%/flower_err.log
 ) else if "%1"=="start_notebook" (

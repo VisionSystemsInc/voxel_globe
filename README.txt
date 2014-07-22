@@ -5,6 +5,7 @@ Table of contents
  -Linux
  --Setup
  -Windows 
+ --Short version
  --Upgrading
  --Setup
  ---Database
@@ -14,7 +15,8 @@ Table of contents
  --Stopping services
  --Checking services
  --Controlling Individual Services
- -Special Windows Notes - Problems and solutions for windows
+ --Special Windows Notes - Problems and solutions for windows
+ -Testing
 
 ====================
 = General Checkout =
@@ -40,6 +42,16 @@ Coming soon
 ===========
 = WINDOWS =
 ===========
+
+Short version - Install
+-----------------------
+1) ./external/bin_Windows_NT_x86_64/build.bat
+2) ./external/bin_Windows_NT_x86_64/setup.bat
+3) ./data/initialize_database.bat
+4) ./start all.lnk
+
+Instructions
+============
 
 Instructions will be given graphically (usually double clicking a bat file when
 possible). All graphical examples can be done command line.
@@ -72,7 +84,10 @@ Windows - Setup
 
 Windows Setting up the database
 -------------------------------
-To setup the database to a known regression configuration, run ./data/setup.bat
+To setup the database to a known regression configuration, run 
+./data/initialize_database.bat If you ever run this again, saying Y will
+erase the ENTIRE django database, while not saying Y will cause duplicate
+entries. It's your choice.
 
 Windows Removal
 ---------------
@@ -123,6 +138,7 @@ usage.
 
 Current service names are:
 	httpd flower celery rabbitmq postgresql notebook
+        all is a special name, that triggers all services
 Current service commands are:
 	start stop restart status
 
@@ -145,6 +161,23 @@ connection parameters.
  around it is to 
     1) NOT put the any files needed by these serives on a network drive, 
     or 
-    2) Create a unprivledged user account, change all the tasks to "Run only when logged in" as that user
-       Note, this is less secure than running as the Windows NT Network account, which was designed just
-       for this purpose.
+    2) Create a unprivledged user account, change all the tasks to "Run only 
+       when logged in" as that user. Note, this is less secure than running as
+       the Windows NT Network account, which was designed just for this purpose
+
+
+===========
+= Testing =
+===========
+
+1) Start all daemons
+2) Open Web Browser
+3) Go to http://localhost:80 (or 8080 if running unprivledged in Linux)
+   - Test out gui, it should be working now
+4) Go to http://localhost:80/world
+   - Should dump out environment
+5) http://localhost:80/world/search
+   - Should see search form
+6) Enter something easy like 33 by 37.245
+   - Should see results for Syria, most importantly the area should be 
+     reported as 18378
