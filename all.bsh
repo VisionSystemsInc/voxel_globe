@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $0)/env.sh
+source $(dirname $0)/np2r.env
 
 services=(postgresql rabbitmq-server celeryd flower httpd notebook)
 
