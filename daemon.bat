@@ -68,7 +68,7 @@ goto done
 for %%t in (%TASKS%) do (
   schtasks /end /TN %%t_daemon
   if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
-  if /i "%%t"=="postgresql" pg_ctl -D %NPR_POSTGRESQL_DATABASE% stop 2>1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
+  if /i "%%t"=="postgresql" pg_ctl -D %NPR_POSTGRESQL_DATABASE% -m fast stop 2>1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
 )
 goto done
 

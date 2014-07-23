@@ -181,3 +181,11 @@ connection parameters.
 6) Enter something easy like 33 by 37.245
    - Should see results for Syria, most importantly the area should be 
      reported as 18378
+7) http://localhost:80/admin/
+   - Log in and view the databases
+8) http://localhost:5555/
+   - You should see one Worker
+9) http://localhost:8888/
+   - IPython Notebook (experimental, works local host ONLY right now)
+10) https://localhost:443 (8443 if running unprivledged in Linux)
+   - Same as Steps 3-7
