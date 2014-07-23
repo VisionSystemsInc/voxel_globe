@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 class WorldBorder(models.Model):
     # Regular Django fields corresponding to the attributes in the
     # world borders shapefile.
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     area = models.IntegerField()
     pop2005 = models.IntegerField('Population 2005')
     fips = models.CharField('FIPS Code', max_length=2)
