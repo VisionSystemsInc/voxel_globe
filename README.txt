@@ -17,6 +17,7 @@ Table of contents
  --Controlling Individual Services
  --Special Windows Notes - Problems and solutions for windows
  -Testing
+ -FAQ
 
 ====================
 = General Checkout =
@@ -189,3 +190,16 @@ connection parameters.
    - IPython Notebook (experimental, works local host ONLY right now)
 10) https://localhost:443 (8443 if running unprivledged in Linux)
    - Same as Steps 3-7
+
+=======
+= FAQ =
+=======
+
+Q1) Why does it say
+django.core.exceptions.ImproperlyConfigured: Cannot determine PostGIS version for \
+database "geodjango". GeoDjango requires at least PostGIS version 1.3. Was the
+database created from a spatial database template?
+
+A1) This is a poorly conditioned error message that occurs when the database is
+    not running when geodjango attempts to run. This most often occurs when a
+    django model is loaded by python, and the database has not started yet.
