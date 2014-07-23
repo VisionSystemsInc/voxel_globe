@@ -37,19 +37,20 @@ def result2(request, lat, lon='33.00'):
     #AEN: THIS DOESN'T WORK! Maybe it was, but was just sending an empty page. I WANT THE DEFAULT DAMNIT!
     #raise Http404; #This SHOULD be 400
 
-  pt = 'POINT(%s %s)' % (lat, lon)
+  pt = 'POINT(%s %s)' % (lon, lat)
   country = WorldBorder.objects.filter(mpoly__contains=pt);
 
+  countriesNearUS = filter(lambda x:x.closeToUS(), WorldBorder.objects.all())
+  
   if not country:
     context = RequestContext(request, {'lat':lat, 'lon':lon,
                                        'countriesNearUnitedStates':countriesNearUS})
+    return render(request, 'world/result.html', context);
 
   d=Distance(m=500);
   touching = WorldBorder.objects.filter(mpoly__touches=country[0].mpoly)
   neighbors = WorldBorder.objects.filter(mpoly__distance_lte=(country[0].mpoly, d))
   neighbors = filter(lambda x: x.id!=country[0].id, neighbors);
-
-  countriesNearUS = filter(lambda x:x.closeToUS(), WorldBorder.objects.all())
 
   t = tasks.getArea.delay(country[0].id);
   t.wait(); #This should be something far more complicated, like a long pull,Perhaps USING rabbitmq to check based on the task.id!
@@ -62,10 +63,9 @@ def result2(request, lat, lon='33.00'):
   
   return render(request, 'world/result.html', context);
 
-  template = loader.get_template('world/result.html')
-  s= template.render(context);
+#  template = loader.get_template('world/result.html')
+#  s= template.render(context);
   
-
   '''if not country:
     s+= "{None}\n\n"
   else:
@@ -85,4 +85,4 @@ def result2(request, lat, lon='33.00'):
   s += "&lt;static query&gt; Countries near the United States\n"
   s += '\n'.join(map(lambda x:x.name, countriesNearUS))'''
 
-  return HttpResponse(s)
+#  return HttpResponse(s)

@@ -1,8 +1,10 @@
 @echo off
 
-set SERVICES=httpd flower celery rabbitmq postgresql notebook
-
 setlocal
+
+call %~dp0/np2r.bat
+
+set SERVICES=httpd flower celery rabbitmq postgresql notebook
 
 set argC=0
 for %%x in (%*) do Set /A argC+=1
@@ -38,11 +40,19 @@ if "%NEXT%"=="usage" goto usage
 :check_elevated
 net session >nul 2>&1
 if not %errorLevel% == 0 (
-  echo Elevated permissions...
-  ECHO Set UAC = CreateObject^("Shell.Application"^) > "%~dp0\OEgetPrivileges.vbs" 
-  ECHO UAC.ShellExecute "%~f0", "%*", "", "runas", 1 >> "%~dp0\OEgetPrivileges.vbs" 
-  "%~dp0\OEgetPrivileges.vbs" 
-  exit /B 1
+  if "%attemptElevate%" NEQ "1" (
+    set attemptElevate=1
+    echo Elevated permissions...
+    ECHO Set UAC = CreateObject^("Shell.Application"^) > "%~dp0\OEgetPrivileges.vbs" 
+    ECHO UAC.ShellExecute "%~f0", "%*", "", "runas", 1 >> "%~dp0\OEgetPrivileges.vbs" 
+    "%~dp0\OEgetPrivileges.vbs" 
+    exit /B 1
+  ) else (
+    echo ERROR: Elevation of permissinos FAILED. I will attempt to run the command anyway ^
+but it will probably fail. Please make sure you are running from an user account ^
+that has the capability of elevate ^(UAC permissions^), not neccesarily an ^
+admin account.
+  )
 )
 del %~dp0\OEgetPrivileges.vbs > NUL 2>&1
 
@@ -57,8 +67,8 @@ goto done
 :stop
 for %%t in (%TASKS%) do (
   schtasks /end /TN %%t_daemon
-  if /i "%%t"=="rabbitmq" taskkill /im epmd.exe /f
-  REM if "%%t"=="rabbitmq" %EMPD_IM% -kill
+  if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
+  if /i "%%t"=="postgresql" pg_ctl -D %NPR_POSTGRESQL_DATABASE% -m fast stop 2>1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
 )
 goto done
 
@@ -78,3 +88,5 @@ echo   where service_name can be [%SERVICES%]
 :done
 echo %cmdcmdline% | find /i "%~0" >nul
 if not errorlevel 1 pause
+
+endlocal

@@ -4,8 +4,8 @@
 
 <form action="{% url 'world:result' %}" method="post"/>
 {% csrf_token %}
-Lon: <input type=text" name="lon"/><br/>
-Lat: <input type=text" name="lat"/><br/>
+Lat (S is negative): <input type=text" name="lat"/><br/>
+Lon (E is negative): <input type=text" name="lon"/><br/>
 <input type="submit" value="Lookup"/>
 </form>
 
