@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    #url(r'^meta/', include('meta.urls')),
     url(r'^world/', include('world.urls', namespace='world')),
     url(r'^$', include('meta.urls', namespace='meta')),
+    url(r'^meta/', include('meta.urls', namespace='meta')),
 )

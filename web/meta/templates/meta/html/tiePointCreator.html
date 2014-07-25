@@ -1,0 +1,181 @@
+{% extends "meta/base.html" %}
+{% load staticfiles %}
+
+{% block title %}META4 - Tie Point {% endblock %}
+
+{% block includes %}
+<link rel="stylesheet" href="{% static 'meta/OpenLayers-3.0.0-gamma.2/css/ol.css' %}" type="text/css">
+
+<script src="{% static 'meta/cesium/Cesium/Cesium.js' %}"></script>
+<script src="{% static 'meta/OpenLayers-3.0.0-gamma.2/build/ol.js' %}"></script>
+
+<!-- Include the client side javascript code -->
+<script src="{% static 'meta/js/tiePoint/imageView.js' %}"></script>
+<script src="{% static 'meta/js/tiePoint/mapView.js' %}"></script>
+<style>
+    @import url({% static 'meta/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css' %});
+
+    #mainContainer {
+        vertical-align: top;
+        display: inline-block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
+
+    #mapContainer {
+        vertical-align: top;
+        /*        background-color: red; */
+        display: inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+    }
+    #imageContainer {
+        vertical-align: top;
+        display: inline-block;
+        position: relative;
+        height: 98%;
+        width: 49%;
+        margin: 0px 0px 0px 20px;
+        overflow: auto;
+        padding: 0;
+    }
+
+    #imageToolbar {
+        vertical-align: top;
+        height: 19%;
+        width: 100%
+    }
+
+    #mapToolbar {
+        vertical-align: top;
+        height: 19%;
+        width: 100%
+    }
+
+    #imageWidget {
+        /*background-color:red;*/
+        position: relative;
+        vertical-align: top;
+        /*text-align:center;*/
+        vertical-align: top;
+        height: 600px;
+        width: 100%;
+        margin: 0;
+        overflow: auto;
+        padding: 0;
+    }
+
+    #mapWidget {
+        vertical-align: top;
+        position: relative;
+        height: 600px;
+        width: 100%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+    }
+
+</style>
+{% endblock %}
+
+{%block globalfunctions %}
+// Global functions defined outside of the jquery document ready function can be put here.
+{% endblock %}
+
+{% block javascript %}
+
+$.ajax({
+    type: "GET",
+    url: "/meta/fetchImageList",
+    data: {},
+    success: function(data) {
+        //alert("received json data..." + data);
+        $('#debugInfo').html("");
+        for (var i=0; i < data.length; i++) {
+            $('#sideControlsContent').append(data[i].pk + " : " + data[i].fields.name);
+        }
+    },
+    dataType: 'json'
+});
+
+var imgConfig = {
+    width : 999,
+    height : 749,
+    url: '{% static 'meta/images/camelot-UK_2012OxfordUniversity-42/' %}',
+    divName : "imageWidget"
+}
+
+var mapConfig = {
+    latitude : 51.753523,
+    longitude : -1.253367,
+    zoomLevel : 0.001
+}
+
+var imgEditor = new TiePointEditor(imgConfig);
+var mapViewer = new MapViewer(mapConfig);
+
+imgEditor.initialize();
+mapViewer.initialize();
+
+$('#sideControlsDiv').mousedown(function (e) {
+    $('#sideControlsDiv').toggle();
+    $('#sideControlsContentDiv').toggle("slide", {}, 200);
+});
+
+$('#sideControlsContentDivBtn').mousedown(function (e) {
+    $('#sideControlsContentDiv').toggle("slide", {}, 200);
+    $('#sideControlsDiv').toggle();
+});
+
+{% endblock %}
+        
+{% block pageTitle %}<h2>META4 Tie Point Creator</h2>{% endblock %}
+{% block debugOptions %}<button id="printDebugBtn" style="margin:0px 80px;font-size:80%">Print Debug Info</button>{% endblock %}
+
+{% block content %}
+
+
+<div class="slideout">
+    <div id="sideControlsContentDiv" class="slideout-content" style="display:none;">
+        <div id="sideControlsContentDivBtn" style="float:right; position:absolute; right: 0px; top: 2px; "><img width="20" src="{% static 'meta/icons/gear.png' %}"></img></div>
+        <div id="sideControlsContent">
+             <div id="imageToolbar">
+            <label>Add Geometry &nbsp;</label>
+              <select id="drawType">
+                <option value="None">None</option>
+                <option value="Point">Point</option>
+                <option value="LineString">LineString</option>
+                <option value="Polygon">Polygon</option>
+              </select>
+        </div>
+        </div>
+    </div>
+    <div id="sideControlsDiv" class="slideout-tab"><img width="20" src="{% static 'meta/icons/gear.png' %}" title="Configure the displayed images and tie points."></img></div>
+</div>
+
+<div id="mainContainer" class="main-content">
+    <div id="imageContainer">
+        <div id="imageWidget"></div>
+       
+    </div>
+
+    <div id="mapContainer">
+        <div id="mapToolbar">
+            The Map will be here
+        </div>
+        <div id="mapWidget">
+            <!--<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas> -->
+        </div>
+    </div>
+
+<div id="debugInfo">
+</div>
+
+</div>
+
+{% endblock %}

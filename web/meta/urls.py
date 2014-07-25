@@ -3,5 +3,13 @@ from django.conf.urls import patterns, url
 from meta import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.index, name='index')
+# pages                       
+    url(r'^$', views.index, name='index'),
+    url(r'^imageIngest/$', views.imageIngest, name='imageIngest'),
+    url(r'^tiePointCreator/$', views.tiePointCreator, name='tiePointCreator'),
+    url(r'^voxelCreator/$', views.voxelCreator, name='voxelCreator'),
+    url(r'^voxelWorldViewer/$', views.voxelWorldViewer, name='voxelWorldViewer'),
+
+# json API calls    
+    url(r'^fetchImageList$', views.fetchImageList, name='fetchImageList'),
 )
