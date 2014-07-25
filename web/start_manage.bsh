@@ -2,8 +2,6 @@
 
 . ../np2r.env
 
-export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${CELERY_PROCESSORS}
-
 os=`uname`
 
 if [ "${os:0:5}" == "CYGWI" ]

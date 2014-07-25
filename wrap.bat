@@ -3,7 +3,7 @@ setlocal
 
 call %~dp0\np2r.bat %*
 
-if "%argC%" == "0" (
+if "%NPR_NARG%" == "0" (
   %~d0
   cd %~dp0
 )

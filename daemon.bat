@@ -6,10 +6,10 @@ call %~dp0/np2r.bat
 
 set SERVICES=httpd flower celery rabbitmq postgresql notebook
 
-set argC=0
-for %%x in (%*) do Set /A argC+=1
+set NPR_NARG=0
+for %%x in (%*) do Set /A NPR_NARG+=1
 
-if not "%argC%"=="2" (
+if not "%NPR_NARG%"=="2" (
   echo ERROR: Two arguments only
   goto usage
 )
