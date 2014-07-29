@@ -4,8 +4,6 @@ setlocal
 
 call %~dp0/np2r.bat
 
-set SERVICES=httpd flower celery rabbitmq postgresql notebook
-
 set NPR_NARG=0
 for %%x in (%*) do Set /A NPR_NARG+=1
 
@@ -16,11 +14,11 @@ if not "%NPR_NARG%"=="2" (
 
 ::Special case all
 if /i "%1" == "all" (
-  set TASKS=%SERVICES%
+  set TASKS=%NPR_SERVICES%
   goto valid_service_name
 )
 ::See if any of the names match
-for %%i in (%SERVICES%) do (
+for %%i in (%NPR_SERVICES%) do (
   if /i "%1" == "%%i" (
     set TASKS=%1
     goto valid_service_name
@@ -89,7 +87,7 @@ goto done
 
 :usage
 echo Usages: %0 {service_name} [start^|stop^|restart^|status]
-echo   where service_name can be [%SERVICES%]
+echo   where service_name can be [%NPR_SERVICES%]
 
 :done
 echo %cmdcmdline% | find /i "%~0" >nul

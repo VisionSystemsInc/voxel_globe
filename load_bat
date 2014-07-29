@@ -1,23 +1,10 @@
 #!/bin/false
-# to be sourced only
+# to be sourced only by BASH, not sh!
+# Usage: load_bad common.bat
 
 while read line
 do
-  varName=`\echo $line | \sed -r 's:[ ]*set (.+?)=.*:\1:' -`
-  varValue=`\echo $line | \sed -r 's:[ ]*set .+?=(.*):\1:' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \sed 's|;|:|g' -`
-  newline=`\echo $line | \sed 's:set:export:' - | \sed -r 's:=(.+)$:="\1":' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \sed 's|;|:|g' -`
-                   #    set to export              = to ="", greedy once          %% to ${}, ungreedy global   ; to :
-  #echo $varName
-  #echo 'should be'
-  #echo $varValue
-  eval export $varName=\"$varValue\"
-#eval echo export $varName=\"$varValue\"
-  #echo 'but is'
-  #echo ${!varName}
-done < <(\grep '^[ ]*set' $1)
+  eval $line
+  #eval echo $line
+done < <(\grep '^[ ]*set' $1 | sed 's|;|:|g' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \sed -r 's:[ ]*set (.+?)=(.*):export \1=\\\"\2\\\":' -)
 
-#echo ${VSI_PROJECT_NAME}
-
-#\sed 's:set:export:' $1 | \sed -r 's:=(.+)$:="\1":' - | \perl -pe 's:%(.*?)%:\${\1}:g' -
-
-#set

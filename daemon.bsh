@@ -1,0 +1,27 @@
+#!/bin/bash
+
+source $(dirname $0)/np2r.env
+
+if [ "$#" -lt 2 ]
+then
+  echo "Usages: $0 "'{service_name} [start|stop|restart|status]'
+  echo "  where service_name can be [${NPR_SERVICES}]"
+  exit 1
+fi
+
+if [ "$1" == "all" ]
+then
+  SERVICES=($NPR_SERVICES)
+else
+  SERVICES=($1)
+fi
+shift 1
+
+for s in "${SERVICES[@]}"
+do
+  echo -en "\\033[1;31m"
+  echo -n "Running $1 $s:"
+  echo -e "\\033[0;39m"
+  ${NPR_INIT_DIR}/$s "${@}"
+  echo
+done
