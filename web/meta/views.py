@@ -23,8 +23,11 @@ def voxelWorldViewer(request):
 #
 # API for grabbing data in the database
 #
-def fetchImageList(request):
+def fetchVideoList(request):
     imgs = meta.models.Image.objects.all();    
     return HttpResponse( serializers.serialize('json', imgs) , content_type="application/json");
     
+def fetchGeoPointList(request):    
+    geoPoints = meta.models.GeoTiePoint.objects.all();    
+    return HttpResponse( serializers.serialize('json', geoPoints) , content_type="application/json");
     

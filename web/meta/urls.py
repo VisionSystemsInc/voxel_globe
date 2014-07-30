@@ -11,5 +11,6 @@ urlpatterns = patterns('',
     url(r'^voxelWorldViewer/$', views.voxelWorldViewer, name='voxelWorldViewer'),
 
 # json API calls    
-    url(r'^fetchImageList$', views.fetchImageList, name='fetchImageList'),
+    url(r'^fetchVideoList$', views.fetchVideoList, name='fetchVideoList'),
+    url(r'^fetchGeoPointList$', views.fetchGeoPointList, name='fetchGeoPointList'),
 )
