@@ -10,7 +10,7 @@ set NPR_DAEMON_GROUP=npr
 set NPR_BUILD=%OS%_%ARCH%
 set NPR_EMAIL=andrew.neff@vsi-ri.com
 set NPR_AUTOSTART=0
-set NPR_SERVICES=httpd flower celery rabbitmq postgresql notebook
+set NPR_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
 
 REM ### DIR Settings ###
@@ -86,6 +86,9 @@ set NPR_RABBITMQ_PID_FILE=%NPR_PID_DIR%/rabbitmq_server.pid
 
 set NPR_RABBITMQ_USER=npr_rabbitmq
 set NPR_RABBITMQ_MNESIA_BASE=%NPR_DATABASE_DIR%
+
+REM ##### Image Server Settings #####
+set NPR_IMAGE_SERVER_HOSTNAME=localhost
 
 REM ##### Apache HTTPD Settings ##### 
 set NPR_HTTPD_CONF=%NPR_CONF_DIR%/httpd.conf

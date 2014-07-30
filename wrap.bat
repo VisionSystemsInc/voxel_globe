@@ -12,7 +12,7 @@ if "%1"=="start_httpd" (
   set PIDFILE=%NPR_HTTPD_PID_DIR%/httpd.pid
   if not exist %NPR_HTTPD_LOG_DIR:/=\% mkdir %NPR_HTTPD_LOG_DIR:/=\%
   httpd -f %NPR_HTTPD_CONF% > %NPR_HTTPD_LOG_DIR%/httpd_out.log 2> %NPR_HTTPD_LOG_DIR%/httpd_err.log
-) else if "%1"=="start_celery" (
+) else if "%1"=="start_celeryd" (
  
   :waitfordatabase
   pg_isready %NPR_POSTGRESQL_CREDENTIALS%
