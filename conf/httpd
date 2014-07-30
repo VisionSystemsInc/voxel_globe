@@ -1,11 +1,11 @@
 #!/bin/bash
 
 ##HTTPD=/usr/sbin/httpd.worker
-#HTTPD=${INSTALL_DIR}/roam/httpd
-#OPTIONS="-f ${PROJECT_ROOT}/conf/httpd.conf"
+#HTTPD=${NPR_INSTALL_DIR}/roam/httpd
+#OPTIONS="-f ${NPR_PROJECT_ROOT}/conf/httpd.conf"
 ##HTTPD_LANG=C
-#PIDFILE=${INSTALL_DIR}/var/run/httpd.pid
-#LOCKFILE=${INSTALL_DIR}/var/lock/subsys/httpd
+#PIDFILE=${NPR_INSTALL_DIR}/var/run/httpd.pid
+#LOCKFILE=${NPR_INSTALL_DIR}/var/lock/subsys/httpd
 #
 #if [ $(id -u) -ne 0 ]; then
 #  OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
@@ -13,23 +13,22 @@
 #  export HTTPD_SSL_PORT=HTTPD_UNPRIVLEDGED_SSL_PORT
 #fi
 
-APACHECTL=${ROAM_DIR}/apachectl
-HTTPD=${ROAM_DIR}/httpd.worker
-PIDFILE=${HTTPD_PID_DIR}/httpd.pid
-export PIDFILE
-LOCKFILE=${HTTPD_LOCK_DIR}/http
-export LOG_DIR=${HTTPD_LOG_DIR}
+APACHECTL=${NPR_ROAM_DIR}/apachectl
+HTTPD=${NPR_ROAM_DIR}/httpd.worker
+export PIDFILE=${NPR_HTTPD_PID_DIR}/httpd.pid
+LOCKFILE=${NPR_HTTPD_LOCK_DIR}/http
+export LOG_DIR=${NPR_HTTPD_LOG_DIR}
 
 HTTPD_LANG="C"
 STOP_TIMEOUT=10
-OPTIONS="-DLinux -d ${APACHE_DIR} -f ${HTTPD_CONF}"
+OPTIONS="-DLinux -d ${NPR_HTTPD_DIR} -f ${NPR_HTTPD_CONF}"
 
 if [ $(id -u) -ne 0 ]; then
   OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
-  export HTTPD_PORT=${HTTPD_UNPRIVLEDGED_PORT}
-  export HTTPD_SSL_PORT=${HTTPD_UNPRIVLEDGED_SSL_PORT}
+  export NPR_HTTPD_PORT=${NPR_HTTPD_UNPRIVLEDGED_PORT}
+  export NPR_HTTPD_SSL_PORT=${NPR_HTTPD_UNPRIVLEDGED_SSL_PORT}
 
-  HTTPD_USER=`id -u -n`
-  HTTPD_GROUP=`id -g -n`
+  NPR_HTTPD_DAEMON_USER=`id -u -n`
+  NPR_HTTPD_DAEMON_GROUP=`id -g -n`
 fi
 

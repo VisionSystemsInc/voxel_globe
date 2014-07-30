@@ -1,6 +1,6 @@
 [submodule "vxl_src"]
 	path = vxl_src
-	url = ../NGA_P2.git
+	url = ../vxl_npr.git
 [submodule "external/src"]
 	path = external/src
 	url = ../NGA_P2_external_src.git

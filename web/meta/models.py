@@ -30,6 +30,8 @@ class ImageTiePoint(models.Model):
     #description = models.CharField(max_length=250)
     x = models.FloatField()
     y = models.FloatField()
+
+    userCorrected = models.IntegerField('User Correction', default=0);
     
     image = models.ForeignKey('Image', blank=False)
     geoPoint = models.ForeignKey('GeoTiePoint', null=True, blank=True)

@@ -1,0 +1,10 @@
+#!/bin/false
+# to be sourced only by BASH, not sh!
+# Usage: load_bad common.bat
+
+while read line
+do
+  eval $line
+  #eval echo $line
+done < <(\grep '^[ ]*set' $1 | sed 's|;|:|g' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \sed -r 's:[ ]*set (.+?)=(.*):export \1=\\\"\2\\\":' -)
+

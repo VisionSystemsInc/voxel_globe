@@ -4,23 +4,21 @@ setlocal
 
 call %~dp0/np2r.bat
 
-set SERVICES=httpd flower celery rabbitmq postgresql notebook
+set NPR_NARG=0
+for %%x in (%*) do Set /A NPR_NARG+=1
 
-set argC=0
-for %%x in (%*) do Set /A argC+=1
-
-if not "%argC%"=="2" (
+if not "%NPR_NARG%"=="2" (
   echo ERROR: Two arguments only
   goto usage
 )
 
 ::Special case all
 if /i "%1" == "all" (
-  set TASKS=%SERVICES%
+  set TASKS=%NPR_SERVICES%
   goto valid_service_name
 )
 ::See if any of the names match
-for %%i in (%SERVICES%) do (
+for %%i in (%NPR_SERVICES%) do (
   if /i "%1" == "%%i" (
     set TASKS=%1
     goto valid_service_name
@@ -70,10 +68,10 @@ for %%t in (%TASKS%) do (
   if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
   if /i "%%t"=="postgresql" (
     pg_isready %NPR_POSTGRESQL_CREDENTIALS% > NUL
-	if "%errorlevel%" == "0" (
-	  echo Stray postgresql detected, cleaning up
-	  pg_ctl stop -D %NPR_POSTGRESQL_DATABASE% -m fast 2>1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
-	)
+    if not errorlevel 1 (
+      echo Stray postgresql detected, cleaning up
+      pg_ctl stop -D %NPR_POSTGRESQL_DATABASE% -m fast 2>&1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
+    )
   )
 )
 goto done
@@ -89,7 +87,7 @@ goto done
 
 :usage
 echo Usages: %0 {service_name} [start^|stop^|restart^|status]
-echo   where service_name can be [%SERVICES%]
+echo   where service_name can be [%NPR_SERVICES%]
 
 :done
 echo %cmdcmdline% | find /i "%~0" >nul
