@@ -79,13 +79,13 @@ set NPR_CELERY_LOG_DIR=%NPR_LOG_DIR%/celery
 set NPR_CELERY_LOCK_DIR=%NPR_LOCK_DIR%/celery
 
 REM ##### RABITMQ Settings ##### 
-set NPR_RABBITMQ_SERVER_PID_DIR=%NPR_PID_DIR%/rabbitmq-server
-set NPR_RABBITMQ_SERVER_LOCK_DIR=%NPR_LOCK_DIR%/rabbitmq-server
-set NPR_RABBITMQ_SERVER_LOG_DIR=%NPR_LOG_DIR%/rabbitmq-server
-set NPR_RABBITMQ_SERVER_PID_FILE=%NPR_PID_DIR%/rabbitmq_server.pid
+set NPR_RABBITMQ_PID_DIR=%NPR_PID_DIR%/rabbitmq-server
+set NPR_RABBITMQ_LOCK_DIR=%NPR_LOCK_DIR%/rabbitmq-server
+set NPR_RABBITMQ_LOG_DIR=%NPR_LOG_DIR%/rabbitmq-server
+set NPR_RABBITMQ_PID_FILE=%NPR_PID_DIR%/rabbitmq_server.pid
 
-set NPR_RABBITMQ_SERVER_USER=npr_rabbitmq
-set NPR_RABBITMQ_SERVER_MNESIA_BASE=%NPR_DATABASE_DIR%
+set NPR_RABBITMQ_USER=npr_rabbitmq
+set NPR_RABBITMQ_MNESIA_BASE=%NPR_DATABASE_DIR%
 
 REM ##### Apache HTTPD Settings ##### 
 set NPR_HTTPD_CONF=%NPR_CONF_DIR%/httpd.conf

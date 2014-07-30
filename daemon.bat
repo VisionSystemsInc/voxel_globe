@@ -68,10 +68,10 @@ for %%t in (%TASKS%) do (
   if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
   if /i "%%t"=="postgresql" (
     pg_isready %NPR_POSTGRESQL_CREDENTIALS% > NUL
-	if "%errorlevel%" == "0" (
-	  echo Stray postgresql detected, cleaning up
-	  pg_ctl stop -D %NPR_POSTGRESQL_DATABASE% -m fast 2>1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
-	)
+    if not errorlevel 1 (
+      echo Stray postgresql detected, cleaning up
+      pg_ctl stop -D %NPR_POSTGRESQL_DATABASE% -m fast 2>&1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
+    )
   )
 )
 goto done
