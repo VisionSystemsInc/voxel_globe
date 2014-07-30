@@ -171,9 +171,7 @@ $.ajax({
             $('#correspondenceList').append('<li>' + data[i].fields.name + '</li>');                         
             geoTiePoints.push(geoPt);
         }
-        if (geoTiePoints.length > 0) {
-            initializePage(images[0]);
-        } else {
+        if (geoTiePoints.length == 0) {
             $('#correspondenceList').html("No geographic landmarks found in the database."); 
         }
     },
