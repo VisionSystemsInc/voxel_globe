@@ -1,4 +1,4 @@
-@echo on
+@echo off
 setlocal
 
 call %~dp0\np2r.bat %*

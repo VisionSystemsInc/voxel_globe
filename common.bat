@@ -88,7 +88,10 @@ set NPR_RABBITMQ_USER=npr_rabbitmq
 set NPR_RABBITMQ_MNESIA_BASE=%NPR_DATABASE_DIR%
 
 REM ##### Image Server Settings #####
-set NPR_IMAGE_SERVER_HOSTNAME=localhost
+set NPR_IMAGE_SERVER_HOST=localhost
+set NPR_IMAGE_SERVER_PORT=80
+set NPR_IMAGE_SERVER_AUTHORITY=%NPR_IMAGE_SERVER_HOST%:%NPR_IMAGE_SERVER_PORT%
+REM http://en.wikipedia.org/wiki/URI_scheme#Examples
 
 REM ##### Apache HTTPD Settings ##### 
 set NPR_HTTPD_CONF=%NPR_CONF_DIR%/httpd.conf
