@@ -20,8 +20,18 @@ shift 1
 for s in "${SERVICES[@]}"
 do
   echo -en "\\033[1;31m"
-  echo -n "Running $1 $s:"
+  echo -n "Running $s $1:"
   echo -e "\\033[0;39m"
   ${NPR_INIT_DIR}/$s "${@}"
+
+  if [ "$s" == "postgresql" -a "$1" == "stop" ]
+  then
+    pg_isready ${NPR_POSTGRESQL_CREDENTIALS} 2>&1 > /dev/null
+    if [ "$?" == "0" ]
+    then
+      echo Stray postgresql detected, cleaning up
+      pg_ctl stop -D ${NPR_POSTGRESQL_DATABASE} -m fast 2>&1 >> ${NPR_LOG_DIR}/postgresql_stop_stray.log
+    fi
+  fi
   echo
 done

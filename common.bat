@@ -13,6 +13,15 @@ set NPR_AUTOSTART=0
 set NPR_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
 
+REM Debug flags
+set NPR_DEBUG=1
+REM This flags should ONLY be used in the following lines. Please create a new
+REM Debug flag everytime you need it. NPR_DEBUG is just an easy way to disable
+REM or enable them all at once.
+set NPR_DJANGO_DEBUG=%NPR_DEBUG%
+set NPR_DJANGO_TEMPLATE_DEBUG=%NPR_DEBUG%
+set NPR_CELERY_AUTORELOAD=%NPR_DEBUG%
+
 REM ### DIR Settings ###
 set NPR_CONF_DIR=%NPR_PROJECT_ROOT%/conf
 set NPR_LOG_DIR=%NPR_PROJECT_ROOT%/logs

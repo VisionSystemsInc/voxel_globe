@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 . ../np2r.env
@@ -9,5 +10,5 @@ then
   python.exe "${@}"
 else
   ipython "${@}"
-end
+fi
 

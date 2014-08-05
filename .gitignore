@@ -5,3 +5,6 @@ logs
 npr2.bat
 np2r.bat
 np2r.env
+.project
+.pydevproject
+.settings

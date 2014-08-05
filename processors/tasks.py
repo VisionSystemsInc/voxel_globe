@@ -28,54 +28,58 @@ def getArea(id):
   country = world.models.WorldBorder.objects.get(id=id)
   return country.area;
 
+
+
+
+
 class VipTask(Task):
   abstract = True
   
-  def __createServiceIntanceEntry(self, taskID=None, inputs=None):
-    '''Create initial database entry for service instance, and return the taskID'''
-
+  def __createServiceIntanceEntry(self, inputs=None, user="NAY"):
+    '''Create initial database entry for service instance, and return the ID'''
+    
     serviceInstance = meta.models.ServiceInstance(
                           inputs=json.dumps(inputs),
                           status="Creating",
-                          user="NAY",
-                          serviceName="NAY", #Next TODO
-                          outputs='NAY', taskID='NAY');
+                          user=user,
+                          serviceName=self.name, #Next TODO
+                          outputs='NAY');
     serviceInstance.save();
-    if taskID is None:
-      taskID = serviceInstance.id;
-    serviceInstance.taskID = taskID;
-    serviceInstance.save()
-    return taskID;
+    return str(serviceInstance.id);
     
-  def __updateServiceIntanceEntry(self, output, task_id, status, args=None, kwargs=None):
-###    try:
-###      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
-###    except (ValueError, meta.models.ServiceInstance.DoesNotExist):
-###      #Perhaps the task id is missing or is not the primary key
+  def __updateServiceIntanceEntry(self, output, task_id, status,
+                                        args=None, kwargs=None):
     try:
-###      #Maybe it's the task id, in the case of uuid4
-      serviceInstance = meta.models.ServiceInstance.objects.get(taskID=task_id);
+      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
     except meta.models.ServiceInstance.DoesNotExist:
       #Else it's just missing, create it
       status="Impromptu:"+status;
-      self.__createServiceIntanceEntry(task_id, (args, kwargs));
-      serviceInstance = meta.models.ServiceInstance.objects.get(taskID=task_id);
+      task_id = self.__createServiceIntanceEntry((args, kwargs));
+      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
 
     serviceInstance.outputs = json.dumps(output)
-    serviceInstance.taskID = task_id;
     serviceInstance.status = status;
     serviceInstance.save();
 
   def apply_async(self, args=None, kwargs=None, task_id=None, *args2, **kwargs2):
-    task_id = self.__createServiceIntanceEntry(task_id, (args, kwargs));
+    '''Automatically create task_id's based off of new primary keys in the
+       database. Ignores specified task_id. I decided that was best''' 
+    taskID = self.__createServiceIntanceEntry((args, kwargs));
     
-    return super(VipTask, self).apply_async(args=args, kwargs=kwargs, task_id=task_id, *args2, **kwargs2)
+    return super(VipTask, self).apply_async(args=args, kwargs=kwargs, 
+                                            task_id=taskID, *args2, **kwargs2)
   
-  def apply(self, args=None, kwargs=None, task_id=None, *args2, **kwargs2):
-    ''' Automatically create task_id's based off of new primary keys in the database''' 
-    task_id = self.__createServiceIntanceEntry(task_id, (args, kwargs));
-    
-    return super(VipTask, self).apply(args=args, kwargs=kwargs, task_id=task_id, *args2, **kwargs2)
+  def apply(self, args=None, kwargs=None, *args2, **kwargs2):
+    '''Automatically create task_id's based off of new primary keys in the
+       database. Ignores specified task_id. I decided that was best''' 
+    if kwargs:
+      kwargs.pop('task_id', None); #Remove task_id incase it is specified.
+      #apply is different from apply_async in this manner
+
+    taskID = self.__createServiceIntanceEntry((args, kwargs));
+
+    return super(VipTask, self).apply(args=args, kwargs=kwargs, task_id=taskID,
+                                      *args2, **kwargs2)
   
 #  def after_return(self, status, retval, task_id, args, kwargs, einfo): #, *args2, **kwargs2
   def on_success(self, retval, task_id, args, kwargs):
@@ -83,7 +87,11 @@ class VipTask(Task):
     self.__updateServiceIntanceEntry(retval, task_id, 'Success', args, kwargs);
   
   def on_failure(self, exc, task_id, args, kwargs, einfo):
-    self.__updateServiceIntanceEntry(str(einfo), task_id, 'Failure', args, kwargs);
+    self.__updateServiceIntanceEntry(str(einfo), task_id, 'Failure',
+                                     args, kwargs);
+    
+#  def on_retry(self, exc, task_id, args, kwargs, einfo):
+#    pass
 
 @app.task(base=VipTask)
 def test(abc=None, *args, **kwargs):
@@ -91,30 +99,36 @@ def test(abc=None, *args, **kwargs):
     raise Exception("ouch");
   return 42
 
-@app.task(base=VipTask)
-def add_sample_data():
+@app.task(base=VipTask, bind=True)
+def addImageTiePoint(self, *args, **kwargs):
+  tp = meta.models.ImageTiePoint(*args, **kwargs);
+  tp.service_id = self.request.id;
+
+@app.task(base=VipTask, bind=True)
+def add_sample_data(self):
   print 'Adding Sample data'
   img = meta.models.Image(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
                           numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
                           imageURL='http://%s:%d/static/meta/images/camelot-UK_2012OxfordUniversity-42' % 
-                                   (env['NPR_POSTGRESQL_HOST'], int(env['NPR_HTTPD_PORT'])));
+                                    (env['NPR_POSTGRESQL_HOST'], int(env['NPR_HTTPD_PORT'])));
                                   #I know postgresql here is WRONG, don't care right now, it WILL be image server!
-  img.save();
+  img.service_id = self.request.id;
+  img.save()
 
   tp = meta.models.ImageTiePoint(x=100, y=100, name='Some point', image = img);
-  tp.save();
+  tp.service_id = self.request.id;
   
   gtp = meta.models.GeoTiePoint(name='Some geo point', 
            description='None provided. Just some point trying to make a point in life',
            latitude=51.7534, longitude=-1.2539, altitude=89.2,
            apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
+  gtp.service_id = self.request.id;
   gtp.save();
   
-  tp = meta.models.ImageTiePoint.objects.get(name='Some point');
-  #This previous command is NOT neccesary, since tp is still in memory, 
-  #HOWEVER I wanted to provice an update example
   tp.geoPoint = gtp;
   tp.save();
+  
+  return [img.id, tp.id, gtp.id] 
 
 #TODO
 #Define Add task

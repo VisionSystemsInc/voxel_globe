@@ -19,8 +19,9 @@ CELERY_CREATE_DIRS=1
 
 CELERYD_CHDIR=${NPR_CELERY_PROCESSORS}
 CELERY_APP=tasks
-CELERYD_OPTS="--time-limit=300 --concurrency=`nproc`"
-#CELERYD_OPTS="--time-limit=300 --concurrency=3"
+CELERYD_OPTS="--time-limit=300 --concurrency=${NPR_NUMBER_CORES}"
 
-#export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${NPR_DJANGO_PROJECT}
-#export DJANGO_SETTINGS_MODULE=${NPR_DJANGO_SETTINGS_MODULE}
+if [ "${NPR_CELERY_AUTORELOAD+foo}" == "foo" ]
+then
+  CELERYD_OPTS="${CELERYD_OPTS} --autoreload"
+fi
