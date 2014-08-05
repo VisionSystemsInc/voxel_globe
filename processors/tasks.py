@@ -28,62 +28,62 @@ def getArea(id):
   country = world.models.WorldBorder.objects.get(id=id)
   return country.area;
 
-def serviceWrap(service):
-  def inner(*args, **kwargs): 
-    preTask(args, kwargs);
-    outputs = service(*args, **kwargs);
-    postTask(outputs);
-    return outputs;
-  return inner;
-
-def preTask(args, kwargs):
-  ##TODO: Add Parameters instance
-  print 'args are', args
-  print 'kwargs are', kwargs
-  pass;
-
-def postTask(outputs):
-  ##TODO Tie results to Parameters, update output,
-  print "All done!"
-
 class VipTask(Task):
   abstract = True
   
-  def __getTaskId(self, inputs=None):
+  def __createServiceIntanceEntry(self, taskID=None, inputs=None):
+    '''Create initial database entry for service instance, and return the taskID'''
+
     serviceInstance = meta.models.ServiceInstance(
                           inputs=json.dumps(inputs),
-                          outputs='NAY', step=0, name='NAY');
+                          status="Creating",
+                          user="NAY",
+                          serviceName="NAY", #Next TODO
+                          outputs='NAY', taskID='NAY');
     serviceInstance.save();
-    return serviceInstance.id;
+    if taskID is None:
+      taskID = serviceInstance.id;
+    serviceInstance.taskID = taskID;
+    serviceInstance.save()
+    return taskID;
+    
+  def __updateServiceIntanceEntry(self, output, task_id, status, args=None, kwargs=None):
+###    try:
+###      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
+###    except (ValueError, meta.models.ServiceInstance.DoesNotExist):
+###      #Perhaps the task id is missing or is not the primary key
+    try:
+###      #Maybe it's the task id, in the case of uuid4
+      serviceInstance = meta.models.ServiceInstance.objects.get(taskID=task_id);
+    except meta.models.ServiceInstance.DoesNotExist:
+      #Else it's just missing, create it
+      status="Impromptu:"+status;
+      self.__createServiceIntanceEntry(task_id, (args, kwargs));
+      serviceInstance = meta.models.ServiceInstance.objects.get(taskID=task_id);
+
+    serviceInstance.outputs = json.dumps(output)
+    serviceInstance.taskID = task_id;
+    serviceInstance.status = status;
+    serviceInstance.save();
 
   def apply_async(self, args=None, kwargs=None, task_id=None, *args2, **kwargs2):
-    if not task_id:
-      task_id = self.__getTaskId((args, kwargs));
+    task_id = self.__createServiceIntanceEntry(task_id, (args, kwargs));
+    
     return super(VipTask, self).apply_async(args=args, kwargs=kwargs, task_id=task_id, *args2, **kwargs2)
   
   def apply(self, args=None, kwargs=None, task_id=None, *args2, **kwargs2):
     ''' Automatically create task_id's based off of new primary keys in the database''' 
-    if not task_id:
-      task_id = self.__getTaskId((args, kwargs));
-    return super(VipTask, self).apply(args=args, kwargs=kwargs, task_id=task_id, *args2, **kwargs2)
+    task_id = self.__createServiceIntanceEntry(task_id, (args, kwargs));
     
+    return super(VipTask, self).apply(args=args, kwargs=kwargs, task_id=task_id, *args2, **kwargs2)
   
 #  def after_return(self, status, retval, task_id, args, kwargs, einfo): #, *args2, **kwargs2
   def on_success(self, retval, task_id, args, kwargs):
     #I can't currently tell if apply or apply_asyn is called, but I don't think I care
-    try:
-      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
-    except (meta.models.ServiceInstance.DoesNotExist, ValueError):
-      serviceInstance = meta.models.ServiceInstance(
-            step=0,
-            inputs=json.dumps((args, kwargs)));
-    
-    serviceInstance.outputs = json.dumps(retval)
-    serviceInstance.name = task_id;
-    serviceInstance.save();
+    self.__updateServiceIntanceEntry(retval, task_id, 'Success', args, kwargs);
   
   def on_failure(self, exc, task_id, args, kwargs, einfo):
-    self.on_success(str(einfo), task_id, args, kwargs);
+    self.__updateServiceIntanceEntry(str(einfo), task_id, 'Failure', args, kwargs);
 
 @app.task(base=VipTask)
 def test(abc=None, *args, **kwargs):
@@ -91,8 +91,7 @@ def test(abc=None, *args, **kwargs):
     raise Exception("ouch");
   return 42
 
-@app.task
-@serviceWrap
+@app.task(base=VipTask)
 def add_sample_data():
   print 'Adding Sample data'
   img = meta.models.Image(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
