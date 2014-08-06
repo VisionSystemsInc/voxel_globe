@@ -139,7 +139,7 @@ $.ajax({
         for (var i=0; i < data.length; i++) {
             var img = { id : data[i].pk,
                         name : data[i].fields.name,
-                        url : "http://" + window.location.host + data[0].fields.imageURL,
+                        url : data[i].fields.imageURL,
                         width : data[i].fields.imageWidth,
                         height : data[i].fields.imageHeight
             };          

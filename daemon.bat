@@ -1,6 +1,6 @@
 @echo off
 
-setlocal
+setlocal enabledelayedexpansion
 
 call %~dp0/np2r.bat
 
@@ -14,7 +14,23 @@ if not "%NPR_NARG%"=="2" (
 
 ::Special case all
 if /i "%1" == "all" (
-  set TASKS=%NPR_SERVICES%
+  if /i "%2" == "stop" (
+  REM Stop in reverse order, and NO, GOOGLE DID NOT HELP HERE! This is ALL AEN!
+	set TEMPTASKS=%NPR_SERVICES%
+
+    set NUMT=0
+    for %%x in (!TEMPTASKS!) do set /A NUMT+=1
+
+    for /L %%x in (!NUMT!, -1, 1) do (
+      set COUNTT=0
+      for %%y in (!TEMPTASKS!) do (
+        set /A COUNTT+=1
+	    if "!COUNTT!"=="%%x" set TASKS=!TASKS! %%y
+      )
+    )
+  ) else (
+    set TASKS=%NPR_SERVICES%
+  )
   goto valid_service_name
 )
 ::See if any of the names match
