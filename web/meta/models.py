@@ -198,9 +198,9 @@ class ImageCollection(VipObjectModel):
 class Image(VipObjectModel):
   fileFormat = models.CharField(max_length=4);
   pixelFormat = models.CharField(max_length=1, choices=PIXEL_FORMATS);
-  imageWidth = models.IntegerField('Image Width (pixels)');
-  imageHeight = models.IntegerField('Image Height (pixels)');
-  numberColorBands = models.IntegerField('Number of Color Bands');
+  imageWidth = models.PositiveIntegerField('Image Width (pixels)');
+  imageHeight = models.PositiveIntegerField('Image Height (pixels)');
+  numberColorBands = models.PositiveIntegerField('Number of Color Bands');
   imageURL = models.TextField(unique=True);
 
 class ImageTiePoint(VipObjectModel):
