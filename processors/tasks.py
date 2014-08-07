@@ -51,6 +51,7 @@ class VipTask(Task):
                                         args=None, kwargs=None):
     try:
       serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
+      #serviceInstance = meta.models.ServiceInstance.objects.get_for_id(task_id);
     except meta.models.ServiceInstance.DoesNotExist:
       #Else it's just missing, create it
       status="Impromptu:"+status;
@@ -106,19 +107,28 @@ def addImageTiePoint(self, *args, **kwargs):
 
 @app.task(base=VipTask, bind=True)
 def add_sample_data(self):
-  print 'Adding Sample data'
-  img = meta.models.Image(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
-                          numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                          imageURL='http://%s:%d/static/meta/images/camelot-UK_2012OxfordUniversity-42' % 
-                                    (env['NPR_POSTGRESQL_HOST'], int(env['NPR_HTTPD_PORT'])));
+  '''Add regression data to database.
+  
+     This function is primarily used by initialize_database.py to create test
+     data for going into the database.'''
+
+  img = meta.models.Image.create(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
+                                 numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
+                                 imageURL='http://%s/static/meta/images/camelot-UK_2012OxfordUniversity-42' % 
+                                    (env['NPR_IMAGE_SERVER_AUTHORITY']));
                                   #I know postgresql here is WRONG, don't care right now, it WILL be image server!
   img.service_id = self.request.id;
   img.save()
+  
+  ic = meta.models.ImageCollection.create(name="Oxford Libraries", service_id = self.request.id);
+  ic.save();
+  ic.images.add(img);
+  #No saving needed for this.
 
-  tp = meta.models.ImageTiePoint(x=100, y=100, name='Some point', image = img);
+  tp = meta.models.ImageTiePoint.create(x=100, y=100, name='Some point', image = img);
   tp.service_id = self.request.id;
   
-  gtp = meta.models.GeoTiePoint(name='Some geo point', 
+  gtp = meta.models.GeoTiePoint.create(name='Some geo point', 
            description='None provided. Just some point trying to make a point in life',
            latitude=51.7534, longitude=-1.2539, altitude=89.2,
            apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
