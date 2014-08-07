@@ -10,6 +10,7 @@
 <script src="{% static 'meta/OpenLayers-3.0.0-gamma.2/build/ol.js' %}"></script>
 
 <!-- Include the client side javascript code -->
+<script src="{% static 'meta/js/tiePoint/tiePointCreator.js' %}"></script>
 <script src="{% static 'meta/js/tiePoint/imageView.js' %}"></script>
 <script src="{% static 'meta/js/tiePoint/mapView.js' %}"></script>
 <style>
@@ -23,32 +24,38 @@
         width: 100%;
     }
 
-    #mapContainer {
-        vertical-align: top;
+    #sideBuffer {
         /*        background-color: red; */
+        vertical-align: top;
         display: inline-block;
         position: relative;
         height: 98%;
-        width: 650px;
+        width: 22px;
         margin: 0;
         overflow: hidden;
         padding: 0;
     }
-    #imageContainer {
+    #mapContainer {
+        /*        background-color: red; */
         vertical-align: top;
         display: inline-block;
         position: relative;
         height: 98%;
-        width: 650px;
-        margin: 0px 0px 0px 0px;
-        overflow: auto;
+        width: 28%;
+        margin: 0;
+        overflow: hidden;
+        margin: 0px 0px 0px 22px;
         padding: 0;
     }
-
-    #imageToolbar {
+    #imageContainer {
+        /* background-color:red; */
         vertical-align: top;
-        height: 19%;
-        width: 100%
+        display: inline-block;
+        position: relative;
+        height: 98%;
+        width: 70%;
+        overflow: auto;
+        padding: 0;
     }
 
     #mapToolbar {
@@ -57,23 +64,46 @@
         width: 100%
     }
 
-    #imageWidget {
-        /*background-color:red;*/
-        position: relative;
-        vertical-align: top;
-        /*text-align:center;*/
-        vertical-align: top;
-        height: 600px;
+    .imageWidget {
+        display: inline-block;   
+        background-color:#f5f5f5;     
+        position:relative;
+        height: 49%;
+        width: 24%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+        border : 1px solid black;
+    }
+    .imageToolbar {
+        display: block;
+        position:absolute;
+        bottom:0px;
+        left:0px;
+        z-index:20;
+        height: 20px;
+        width: 98%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+    }
+    .imageContents {
+        display: block;
+        position:absolute;
+        top:0px;
+        left:0px;
+        z-index:10;
+        height: 100%;
         width: 100%;
         margin: 0;
-        overflow: auto;
+        overflow: hidden;
         padding: 0;
     }
 
     #mapWidget {
         vertical-align: top;
         position: relative;
-        height: 600px;
+        height: 100%;
         width: 100%;
         margin: 0;
         overflow: hidden;
@@ -89,124 +119,16 @@
 
 {% block javascript %}
 
-var imgEditors = [];
-var mapViewers = [];
-var images = [];
-var tiePoints = [];
-var geoTiePoints = [];
-
-function initializePage(img) {
-    var imgConfig = {
-        width : img.width,
-        height : img.height,
-        url: img.url,
-        divName : "imageWidget"
-    }
-    
-    var mapConfig = {
-        latitude : 51.753523,
-        longitude : -1.253367,
-        zoomLevel : 0.001
-    }
-
-    var imgEditor = new TiePointEditor(imgConfig);
-    var mapViewer = new MapViewer(mapConfig);
-    
-    imgEditor.initialize();
-    mapViewer.initialize();
-
-    imgEditors.push(imgEditor);
-    mapViewers.push(mapViewer);
-};
-
-function showHideMapDisplay() {
-   if ($('#showMap').prop("checked")) {
-       $('#mapContainer').toggle(true);
-   } else {
-       $('#mapContainer').toggle(false);
-   }
-}
-
-
-// Set up the initial state
-showHideMapDisplay(); // make map display consistent with checkbox
-
-$.ajax({
-    type: "GET",
-    url: "/meta/fetchVideoList",
-    data: {},
-    success: function(data) {
-        for (var i=0; i < data.length; i++) {
-            var img = { id : data[i].pk,
-                        name : data[i].fields.name,
-                        url : data[i].fields.imageURL,
-                        width : data[i].fields.imageWidth,
-                        height : data[i].fields.imageHeight
-            };          
-            $('#imageList').append('<li>' + data[i].fields.name + '</li>');                         
-            images.push(img);
-        }
-        if (images.length > 0) {
-            initializePage(images[0]);
-        } else {
-            $('#imageWidget').html("No images found in the database."); 
-        }
-    },
-    dataType: 'json'
-});
-
-$.ajax({
-    type: "GET",
-    url: "/meta/fetchGeoPointList",
-    data: {},
-    success: function(data) {
-//        alert("received json data...http://" + window.location.host + data[0].fields.imageURL);
-        for (var i=0; i < data.length; i++) {
-            var geoPt = { id : data[i].pk,
-                        name : data[i].fields.name,
-                        lat : data[i].fields.latitude,
-                        lon : data[i].fields.longitude,
-                        alt : data[i].fields.altitude
-            };          
-            $('#correspondenceList').append('<li>' + data[i].fields.name + '</li>');                         
-            geoTiePoints.push(geoPt);
-        }
-        if (geoTiePoints.length == 0) {
-            $('#correspondenceList').html("No geographic landmarks found in the database."); 
-        }
-    },
-    dataType: 'json'
-});
-
-
-
-// Set up all of the events...
-
-$('#sideControlsDiv').mousedown(function (e) {
-    $('#sideControlsDiv').toggle();
-    //$('#imageContainer').css("width", "500px");
-    //$('#mapContainer').css("width", "500px");
-    $('#sideControlsContentDiv').toggle("slide", {}, 300);
-});
-
-$('#sideControlsContentDivBtn').mousedown(function (e) {
-    $('#sideControlsContentDiv').toggle("slide", {
-        complete : function() {
-          //  $('#imageContainer').css("width", "650px");
-          //  $('#mapContainer').css("width", "650px");
-            $('#sideControlsDiv').toggle();            
-        }
-    }, 300);
-});
-
-$('#showMap').click(function (e) {
-    showHideMapDisplay();
-});
+  initializeDataAndEvents();
 
 {% endblock %}
         
 {% block pageTitle %}<h2>META4 Tie Point Creator</h2>{% endblock %}
-{% block debugOptions %}<button id="printDebugBtn" style="margin:0px 80px;font-size:80%">Print Debug Info</button>{% endblock %}
+{% block debugOptions %}
+<input type="checkbox" id="showMap"></input><span style="margin:0px 20px 0px 0px;">Display Map</span>
+Display <input type="number" value="1" id="numImagesPerPage" min="1" max="8" style="width:25px"></input><span style="margin:0px 20px 0px 0px;"> Images Per Page</span>
+<button id="printDebugBtn" style="margin:0px 80px;font-size:80%">Print Debug Info</button>
+{% endblock %}
 
 {% block content %}
 
@@ -214,33 +136,29 @@ $('#showMap').click(function (e) {
 
     <div class="slideout">
         <div id="sideControlsContentDiv" class="slideout-content" style="display:none;overflow:auto;">
-            <div id="sideControlsContentDivBtn" style="float:right; position:absolute; right: 0px; top: 2px; "><img width="20" src="{% static 'meta/icons/gear.png' %}"></img></div>
+            <div id="sideControlsContentDivBtn" style="float:right; position:absolute; right: 0px; top: 2px; "><img width="20" src="{% static 'meta/icons/minimize.png' %}"></img></div>
             <div id="sideControlsContent" style="margin: 5px 5px 5px 5px; font-size:90%;">
                 <div id="imageSelectionOptions">
+                    Load Videos and Correspondences into the Editor
                     <h3>Videos</h3>                                       
-                    <input type="text" width="20"></input>&nbsp;<button style="font-size:90%;">Filter Videos</button>
-                    <br>
-                    <div id="imageListDiv" style="height:160px;background-color:#ffffff;border:1px solid black;">
-                        <ul id="imageList" class="bullet-list">
-                            
-                        </ul>
+                    <!-- <input type="text" width="20"></input>&nbsp;<button style="font-size:90%;">Filter Videos</button><br> -->                    
+                    <div id="imageList" style="height:160px;background-color:#ffffff;border:1px solid black;overflow:auto;">
+                        
                     </div>
-                    <button id="updateSelectedVideo" style="font-size:90%;" title="Show the selected video">Update Video Display</button>
+                    <!-- <button id="updateSelectedVideo" style="font-size:90%;" title="Show the selected video">Update Video Display</button> -->
                 </div>                
                 <div id="tiePointSelectionOptions">
                  <h3>Correspondence Points</h3>
-                 <input type="text" width="20"></input>&nbsp;<button style="font-size:90%;">Filter Points</button>
-                 <div id="correspondenceistDiv" style="height:100px;background-color:#ffffff;border:1px solid black;">
-                        <ul id="correspondenceList" class="bullet-list">
-                            
-                        </ul>
+                  <!-- <input type="text" width="20"></input>&nbsp;<button style="font-size:90%;">Filter Points</button> -->
+                 <div id="correspondenceList" style="height:260px;background-color:#ffffff;border:1px solid black;overflow:auto;">
+                       
                     </div>                
                  <div id="imageToolbar">
                     <button id="addTiePoint" style="font-size:90%;" title="Create a new correspondence">New</button><button id="addTiePoint" style="font-size:90%;" title="Remove a correspondence" disabled>Remove</button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <button id="clearSelectedTiePoints" style="font-size:90%;" title="Clear displayed correspondence list.">Clear</button><button id="selectAllTiePoints" style="font-size:90%;" title="Select All correspondence points for display">Select All</button>
                  <br>
-                    <button id="updateSelectedCorrespondences" style="font-size:90%;" title="Update the displayed correspondences">Update Correspondence Display</button>
+                    <!-- <button id="updateSelectedCorrespondences" style="font-size:90%;" title="Update the displayed correspondences">Update Correspondence Display</button> -->
                     </br>
                  This will go away
                   <select id="drawType">
@@ -249,25 +167,16 @@ $('#showMap').click(function (e) {
                     <option value="LineString">LineString</option>
                     <option value="Polygon">Polygon</option>
                   </select>
-                </div>
-                 <div id="displayOptions">
-                    <h3>Display Options</h3>
-                    <ul class="bullet-list">
-                        <li><input type="checkbox" id="showMap">Display Map</input></li>
-                        <li>Display <input type="number" value="1" id="numImagesPerPage" min="1" max="9" style="width:25px" ></input> Images Per Page</li>
-                    </ul>
-                 </div>
+                </div>               
             </div>
             </div>
         </div>
         <div id="sideControlsDiv" class="slideout-tab"><img width="20" src="{% static 'meta/icons/gear.png' %}" title="Configure the displayed videos and correspondences."></img></div>
     </div>
 
-    <div id="imageContainer">
-        <div id="imageWidget"></div>
-       
+<div id="editorContentDiv" style="position:relative;">
+    <div id="sideBuffer">
     </div>
-
     <div id="mapContainer">
         <div id="mapWidget">
             <!--<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas> -->
@@ -275,6 +184,9 @@ $('#showMap').click(function (e) {
         <div id="mapToolbar">            
         </div>
     </div>
+    <div id="imageContainer">           
+    </div>        
+</div>
 
 <div id="debugInfo">
 </div>
