@@ -102,8 +102,10 @@ def test(abc=None, *args, **kwargs):
 
 @app.task(base=VipTask, bind=True)
 def addImageTiePoint(self, *args, **kwargs):
-  tp = meta.models.ImageTiePoint(*args, **kwargs);
+  tp = meta.models.ImageTiePoint.create(*args, **kwargs);
   tp.service_id = self.request.id;
+  tp.save();
+  return tp;
 
 @app.task(base=VipTask, bind=True)
 def add_sample_data(self):
@@ -114,7 +116,7 @@ def add_sample_data(self):
 
   img = meta.models.Image.create(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
                                  numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                                 imageURL='http://%s/static/meta/images/camelot-UK_2012OxfordUniversity-42' % 
+                                 imageURL='http://%s/static/meta/images/camelot-UK_2012OxfordUniversity-42/' % 
                                     (env['NPR_IMAGE_SERVER_AUTHORITY']));
                                   #I know postgresql here is WRONG, don't care right now, it WILL be image server!
   img.service_id = self.request.id;
