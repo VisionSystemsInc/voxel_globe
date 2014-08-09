@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 call %~dp0\np2r.bat %*
 
@@ -12,7 +12,7 @@ if "%1"=="start_httpd" (
   set PIDFILE=%NPR_HTTPD_PID_DIR%/httpd.pid
   if "%NPR_HTTPD_DEBUG_INDEXES%" == "1" set HTTPD_OPTIONS=%HTTPD_OPTIONS% -Ddebug_indexes
   if not exist %NPR_HTTPD_LOG_DIR:/=\% mkdir %NPR_HTTPD_LOG_DIR:/=\%
-  httpd %HTTPD_OPTIONS% -f %NPR_HTTPD_CONF% > %NPR_HTTPD_LOG_DIR%/httpd_out.log 2> %NPR_HTTPD_LOG_DIR%/httpd_err.log
+  httpd !HTTPD_OPTIONS! -f %NPR_HTTPD_CONF% > %NPR_HTTPD_LOG_DIR%/httpd_out.log 2> %NPR_HTTPD_LOG_DIR%/httpd_err.log
 ) else if "%1"=="start_celeryd" (
  
   :waitfordatabase
