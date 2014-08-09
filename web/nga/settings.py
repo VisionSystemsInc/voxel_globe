@@ -90,7 +90,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = env['NPR_DJANGO_STATIC_DIR'];
+STATIC_URL = '/'+env['NPR_DJANGO_STATIC_URL_PATH']+'/';
 STATIC_ROOT = env['NPR_DJANGO_STATIC_ROOT'];
 MEDIA_ROOT = env['NPR_DJANGO_MEDIA_ROOT'];
 

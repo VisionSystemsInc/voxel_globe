@@ -3,6 +3,7 @@ from meta.models import *
 
 # Register your models here.
 admin.site.register(Image)
+admin.site.register(ImageCollection)
 admin.site.register(ImageTiePoint)
 admin.site.register(GeoTiePoint)
 

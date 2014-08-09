@@ -1,5 +1,5 @@
 
-NOTEBOOK_OPTIONS="notebook --pylab=inline --no-browser --port=${NPR_NOTEBOOK_PORT}"
+NOTEBOOK_OPTIONS="notebook --pylab=inline --no-browser --port=${NPR_NOTEBOOK_PORT} --ip=${NPR_NOTEBOOK_IP}"
 NOTEBOOK_BIN=${NPR_ROAM_DIR}/ipython
 
 NOTEBOOK_USER=${NPR_NOTEBOOK_DAEMON_USER}

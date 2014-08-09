@@ -1,12 +1,10 @@
 #!/bin/bash
 
-. ../np2r.env
-
 os=`uname`
 
 if [ "${os:0:5}" == "CYGWI" ]
 then
-  python.exe manage.py "${@}"
+  $(dirname ${BASH_SOURCE[0]})/../wrap.bsh python.exe $(dirname ${BASH_SOURCE[0]})/manage.py "${@}"
 else
-  python manage.py "${@}"
+  $(dirname ${BASH_SOURCE[0]})/../wrap.bsh python $(dirname ${BASH_SOURCE[0]})/manage.py "${@}"
 fi

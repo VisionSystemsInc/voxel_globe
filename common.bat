@@ -21,6 +21,7 @@ REM or enable them all at once.
 set NPR_DJANGO_DEBUG=%NPR_DEBUG%
 set NPR_DJANGO_TEMPLATE_DEBUG=%NPR_DEBUG%
 set NPR_CELERY_AUTORELOAD=%NPR_DEBUG%
+set NPR_HTTPD_DEBUG_INDEXES=%NPR_DEBUG%
 
 REM ### DIR Settings ###
 set NPR_CONF_DIR=%NPR_PROJECT_ROOT%/conf
@@ -32,6 +33,7 @@ set NPR_DATABASE_DIR=%NPR_PROJECT_ROOT%/data
 REM ### Python settings ###
 set PYTHONSTARTUP=%NPR_CONF_DIR%/pythonrc.py
 set NPR_NOTEBOOK_PORT=8888
+set NPR_NOTEBOOK_IP=0.0.0.0
 set NPR_NOTEBOOK_USER=%USERNAME%
 set NPR_NOTEBOOK_LOG_DIR=%NPR_LOG_DIR%/notebook
 set NPR_NOTEBOOK_PID_DIR=%NPR_PID_DIR%/notebook
@@ -42,7 +44,7 @@ set NPR_DJANGO_PROJECT=%NPR_PROJECT_ROOT%/web
 set NPR_DJANGO_SITE=%NPR_DJANGO_PROJECT%/nga
 set NPR_DJANGO_STATIC_ROOT=%NPR_DJANGO_PROJECT%/static_deploy
 set NPR_DJANGO_SETTINGS_MODULE=nga.settings
-set NPR_DJANGO_STATIC_DIR=/static/
+set NPR_DJANGO_STATIC_URL_PATH=static
 set NPR_DJANGO_MEDIA_ROOT=%NPR_DJANGO_PROJECT%/media_root
 REM Note: Since environment variables are process-wide, this doesn’t work when you
 REM run multiple Django sites in the same process. This happens with mod_wsgi.
@@ -99,8 +101,12 @@ set NPR_RABBITMQ_MNESIA_BASE=%NPR_DATABASE_DIR%
 REM ##### Image Server Settings #####
 set NPR_IMAGE_SERVER_HOST=localhost
 set NPR_IMAGE_SERVER_PORT=80
+set NPR_IMAGE_SERVER_URL_PATH=images
+  REM Where are the images served from
+set NPR_IMAGE_SERVER_ROOT=%NPR_PROJECT_ROOT%/images
+  REM Where are the images physically/virtually?
+
 set NPR_IMAGE_SERVER_AUTHORITY=%NPR_IMAGE_SERVER_HOST%:%NPR_IMAGE_SERVER_PORT%
-REM http://en.wikipedia.org/wiki/URI_scheme#Examples
 
 REM ##### Apache HTTPD Settings ##### 
 set NPR_HTTPD_CONF=%NPR_CONF_DIR%/httpd.conf
@@ -108,8 +114,8 @@ set NPR_HTTPD_PORT=80
 set NPR_HTTPD_SSL_PORT=443
 set NPR_HTTPD_DAEMON_USER=npr_httpd
 set NPR_HTTPD_DAEMON_GROUP=%NPR_DAEMON_GROUP%
-set NPR_HTTPD_UNPRIVLEDGED_PORT=8080
-set NPR_HTTPD_UNPRIVLEDGED_SSL_PORT=8443
+REM DELME set NPR_HTTPD_UNPRIVLEDGED_PORT=8080
+REM DELME set NPR_HTTPD_UNPRIVLEDGED_SSL_PORT=8443
 set NPR_HTTPD_PID_DIR=%NPR_PID_DIR%/httpd
 set NPR_HTTPD_LOG_DIR=%NPR_LOG_DIR%/httpd
 set NPR_HTTPD_LOCK_DIR=%NPR_LOCK_DIR%/httpd

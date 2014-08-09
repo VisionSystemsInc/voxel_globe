@@ -5,8 +5,10 @@ import numpy;
 
 import world.models
 import meta.models
-
+from glob import glob;
 from os import environ as env;
+from os.path import join as path_join;
+import os;
 
 app = Celery('tasks');
 app.config_from_object('celeryconfig') #Don't need this because celeryd does it for me
@@ -108,6 +110,36 @@ def addImageTiePoint(self, *args, **kwargs):
   return tp;
 
 @app.task(base=VipTask, bind=True)
+def injestImage(self, *args, **kwargs):
+  pass
+
+@app.task(base=VipTask, bind=True)
+def add_sample_images(self, imageDir, *args, **kwargs):
+  images = glob(path_join(imageDir, '2010*', ''));
+  images.sort();
+  imageCollections = {};
+  for image in images:
+    cam = int(image[-7:-5])
+    date = image[-31:-17];
+    other = image[-16:-11]
+    frameNum = image[-11:-8]
+    image = os.path.basename(os.path.dirname(image));
+    img = meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
+                             numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
+                             imageURL='http://%s/%s/%s/' % (env['NPR_IMAGE_SERVER_AUTHORITY'], env['NPR_IMAGE_SERVER_URL_PATH'], image),
+                             service_id = self.request.id);
+    img.save();
+    
+    imageCollections[cam] = imageCollections.pop(cam, ())+(img.id,);
+    
+  for cam in range(6):
+    ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
+    ic.save();
+    ic.images.add(*imageCollections[cam]);
+    
+
+
+@app.task(base=VipTask, bind=True)
 def add_sample_data(self):
   '''Add regression data to database.
   
@@ -116,9 +148,8 @@ def add_sample_data(self):
 
   img = meta.models.Image.create(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
                                  numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                                 imageURL='http://%s/static/meta/images/camelot-UK_2012OxfordUniversity-42/' % 
-                                    (env['NPR_IMAGE_SERVER_AUTHORITY']));
-                                  #I know postgresql here is WRONG, don't care right now, it WILL be image server!
+                                 imageURL='http://%s/%s/camelot-UK_2012OxfordUniversity-42/' % 
+                                    (env['NPR_IMAGE_SERVER_AUTHORITY'], env['NPR_IMAGE_SERVER_URL_PATH']));
   img.service_id = self.request.id;
   img.save()
   
