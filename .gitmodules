@@ -4,12 +4,12 @@
 [submodule "external/src"]
 	path = external/src
 	url = ../NGA_P2_external_src.git
-[submodule "external/bin_Windows_NT_x86_64"]
-	path = external/bin_Windows_NT_x86_64
-	url = ../NGA_P2_external_bin_Windows_x86_64.git
 [submodule "external/bin_Linux_x86_64"]
 	path = external/bin_Linux_x86_64
 	url = ../NGA_P2_external_bin_Linux_x86_64.git
 [submodule "data"]
 	path = data
 	url = ../NGA_P2_database.git
+[submodule "external/bin_Windows_NT_AMD64"]
+	path = external/bin_Windows_NT_AMD64
+	url = ../NGA_P2_external_bin_Windows_NT_AMD64.git

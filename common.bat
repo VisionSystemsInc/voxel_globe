@@ -7,7 +7,7 @@ REM 4) Used ; only when separating paths, because in linux it'll become :
 REM ### Basic Settings ###
 set VSI_PROJECT_NAME=npr
 set NPR_DAEMON_GROUP=npr
-set NPR_BUILD=%OS%_%ARCH%
+set NPR_BUILD=%NPR_OS%_%NPR_ARCH%
 set NPR_EMAIL=andrew.neff@vsi-ri.com
 set NPR_AUTOSTART=0
 set NPR_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
