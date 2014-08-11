@@ -126,7 +126,7 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     image = os.path.basename(os.path.dirname(image));
     img = meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
                              numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
-                             imageURL='http://%s/%s/%s/' % (env['NPR_IMAGE_SERVER_AUTHORITY'], env['NPR_IMAGE_SERVER_URL_PATH'], image),
+                             imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
     img.save();
     
@@ -149,7 +149,7 @@ def add_sample_data(self):
   img = meta.models.Image.create(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
                                  numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
                                  imageURL='http://%s/%s/camelot-UK_2012OxfordUniversity-42/' % 
-                                    (env['NPR_IMAGE_SERVER_AUTHORITY'], env['NPR_IMAGE_SERVER_URL_PATH']));
+                                    (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH']));
   img.service_id = self.request.id;
   img.save()
   

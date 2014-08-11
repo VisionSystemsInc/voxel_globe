@@ -2,7 +2,7 @@
 
 source $(dirname ${BASH_SOURCE[0]})/np2r.env
 
-export PS1="(npr): "
+export PS1="(${VIP_PROJECT_NAME})[\u@\h \W] : "
 
 if [ "$#" == "0" ]; then
   echo "Starting bash session"

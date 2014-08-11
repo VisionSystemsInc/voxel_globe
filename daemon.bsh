@@ -5,13 +5,13 @@ source $(dirname $0)/np2r.env
 if [ "$#" -lt 2 ]
 then
   echo "Usages: $0 "'{service_name} [start|stop|restart|status]'
-  echo "  where service_name can be [${NPR_SERVICES}]"
+  echo "  where service_name can be [${VIP_SERVICES}]"
   exit 1
 fi
 
 if [ "$1" == "all" ]
 then
-  SERVICES=($NPR_SERVICES)
+  SERVICES=($VIP_SERVICES)
 else
   SERVICES=($1)
 fi
@@ -22,15 +22,15 @@ do
   echo -en "\\033[1;31m"
   echo -n "Running $s $1:"
   echo -e "\\033[0;39m"
-  ${NPR_INIT_DIR}/$s "${@}"
+  ${VIP_INIT_DIR}/$s "${@}"
 
   if [ "$s" == "postgresql" -a "$1" == "stop" ]
   then
-    pg_isready ${NPR_POSTGRESQL_CREDENTIALS} 2>&1 > /dev/null
+    pg_isready ${VIP_POSTGRESQL_CREDENTIALS} 2>&1 > /dev/null
     if [ "$?" == "0" ]
     then
       echo Stray postgresql detected, cleaning up
-      pg_ctl stop -D ${NPR_POSTGRESQL_DATABASE} -m fast 2>&1 >> ${NPR_LOG_DIR}/postgresql_stop_stray.log
+      pg_ctl stop -D ${VIP_POSTGRESQL_DATABASE} -m fast 2>&1 >> ${VIP_LOG_DIR}/postgresql_stop_stray.log
     fi
   fi
   echo

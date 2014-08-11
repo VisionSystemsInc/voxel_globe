@@ -15,7 +15,7 @@ if __name__=='__main__':
   while pw == None:
     pw=get_pass()
 
-  with open(env['NPR_DJANGO_PASSWD'], 'wb') as fid:
+  with open(env['VIP_DJANGO_PASSWD'], 'wb') as fid:
     fid.write(make_password(pw));
   
   print '\nIs is done, best not forget the password now...';

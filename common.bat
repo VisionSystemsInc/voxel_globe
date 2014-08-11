@@ -5,140 +5,138 @@ REM 3) No " quotes, windows doesn't need them
 REM 4) Used ; only when separating paths, because in linux it'll become :
 
 REM ### Basic Settings ###
-set VSI_PROJECT_NAME=npr
-set NPR_DAEMON_GROUP=npr
-set NPR_BUILD=%NPR_OS%_%NPR_ARCH%
-set NPR_EMAIL=andrew.neff@vsi-ri.com
-set NPR_AUTOSTART=0
-set NPR_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
+set VIP_PROJECT_NAME=npr
+set VIP_DAEMON_GROUP=npr
+set VIP_BUILD=%VIP_OS%_%VIP_ARCH%
+set VIP_EMAIL=andrew.neff@vsi-ri.com
+set VIP_AUTOSTART=0
+set VIP_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
 
 REM Debug flags
-set NPR_DEBUG=1
+set VIP_DEBUG=1
 REM This flags should ONLY be used in the following lines. Please create a new
-REM Debug flag everytime you need it. NPR_DEBUG is just an easy way to disable
+REM Debug flag everytime you need it. VIP_DEBUG is just an easy way to disable
 REM or enable them all at once.
-set NPR_DJANGO_DEBUG=%NPR_DEBUG%
-set NPR_DJANGO_TEMPLATE_DEBUG=%NPR_DEBUG%
-set NPR_CELERY_AUTORELOAD=%NPR_DEBUG%
-set NPR_HTTPD_DEBUG_INDEXES=%NPR_DEBUG%
+set VIP_DJANGO_DEBUG=%VIP_DEBUG%
+set VIP_DJANGO_TEMPLATE_DEBUG=%VIP_DEBUG%
+set VIP_CELERY_AUTORELOAD=%VIP_DEBUG%
+set VIP_HTTPD_DEBUG_INDEXES=%VIP_DEBUG%
 
 REM ### DIR Settings ###
-set NPR_CONF_DIR=%NPR_PROJECT_ROOT%/conf
-set NPR_LOG_DIR=%NPR_PROJECT_ROOT%/logs
-set NPR_LOCK_DIR=%NPR_LOCALSTATEDIR%/lock/subsys
+set VIP_CONF_DIR=%VIP_PROJECT_ROOT%/conf
+set VIP_LOG_DIR=%VIP_PROJECT_ROOT%/logs
+set VIP_LOCK_DIR=%VIP_LOCALSTATEDIR%/lock/subsys
 REM Currently only Linux even uses the lock dir
-set NPR_DATABASE_DIR=%NPR_PROJECT_ROOT%/data
+set VIP_DATABASE_DIR=%VIP_PROJECT_ROOT%/data
 
 REM ### Python settings ###
-set PYTHONSTARTUP=%NPR_CONF_DIR%/pythonrc.py
-set NPR_NOTEBOOK_PORT=8888
-set NPR_NOTEBOOK_IP=0.0.0.0
-set NPR_NOTEBOOK_USER=%USERNAME%
-set NPR_NOTEBOOK_LOG_DIR=%NPR_LOG_DIR%/notebook
-set NPR_NOTEBOOK_PID_DIR=%NPR_PID_DIR%/notebook
-set NPR_NOTEBOOK_LOCK_DIR=%NPR_LOCK_DIR%/notebook
+set PYTHONSTARTUP=%VIP_CONF_DIR%/pythonrc.py
+set VIP_NOTEBOOK_PORT=8888
+set VIP_NOTEBOOK_IP=0.0.0.0
+set VIP_NOTEBOOK_USER=%USERNAME%
+set VIP_NOTEBOOK_LOG_DIR=%VIP_LOG_DIR%/notebook
+set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
+set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 
 REM ### Django settings
-set NPR_DJANGO_PROJECT=%NPR_PROJECT_ROOT%/web
-set NPR_DJANGO_SITE=%NPR_DJANGO_PROJECT%/nga
-set NPR_DJANGO_STATIC_ROOT=%NPR_DJANGO_PROJECT%/static_deploy
-set NPR_DJANGO_SETTINGS_MODULE=nga.settings
-set NPR_DJANGO_STATIC_URL_PATH=static
-set NPR_DJANGO_MEDIA_ROOT=%NPR_DJANGO_PROJECT%/media_root
+set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/web
+set VIP_DJANGO_SITE=%VIP_DJANGO_PROJECT%/nga
+set VIP_DJANGO_STATIC_ROOT=%VIP_DJANGO_PROJECT%/static_deploy
+set VIP_DJANGO_SETTINGS_MODULE=nga.settings
+set VIP_DJANGO_STATIC_URL_PATH=static
+set VIP_DJANGO_MEDIA_ROOT=%VIP_DJANGO_PROJECT%/media_root
 REM Note: Since environment variables are process-wide, this doesn’t work when you
 REM run multiple Django sites in the same process. This happens with mod_wsgi.
 REM To avoid this problem, use mod_wsgi’s daemon mode with each site in its own daemon
 REM process, or override the value from the environment by enforcing 
 REM os.environ["DJANGO_SETTINGS_MODULE"] = "mysite.settings" in your wsgi.py.
 
-set NPR_DJANGO_REGRESSION_APP=world
-set NPR_DJANGO_REGRESSION_SHAPEFILE=%NPR_DATABASE_DIR%/world_borders/TM_WORLD_BORDERS-0.3.shp
-set NPR_DJANGO_USER=npr
-set NPR_DJANGO_PASSWD=%NPR_PROJECT_ROOT%/shadow/django
+set VIP_DJANGO_REGRESSION_APP=world
+set VIP_DJANGO_REGRESSION_SHAPEFILE=%VIP_DATABASE_DIR%/world_borders/TM_WORLD_BORDERS-0.3.shp
+set VIP_DJANGO_USER=npr
+set VIP_DJANGO_PASSWD=%VIP_PROJECT_ROOT%/shadow/django
 
 REM ### POSTGRESQL Settings ###
 REM For connecting
-set NPR_POSTGRESQL_HOST=localhost
-set NPR_POSTGRESQL_PORT=5432
-REM set NPR_POSTGRESQL_USER=npr_postgresql REM AEN Obviously I still don't understand this still
-set NPR_POSTGRESQL_USER=postgresql
-set NPR_POSTGRESQL_PASSWORD=vsi
-set NPR_POSTGRESQL_DATABASE_NAME=geodjango
-set NPR_POSTGRESQL_CREDENTIALS=-U %NPR_POSTGRESQL_USER% -h %NPR_POSTGRESQL_HOST% -p %NPR_POSTGRESQL_PORT%
-set NPR_POSTGRESQL_SERVER_CREDENTIALS=-h %NPR_POSTGRESQL_HOST% -p %NPR_POSTGRESQL_PORT%
+set VIP_POSTGRESQL_HOST=localhost
+set VIP_POSTGRESQL_PORT=5432
+REM set VIP_POSTGRESQL_USER=npr_postgresql REM AEN Obviously I still don't understand this still
+set VIP_POSTGRESQL_USER=postgresql
+set VIP_POSTGRESQL_PASSWORD=vsi
+set VIP_POSTGRESQL_DATABASE_NAME=geodjango
+set VIP_POSTGRESQL_CREDENTIALS=-U %VIP_POSTGRESQL_USER% -h %VIP_POSTGRESQL_HOST% -p %VIP_POSTGRESQL_PORT%
+set VIP_POSTGRESQL_SERVER_CREDENTIALS=-h %VIP_POSTGRESQL_HOST% -p %VIP_POSTGRESQL_PORT%
 
 REM For setup
-set NPR_POSTGRESQL_DATABASE=%NPR_DATABASE_DIR%/postgresql
-set NPR_POSTGRESQL_PID_DIR=%NPR_PID_DIR%/postgresql
-set NPR_POSTGRESQL_LOG_DIR=%NPR_LOG_DIR%/postgresql
-set NPR_POSTGRESQL_LOG=%NPR_POSTGRESQL_LOG_DIR%/pg.log
-set NPR_POSTGRESQL_LOCK_DIR=%NPR_LOCK_DIR%/postgresql
-set NPR_POSTGRESQL_DIR=%NPR_INSTALL_DIR%/postgresql
+set VIP_POSTGRESQL_DATABASE=%VIP_DATABASE_DIR%/postgresql
+set VIP_POSTGRESQL_PID_DIR=%VIP_PID_DIR%/postgresql
+set VIP_POSTGRESQL_LOG_DIR=%VIP_LOG_DIR%/postgresql
+set VIP_POSTGRESQL_LOG=%VIP_POSTGRESQL_LOG_DIR%/pg.log
+set VIP_POSTGRESQL_LOCK_DIR=%VIP_LOCK_DIR%/postgresql
+set VIP_POSTGRESQL_DIR=%VIP_INSTALL_DIR%/postgresql
 
-set NPR_POSTGRESQL_ENCODING=UTF-8
-set NPR_POSTGRESQL_AUTH=trust
+set VIP_POSTGRESQL_ENCODING=UTF-8
+set VIP_POSTGRESQL_AUTH=trust
 REM This is ok for current dev, but will soon be md5, unless for some reason YEARS down the road,
 REM db-namespace is needed, in which case we will switch over to ssl connections only with password auth
 
 REM ### Celery Settings ###
-set NPR_CELERY_DEFAULT_NODES=npr
-set NPR_CELERY_DAEMON_USER=npr_celery
-set NPR_CELERY_PROCESSORS=%NPR_PROJECT_ROOT%/processors
-set NPR_CELERY_PID_DIR=%NPR_PID_DIR%/celery
-set NPR_CELERY_LOG_DIR=%NPR_LOG_DIR%/celery
-set NPR_CELERY_LOCK_DIR=%NPR_LOCK_DIR%/celery
+set VIP_CELERY_DEFAULT_NODES=npr
+set VIP_CELERY_DAEMON_USER=npr_celery
+set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%/processors
+set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
+set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
+set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
 
 REM ##### RABITMQ Settings ##### 
-set NPR_RABBITMQ_PID_DIR=%NPR_PID_DIR%/rabbitmq-server
-set NPR_RABBITMQ_LOCK_DIR=%NPR_LOCK_DIR%/rabbitmq-server
-set NPR_RABBITMQ_LOG_DIR=%NPR_LOG_DIR%/rabbitmq-server
-set NPR_RABBITMQ_PID_FILE=%NPR_PID_DIR%/rabbitmq_server.pid
+set VIP_RABBITMQ_PID_DIR=%VIP_PID_DIR%/rabbitmq-server
+set VIP_RABBITMQ_LOCK_DIR=%VIP_LOCK_DIR%/rabbitmq-server
+set VIP_RABBITMQ_LOG_DIR=%VIP_LOG_DIR%/rabbitmq-server
+set VIP_RABBITMQ_PID_FILE=%VIP_PID_DIR%/rabbitmq_server.pid
 
-set NPR_RABBITMQ_USER=npr_rabbitmq
-set NPR_RABBITMQ_MNESIA_BASE=%NPR_DATABASE_DIR%
+set VIP_RABBITMQ_USER=npr_rabbitmq
+set VIP_RABBITMQ_MNESIA_BASE=%VIP_DATABASE_DIR%
 
 REM ##### Image Server Settings #####
-set NPR_IMAGE_SERVER_HOST=localhost
-set NPR_IMAGE_SERVER_PORT=80
-set NPR_IMAGE_SERVER_URL_PATH=images
+set VIP_IMAGE_SERVER_HOST=localhost
+set VIP_IMAGE_SERVER_PORT=80
+set VIP_IMAGE_SERVER_URL_PATH=images
   REM Where are the images served from
-set NPR_IMAGE_SERVER_ROOT=%NPR_PROJECT_ROOT%/images
+set VIP_IMAGE_SERVER_ROOT=%VIP_PROJECT_ROOT%/images
   REM Where are the images physically/virtually?
 
-set NPR_IMAGE_SERVER_AUTHORITY=%NPR_IMAGE_SERVER_HOST%:%NPR_IMAGE_SERVER_PORT%
+set VIP_IMAGE_SERVER_AUTHORITY=%VIP_IMAGE_SERVER_HOST%:%VIP_IMAGE_SERVER_PORT%
 
 REM ##### Apache HTTPD Settings ##### 
-set NPR_HTTPD_CONF=%NPR_CONF_DIR%/httpd.conf
-set NPR_HTTPD_PORT=80
-set NPR_HTTPD_SSL_PORT=443
-set NPR_HTTPD_DAEMON_USER=npr_httpd
-set NPR_HTTPD_DAEMON_GROUP=%NPR_DAEMON_GROUP%
-REM DELME set NPR_HTTPD_UNPRIVLEDGED_PORT=8080
-REM DELME set NPR_HTTPD_UNPRIVLEDGED_SSL_PORT=8443
-set NPR_HTTPD_PID_DIR=%NPR_PID_DIR%/httpd
-set NPR_HTTPD_LOG_DIR=%NPR_LOG_DIR%/httpd
-set NPR_HTTPD_LOCK_DIR=%NPR_LOCK_DIR%/httpd
-set NPR_HTTPD_LOG_LEVEL=info
+set VIP_HTTPD_CONF=%VIP_CONF_DIR%/httpd.conf
+set VIP_HTTPD_PORT=80
+set VIP_HTTPD_SSL_PORT=443
+set VIP_HTTPD_DAEMON_USER=npr_httpd
+set VIP_HTTPD_DAEMON_GROUP=%VIP_DAEMON_GROUP%
+set VIP_HTTPD_PID_DIR=%VIP_PID_DIR%/httpd
+set VIP_HTTPD_LOG_DIR=%VIP_LOG_DIR%/httpd
+set VIP_HTTPD_LOCK_DIR=%VIP_LOCK_DIR%/httpd
+set VIP_HTTPD_LOG_LEVEL=info
 
-set NPR_WSGI_PYTHON_DIR=%NPR_PYTHON_DIR%
+set VIP_WSGI_PYTHON_DIR=%VIP_PYTHON_DIR%
 REM THIS was annoying, WSGI auto adds bin in linux, SO my roam isn't used, however
 REM APACHE is started in my environment, so I'm sure this is why everything is working?
-set NPR_WSGI_PYTHON_PATH=%NPR_DJANGO_PROJECT%;%NPR_CELERY_PROCESSORS%
+set VIP_WSGI_PYTHON_PATH=%VIP_DJANGO_PROJECT%;%VIP_CELERY_PROCESSORS%
 REM For the initial wsgi.py file and all Celery processors
-set NPR_WSGI_SCRIPT_ALIAS=%NPR_DJANGO_SITE%/wsgi.py
+set VIP_WSGI_SCRIPT_ALIAS=%VIP_DJANGO_SITE%/wsgi.py
 
-set NPR_UTIL_DIR=%NPR_INSTALL_DIR%/utils
+set VIP_UTIL_DIR=%VIP_INSTALL_DIR%/utils
 
-REM *********** NON-NPR Section. There can affect ANYTHING ***********
-REM These parameters are not protected by the NPR Prefix, and thus
+REM *********** NON-VIP Section. There can affect ANYTHING ***********
+REM These parameters are not protected by the VIP Prefix, and thus
 REM Affect many application, but hopefully in a good way :)
 
-set DJANGO_SETTINGS_MODULE=%NPR_DJANGO_SETTINGS_MODULE%
+set DJANGO_SETTINGS_MODULE=%VIP_DJANGO_SETTINGS_MODULE%
 
 REM I don't know if this is actually used, but it is mentioned in the Geodjango tutorial
-set PROJ_LIB=%NPR_DJANGO_PROJ_LIB%
-set GDAL_DATA=%NPR_DJANGO_GDAL_DATA%
+set PROJ_LIB=%VIP_DJANGO_PROJ_LIB%
+set GDAL_DATA=%VIP_DJANGO_GDAL_DATA%
 set POSTGIS_ENABLE_OUTDB_RASTERS=1
 set POSTGIS_GDAL_ENABLED_DRIVERS=ENABLE_ALL
 set POSTGIS_GDAL_ENABLED_DRIVERS=GTiff PNG JPEG GIF XYZ

@@ -1,16 +1,16 @@
 #!/bin/bash
 
-APACHECTL=${NPR_ROAM_DIR}/apachectl
-HTTPD=${NPR_ROAM_DIR}/httpd.worker
-export PIDFILE=${NPR_HTTPD_PID_DIR}/httpd.pid
-LOCKFILE=${NPR_HTTPD_LOCK_DIR}/http
-export LOG_DIR=${NPR_HTTPD_LOG_DIR}
+APACHECTL=${VIP_ROAM_DIR}/apachectl
+HTTPD=${VIP_ROAM_DIR}/httpd.worker
+export PIDFILE=${VIP_HTTPD_PID_DIR}/httpd.pid
+LOCKFILE=${VIP_HTTPD_LOCK_DIR}/http
+export LOG_DIR=${VIP_HTTPD_LOG_DIR}
 
 HTTPD_LANG="C"
 STOP_TIMEOUT=10
-OPTIONS="-DLinux -d ${NPR_HTTPD_DIR} -f ${NPR_HTTPD_CONF}"
+OPTIONS="-DLinux -d ${VIP_HTTPD_DIR} -f ${VIP_HTTPD_CONF}"
 
-if [ "${NPR_HTTPD_DEBUG_INDEXES}" == "1" ]
+if [ "${VIP_HTTPD_DEBUG_INDEXES}" == "1" ]
 then
   OPTIONS=${OPTIONS}${OPTIONS:+ }"-Ddebug_indexes"
 fi
@@ -18,7 +18,7 @@ fi
 if [ $(id -u) -ne 0 ]; then
   OPTIONS=${OPTIONS}${OPTIONS:+ }"-DnotRoot"
 
-  NPR_HTTPD_DAEMON_USER=`id -u -n`
-  NPR_HTTPD_DAEMON_GROUP=`id -g -n`
+  VIP_HTTPD_DAEMON_USER=`id -u -n`
+  VIP_HTTPD_DAEMON_GROUP=`id -g -n`
 fi
 

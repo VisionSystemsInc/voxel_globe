@@ -1,14 +1,14 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 NAME=rabbitmq-server
-#DAEMON=${NPR_ROAM_DIR}/rabbitmq-server
-DAEMON=${NPR_LIBDIR}/rabbitmq/sbin/rabbitmq-server
-CONTROL=${NPR_LIBDIR}/rabbitmq/sbin/rabbitmqctl
-INIT_LOG_DIR=${NPR_RABBITMQ_LOG_DIR}
-PID_FILE=${NPR_RABBITMQ_PID_DIR}/$NAME.pid
-LOCK_FILE=${NPR_RABBITMQ_LOCK_DIR}/$NAME
+#DAEMON=${VIP_ROAM_DIR}/rabbitmq-server
+DAEMON=${VIP_LIBDIR}/rabbitmq/sbin/rabbitmq-server
+CONTROL=${VIP_LIBDIR}/rabbitmq/sbin/rabbitmqctl
+INIT_LOG_DIR=${VIP_RABBITMQ_LOG_DIR}
+PID_FILE=${VIP_RABBITMQ_PID_DIR}/$NAME.pid
+LOCK_FILE=${VIP_RABBITMQ_LOCK_DIR}/$NAME
 
-export RABBITMQ_LOG_BASE=${NPR_RABBITMQ_LOG_DIR}
-export RABBITMQ_MNESIA_BASE=${NPR_RABBITMQ_MNESIA_BASE}
-export ERLANG_HOME=${NPR_RABBITMQ_ERLANG_HOME}
+export RABBITMQ_LOG_BASE=${VIP_RABBITMQ_LOG_DIR}
+export RABBITMQ_MNESIA_BASE=${VIP_RABBITMQ_MNESIA_BASE}
+export ERLANG_HOME=${VIP_RABBITMQ_ERLANG_HOME}
 
 #See lib/rabbitmq/sbin/rabbitmq-server for MANY MORE environment options to set

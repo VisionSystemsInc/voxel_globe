@@ -4,10 +4,10 @@ setlocal enabledelayedexpansion
 
 call %~dp0/np2r.bat
 
-set NPR_NARG=0
-for %%x in (%*) do Set /A NPR_NARG+=1
+set VIP_NARG=0
+for %%x in (%*) do Set /A VIP_NARG+=1
 
-if not "%NPR_NARG%"=="2" (
+if not "%VIP_NARG%"=="2" (
   echo ERROR: Two arguments only
   goto usage
 )
@@ -16,7 +16,7 @@ if not "%NPR_NARG%"=="2" (
 if /i "%1" == "all" (
   if /i "%2" == "stop" (
   REM Stop in reverse order, and NO, GOOGLE DID NOT HELP HERE! This is ALL AEN!
-	set TEMPTASKS=%NPR_SERVICES%
+	set TEMPTASKS=%VIP_SERVICES%
 
     set NUMT=0
     for %%x in (!TEMPTASKS!) do set /A NUMT+=1
@@ -29,12 +29,12 @@ if /i "%1" == "all" (
       )
     )
   ) else (
-    set TASKS=%NPR_SERVICES%
+    set TASKS=%VIP_SERVICES%
   )
   goto valid_service_name
 )
 ::See if any of the names match
-for %%i in (%NPR_SERVICES%) do (
+for %%i in (%VIP_SERVICES%) do (
   if /i "%1" == "%%i" (
     set TASKS=%1
     goto valid_service_name
@@ -81,12 +81,12 @@ goto done
 :stop
 for %%t in (%TASKS%) do (
   schtasks /end /TN %%t_daemon
-  if /i "%%t"=="rabbitmq" taskkill /im %NPR_RABBITMQ_DAEMON% /f
+  if /i "%%t"=="rabbitmq" taskkill /im %VIP_RABBITMQ_DAEMON% /f
   if /i "%%t"=="postgresql" (
-    pg_isready %NPR_POSTGRESQL_CREDENTIALS% > NUL
+    pg_isready %VIP_POSTGRESQL_CREDENTIALS% > NUL
     if not errorlevel 1 (
       echo Stray postgresql detected, cleaning up
-      pg_ctl stop -D %NPR_POSTGRESQL_DATABASE% -m fast 2>&1 >> %NPR_LOG_DIR%/postgresql_stop_stray.log
+      pg_ctl stop -D %VIP_POSTGRESQL_DATABASE% -m fast 2>&1 >> %VIP_LOG_DIR%/postgresql_stop_stray.log
     )
   )
 )
@@ -103,7 +103,7 @@ goto done
 
 :usage
 echo Usages: %0 {service_name} [start^|stop^|restart^|status]
-echo   where service_name can be [%NPR_SERVICES%]
+echo   where service_name can be [%VIP_SERVICES%]
 
 :done
 echo %cmdcmdline% | find /i "%~0" >nul
