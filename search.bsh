@@ -2,4 +2,4 @@
 
 if [ "$#" == "0" ]; then ADDED_ARGS='-print'; fi
 
-find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -prune -o -path '*/bin' -prune -o -path '*/share' -prune -o -name 'static*' -prune -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune -o -path './data/*/*' -prune -o -path '*/.git' -prune -o \( -not -path '*/roam/roam' -a -path '*/roam/*' \) -o -type f -not -name \*.exe -not -name \*.msi -not -name \*.gz -not -name \*.tgz -not -name \*.zip -not -name \*.bz2 -not -name \*.xz -not -name \*.dll ${ADDED_ARGS} "${@}"
+find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -prune -o -path '*/bin' -prune -o -path '*/share' -prune -o -name 'static*' -prune -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune -o -path './data/*/*' -prune -o -path '*/.git' -prune -o \( -not -path '*/roam/roam' -a -path '*/roam/*' \) -o -type f -not -name \*.exe -not -name \*.msi -not -name \*.gz -not -name \*.tgz -not -name \*.zip -not -name \*.bz2 -not -name \*.xz -not -name \*.dll -not -name \*.py\? -not -name \*.pdf -a \( ${ADDED_ARGS} "${@}" \)
