@@ -11,4 +11,6 @@ export RABBITMQ_LOG_BASE=${VIP_RABBITMQ_LOG_DIR}
 export RABBITMQ_MNESIA_BASE=${VIP_RABBITMQ_MNESIA_BASE}
 export ERLANG_HOME=${VIP_RABBITMQ_ERLANG_HOME}
 
+export HOME=${VIP_DATABASE_DIR}
+
 #See lib/rabbitmq/sbin/rabbitmq-server for MANY MORE environment options to set
