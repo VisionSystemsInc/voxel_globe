@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-call %~dp0\np2r.bat %*
+call %~dp0vip.bat %*
 
 if "%VIP_NARG%" == "0" (
   %~d0

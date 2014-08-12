@@ -2,7 +2,7 @@
 
 setlocal enabledelayedexpansion
 
-call %~dp0/np2r.bat
+call %~dp0vip.bat
 
 set VIP_NARG=0
 for %%x in (%*) do Set /A VIP_NARG+=1

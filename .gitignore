@@ -2,9 +2,8 @@
 *.py[co]
 logs
 *.lnk
-npr2.bat
-np2r.bat
-np2r.env
+vip.bat
+vip.bsh
 .project
 .pydevproject
 .settings

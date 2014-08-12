@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(dirname $0)/np2r.env
+source $(dirname ${BASH_SOURCE[0]})/vip.bsh
 
 if [ "$#" -lt 2 ]
 then
