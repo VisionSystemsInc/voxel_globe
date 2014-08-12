@@ -75,12 +75,12 @@ goto usage
 ::Just in case something went REALLY wrong?!
 
 :start
-for %%t in (%TASKS%) do schtasks /run /TN %%t_daemon
+for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
 goto done
 
 :stop
 for %%t in (%TASKS%) do (
-  schtasks /end /TN %%t_daemon
+  schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
   if /i "%%t"=="rabbitmq" taskkill /im %VIP_RABBITMQ_DAEMON% /f
   if /i "%%t"=="postgresql" (
     pg_isready %VIP_POSTGRESQL_CREDENTIALS% > NUL
@@ -93,12 +93,12 @@ for %%t in (%TASKS%) do (
 goto done
 
 :restart
-for %%t in (%TASKS%) do schtasks /end /TN %%t_daemon
-for %%t in (%TASKS%) do schtasks /run /TN %%t_daemon
+for %%t in (%TASKS%) do schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
+for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
 goto done
 
 :status
-for %%t in (%TASKS%) do schtasks /query /TN %%t_daemon
+for %%t in (%TASKS%) do schtasks /query /TN %%t_%VIP_DAEMON_POSTFIX%
 goto done
 
 :usage
