@@ -1,4 +1,3 @@
-
 Table of contents
 -----------------
  -General checkout
