@@ -156,7 +156,7 @@ Display <input type="number" value="1" id="numImagesPerPage" min="1" max="8" sty
                  <div id="imageToolbar">
                     <button id="addTiePoint" style="font-size:90%;" title="Create a new correspondence">New</button><button id="addTiePoint" style="font-size:90%;" title="Remove a correspondence" disabled>Remove</button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <button id="clearSelectedTiePoints" style="font-size:90%;" title="Clear displayed correspondence list.">Clear</button><button id="selectAllTiePoints" style="font-size:90%;" title="Select All correspondence points for display">Select All</button>
+                    <button id="clearSelectedTiePoints" style="font-size:90%;" title="Clear displayed correspondence list">Clear</button><button id="selectAllTiePoints" style="font-size:90%;" title="Select All correspondence points for display">Select All</button>
                  <br>
                     <!-- <button id="updateSelectedCorrespondences" style="font-size:90%;" title="Update the displayed correspondences">Update Correspondence Display</button> -->
                 </div>               
@@ -183,6 +183,16 @@ Display <input type="number" value="1" id="numImagesPerPage" min="1" max="8" sty
 <div id="debugInfo">
 </div>
 
+
+<div id="tiePointAdderDialog" title="Add a tie point to an image.">
+    Put a list of available tie points to add..allow creation of one...
 </div>
+
+<div id="tiePointRemoverDialog" title="Remove a tie point from an image.">
+    Put a list of available tie points to remove
+</div>
+
+</div>
+
 
 {% endblock %}
