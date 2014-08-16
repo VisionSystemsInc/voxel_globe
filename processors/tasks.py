@@ -10,6 +10,8 @@ from os import environ as env;
 from os.path import join as path_join;
 import os;
 
+from django.contrib.gis import geos
+
 app = Celery('tasks');
 app.config_from_object('celeryconfig') #Don't need this because celeryd does it for me
 
@@ -103,8 +105,8 @@ def test(abc=None, *args, **kwargs):
   return 42
 
 @app.task(base=VipTask, bind=True)
-def addImageTiePoint(self, *args, **kwargs):
-  tp = meta.models.ImageTiePoint.create(*args, **kwargs);
+def addTiePoint(self, *args, **kwargs):
+  tp = meta.models.TiePoint.create(*args, **kwargs);
   tp.service_id = self.request.id;
   tp.save();
   return tp;
@@ -158,16 +160,18 @@ def add_sample_data(self):
   ic.images.add(img);
   #No saving needed for this.
 
-  tp = meta.models.ImageTiePoint.create(x=100, y=100, name='Some point', image = img);
+  tp = meta.models.TiePoint.create(point=geos.Point(x=100, y=101), name='Some point', image = img);
   tp.service_id = self.request.id;
-  
-  gtp = meta.models.GeoTiePoint.create(name='Some geo point', 
+
+  gtp = meta.models.ControlPoint.create(name='Some geo point', 
            description='None provided. Just some point trying to make a point in life',
-           latitude=51.7534, longitude=-1.2539, altitude=89.2,
-           apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
+           point=geos.Point(x=-1.2539, y=51.7534, z=89.2, srid=4326),
+           #latitude=51.7534, longitude=-1.2539, altitude=89.2,
+           apparentPoint=geos.Point(x=-1.254033, y=51.753416, z=71, srid=4326))
+#           apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
   gtp.service_id = self.request.id;
   gtp.save();
-  
+
   tp.geoPoint = gtp;
   tp.save();
   
