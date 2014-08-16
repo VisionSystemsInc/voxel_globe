@@ -7,9 +7,22 @@ from uuid import uuid4;
 
 # Create your models here.
 
-PIXEL_FORMATS = (('f', 'Float'), ('d', 'Double'), ('q', 'Quadruple'), 
+PIXEL_FORMAT = (('f', 'Float'), ('d', 'Double'), ('q', 'Quadruple'), 
                  ('b', 'Byte 8'), ('s', 'Short 16'), 
                  ('i', 'Integer 32'), ('l', 'Long Integer 64'));
+
+LENGTH_UNIT = (('m', 'Meters'), ('f', 'Feet'))
+ANGLE_UNIT = (('r', 'Radians'), ('d', 'Degrees'))
+COORDINATE_SYSTEM = (('l', 'Local Vertical Coordinate System'),
+                     ('c', 'Cartesian'))
+TRANSFORMATION_TYPE = (('c', 'Cartesian'),
+                       ('s', 'Similarity'),
+                       ('g', 'Geographic'));
+
+MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
+              ('c', 'Cylinder'), ('pc', 'Point Cloud'))
+
+use_geography_points = False
 
 class Parameters:
   def __init__(self, params=None, fromStr=None):
@@ -191,34 +204,118 @@ class VipObjectModel(VipCommonModel):
       parent[0].save();
 
     super(VipObjectModel, self).delete(using);
-          
+
+class Session(VipCommonModel):
+  '''Model to track everything in a processing session
+  
+     This is Common Model and not Object model because I expect it to be ever
+     changing. The session shall NOT be passed along to celery. Rather, the
+     values in the session are USED as the input parameters to a celery task.
+     While this may be annoying, it allows us to not need to object track 
+     Session while still maintaining out repeatablity and trackability.'''
+
+  origin = models.ForeignKey('CoordinateSystem')
+  xRegion =  models.FloatField();
+  yRegion =  models.FloatField();
+  zRegion =  models.FloatField();
+  name = models.CharField(max_length=32);
+
+###  imageCollection = models.ForeignKey('ImageCollection')
+  cameraCollection = models.ForeignKey('CameraCollection');
+
+class CameraCollection(VipObjectModel):
+  cameras = models.ManyToManyField('Camera');
+
+class Camera(VipObjectModel):
+  focalLengthU = models.FloatField();
+  focalLengthV = models.FloatField();
+  principlePointU = models.FloatField();
+  principlePointV = models.FloatField();
+  coordinateSystem = models.ForeignKey('CoordinateSystem')
+  #Should the camera point to the image instead? Meaning Camera Collection only
+  #and no image Collection... Ask Joe
+
+''' Coordinate systems '''
+class CoordinateSystem(VipObjectModel):
+  csType = models.CharField(max_length=1, choices=COORDINATE_SYSTEM)
+  srid = models.IntegerField();
+
+class CartisianCoordinateSystem(CoordinateSystem):
+  xUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
+  yUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
+  zUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
+
+class GeoreferenceCoordinateSystem(CoordinateSystem):
+  xUnit = models.CharField(max_length=1, choices=LENGTH_UNIT+ANGLE_UNIT)
+  yUnit = models.CharField(max_length=1, choices=LENGTH_UNIT+ANGLE_UNIT)
+  zUnit = models.CharField(max_length=1, choices=LENGTH_UNIT+ANGLE_UNIT)
+  location = models.PointField(dim=3)
+  
+  def toCartisianCoordinateSystem(self, origin):
+    ''' Returns the transformation to go from this Georeference Coordinate
+        System to a Cartisian frame At the origin point'''
+    pass;
+  
+  objects = models.GeoManager()
+  #I need a GeoManager for PoostGIS onjects
+
+''' Coordinate Transforms '''
+
+class CoordinateTransform(VipObjectModel):
+  coordinateSystem_from = models.ForeignKey('CoordinateSystem', related_name='coordinatetransform_from_set')
+  coordinateSystem_to   = models.ForeignKey('CoordinateSystem', related_name='coordinatetransform_to_set')
+  #I  need to do this for ABSTRACT, but this isn't abstract, so I don't think I need to
+  #coordinateSystem_from = models.ForeignKey('CoordinateSystem', related_name='%(app_label)s_%(class)_from_related')
+  #coordinateSystem_to   = models.ForeignKey('CoordinateSystem', related_name='%(app_label)s_%(class)_to_related')
+  transformType = models.CharField(max_length=1, choices=TRANSFORMATION_TYPE)
+
+class CartesianTransform(CoordinateTransform):
+  rodriguezX = models.FloatField();
+  rodriguezY = models.FloatField();
+  rodriguezZ = models.FloatField();
+  
+  translationX = models.FloatField();
+  translationY = models.FloatField();
+  translationZ = models.FloatField();
+
+''' The rest '''
+
 class ImageCollection(VipObjectModel):
   images = models.ManyToManyField('Image');
 
 class Image(VipObjectModel):
   fileFormat = models.CharField(max_length=4);
-  pixelFormat = models.CharField(max_length=1, choices=PIXEL_FORMATS);
+  pixelFormat = models.CharField(max_length=1, choices=PIXEL_FORMAT);
   imageWidth = models.PositiveIntegerField('Image Width (pixels)');
   imageHeight = models.PositiveIntegerField('Image Height (pixels)');
   numberColorBands = models.PositiveIntegerField('Number of Color Bands');
   imageURL = models.TextField(unique=True);
+  camera = models.ForeignKey('Camera', null=True, blank=True);
 
-class ImageTiePoint(VipObjectModel):
+class TiePoint(VipObjectModel):
   #description = models.CharField(max_length=250)
-  x = models.FloatField()
-  y = models.FloatField()
-
+  #x = models.FloatField()
+  #y = models.FloatField()
+  point = models.PointField(dim=2)
+  
   image = models.ForeignKey('Image', blank=False)
-  geoPoint = models.ForeignKey('GeoTiePoint', null=True, blank=True)
+  geoPoint = models.ForeignKey('ControlPoint', null=True, blank=True)
 
-class GeoTiePoint(VipObjectModel):
+  objects = models.GeoManager()
+
+class ControlPoint(VipObjectModel):
   description = models.TextField()
+  
+  point = models.PointField(dim=3, geography=use_geography_points)
+  apparentPoint = models.PointField(dim=3, geography=use_geography_points, null=True, blank=True)
+
+  objects = models.GeoManager()
     
-  latitude = models.FloatField()
-  longitude = models.FloatField()
-  altitude = models.FloatField()
+  #latitude = models.FloatField()
+  #longitude = models.FloatField()
+  #altitude = models.FloatField()
     
-  apparentLatitude = models.FloatField()
-  apparentLongitude = models.FloatField()
-  apparentAltitude = models.FloatField()
+  #apparentLatitude = models.FloatField()
+  #apparentLongitude = models.FloatField()
+  #apparentAltitude = models.FloatField()
 

@@ -60,6 +60,7 @@ ROOT_URLCONF = 'nga.urls'
 
 WSGI_APPLICATION = 'nga.wsgi.application'
 
+SERIALIZATION_MODULES = { 'geojson' : 'geojson' }
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases

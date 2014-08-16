@@ -12,5 +12,5 @@ urlpatterns = patterns('',
 
 # json API calls    
     url(r'^fetchVideoList$', views.fetchVideoList, name='fetchVideoList'),
-    url(r'^fetchGeoPointList$', views.fetchGeoPointList, name='fetchGeoPointList'),
+    url(r'^fetchControlPointList$', views.fetchControlPointList, name='fetchControlPointList'),
 )
