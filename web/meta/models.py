@@ -127,7 +127,48 @@ class VipObjectModel(VipCommonModel):
       else:
         break;
     return s;
-  
+    
+  @classmethod
+  def taskAddSync(cls, *args, **kwargs):
+    ''' This is DONE, however will NOT currently work. It has to do with some python
+        thing where a class can be loaded twice, and thus have a different ID, and
+        super fails a basic "isinstance" test. I BELEIVE this will start working
+        once I properly import celery into django, and load celery in a shared
+        class space, but I do not want to do that NOW. SO I will continue to use
+        the hack tasks until that is done. If this does NOT solve the problem,
+        I will either 
+        1) Have to give up on this neat trick
+        2) Handle super myself?
+        3) Read more on http://thingspython.wordpress.com/2010/09/27/another-super-wrinkle-raising-typeerror/'''
+#    @tasks.app.task(base=tasks.VipTask, bind=True)
+#This too is broken until I do it right
+    def __taskAddSync(self, *args, **kwargs):
+      obj = cls.create(*args, **kwargs);
+      obj.service_id = self.request.id;
+      obj.save();
+      return obj.id;
+    return __taskAddSync.apply(*args, **kwargs)
+
+  @classmethod
+  def taskAddAsync(cls, *args, **kwargs):
+#    @tasks.app.task(base=tasks.VipTask, bind=True)
+#This too is broken until I do it right
+    def __taskAdd(self, *args, **kwargs):
+      obj = cls.create(*args, **kwargs);
+      obj.service_id = self.request.id;
+      obj.save();
+      return obj.id;
+    return _taskAdd.apply_async(*args, **kwargs)
+
+  ''' I never finished this. Finish when above is fixed ''' 
+  # @classmethod
+  # @tasks.app.task(base=tasks.VipTask, bind=True)
+  # def taskUpdate(self, cls, *args, **kwargs):
+    # print self.request.id
+    # print cls 
+    # print args
+    # print kwargs
+    
   @classmethod
   def create(cls, *args, **kwargs):
     '''Create an new object, autogenerating a uuid for object ID'''
