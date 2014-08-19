@@ -26,16 +26,15 @@ def voxelWorldViewer(request):
 #
 def fetchVideoList(request):
     imgs = meta.models.ImageCollection.objects.all()
-    return HttpResponse( serializers.serialize('json', imgs) , content_type="application/json")
+    return HttpResponse( serializers.serialize('geojson', imgs) , content_type="application/json")
 
 def fetchImages(request):
     print("Requested images for video collection id ", request.REQUEST["videoId"])
     videoId = request.REQUEST["videoId"]
-    video = meta.models.ImageCollection.objects.get(id=int(videoId))
-# ANDY - Add code to grab and return the list of image objects specified by the video.images contents
-    res = {}
-    res['error'] = "not implemented - add code to grab image list for video id " + videoId
-    return HttpResponse( json.dumps(res), content_type="application/json")
+    video = meta.models.ImageCollection.objects.get(id=videoId)
+    return HttpResponse( serializers.serialize('json', video.images.all(), fields=('name',)), 
+                         content_type="application/json")
+    #based off of video_list_example.ipynb
     
 def fetchControlPointList(request):    
     geoPoints = meta.models.ControlPoint.objects.all()    
@@ -44,22 +43,23 @@ def fetchControlPointList(request):
 def fetchTiePoints(request):    
     print("Requested tie points for image id ", request.REQUEST["imageId"])
     imageId = request.REQUEST["imageId"]
-# ANDY - Add code to grab and return the list of tie points for an image with ID imageId
-# I will take care of filtering based on control point selection in the UI (for now)
-    res = {}
-    res['error'] = "not implemented - add code to grab tie points for image id " + imageId
-    return HttpResponse( json.dumps(res), content_type="application/json")
+    tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId)
+    serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint'))
+    return HttpResponse( serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint')) , content_type="application/json")
      
 #  API for updating data in the database
 def createTiePoint(request):
-    print("Requested to create a tie points for image id ", request.REQUEST["imageId"], 
-          " associated with control point ", request.REQUEST["controlPointId"], 
-          " with x=", request.REQUEST["x"], " and y=", request.REQUEST["y"])
-# ANDY - Create an object in the tie point table with the appropriate fields 
-    return 
+    imageId = request.REQUEST["imageId"];
+    controlPointId = request.REQUEST["controlPointId"];
+    x = request.REQUEST["x"];
+    y = request.REQUEST["y"];
+    tasks.createTiePoint.apply(kwargs={'point':'POINT(%s,%s)' % (x,y), 
+                               image_id=imageId, 
+                               geoPoint_id=controlPointId));
+    return HttpResponse('');
 
 def updateTiePoint(request):
     print("Requested to update a tie point with id ", request.REQUEST["tiePointId"],           
           " with x=", request.REQUEST["x"], " and y=", request.REQUEST["y"])    
 # ANDY - Update the tie point table with the appropriate values
-    return 
+    return HttpResponse('');

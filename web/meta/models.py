@@ -5,6 +5,8 @@ import json;
 
 from uuid import uuid4;
 
+import tasks
+
 # Create your models here.
 
 PIXEL_FORMAT = (('f', 'Float'), ('d', 'Double'), ('q', 'Quadruple'), 
