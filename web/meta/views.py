@@ -54,8 +54,8 @@ def createTiePoint(request):
     x = request.REQUEST["x"];
     y = request.REQUEST["y"];
     tasks.createTiePoint.apply(kwargs={'point':'POINT(%s,%s)' % (x,y), 
-                               image_id=imageId, 
-                               geoPoint_id=controlPointId));
+                               'image_id':imageId, 
+                               'geoPoint_id':controlPointId});
     return HttpResponse('');
 
 def updateTiePoint(request):
