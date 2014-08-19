@@ -39,7 +39,7 @@ if "%1"=="start_httpd" (
 ) else if "%1"=="start_flower" (
   flower > %VIP_LOG_DIR%/flower_out.log 2> %VIP_LOG_DIR%/flower_err.log
 ) else if "%1"=="start_notebook" (
-  ipython notebook --no-browser --port=%VIP_NOTEBOOK_PORT% --ip=%VIP_NOTEBOOK_IP% > %VIP_LOG_DIR%/notebook_out.log 2> %VIP_LOG_DIR%/notebook_err.log
+  ipython notebook --notebook-dir=%VIP_NOTEBOOK_DIR% --no-browser --port=%VIP_NOTEBOOK_PORT% --ip=%VIP_NOTEBOOK_IP% > %VIP_LOG_DIR%/notebook_out.log 2> %VIP_LOG_DIR%/notebook_err.log
 ) else %VIP_INSTALL_DIR%/wrap.bat %*
 
 endlocal
