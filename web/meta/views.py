@@ -32,7 +32,9 @@ def fetchImages(request):
     print("Requested images for video collection id ", request.REQUEST["videoId"])
     videoId = request.REQUEST["videoId"]
     video = meta.models.ImageCollection.objects.get(id=videoId)
-    return HttpResponse( serializers.serialize('geojson', video.images.all(), fields=('name',)), 
+#    return HttpResponse( serializers.serialize('geojson', video.images.all(), fields=('name',)), 
+#                         content_type="application/json")
+    return HttpResponse( serializers.serialize('geojson', video.images.all()), 
                          content_type="application/json")
     #based off of video_list_example.ipynb
     
