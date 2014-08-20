@@ -109,8 +109,18 @@ def addTiePoint(self, *args, **kwargs):
   tp = meta.models.TiePoint.create(*args, **kwargs);
   tp.service_id = self.request.id;
   tp.save();
-  return tp;
+  return tp.id;
 
+@app.task(base=VipTask, bind=True)
+def updateTiePoint(self, id, xc, y, *args, **kwargs):
+  tp = meta.models.TiePoint.objects.get(id=id);
+  tp.service_id = self.request.id;
+  #for key, val in kwargs.iteritems():
+  #  tp.
+  tp.point = 'POINT(%s %s)' % (xc,y);
+  tp.update();
+  return tp.id;
+  
 @app.task(base=VipTask, bind=True)
 def injestImage(self, *args, **kwargs):
   pass
