@@ -86,7 +86,7 @@ for %%t in (%TASKS%) do (
     pg_isready %VIP_POSTGRESQL_CREDENTIALS% > NUL
     if not errorlevel 1 (
       echo Stray postgresql detected, cleaning up
-      pg_ctl stop -D %VIP_POSTGRESQL_DATABASE% -m fast 2>&1 >> %VIP_LOG_DIR%/postgresql_stop_stray.log
+      pg_ctl stop -D %VIP_POSTGRESQL_DATABASE% -m fast 2>&1 >> %VIP_POSTGRESQL_LOG_DIR%/postgresql_stop_stray.log
     )
   )
 )
