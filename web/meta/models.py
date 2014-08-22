@@ -313,9 +313,13 @@ class CoordinateTransform(VipObjectModel):
   transformType = models.CharField(max_length=1, choices=TRANSFORMATION_TYPE)
 
 class CartesianTransform(CoordinateTransform):
-  rodriguezX = models.FloatField();
-  rodriguezY = models.FloatField();
-  rodriguezZ = models.FloatField();
+#   rodriguezX = models.FloatField();
+#   rodriguezY = models.FloatField();
+#   rodriguezZ = models.FloatField();
+  rodriguezX = models.PointField();
+  rodriguezY = models.PointField();
+  rodriguezZ = models.PointField();
+  #TOTAL HACK until I get REAL Rodriguez vectors in here, I will Store R!
   
   translationX = models.FloatField();
   translationY = models.FloatField();
