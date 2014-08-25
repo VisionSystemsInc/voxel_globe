@@ -10,6 +10,7 @@ if "%VIP_NARG%" == "0" (
 
 if "%1"=="start_httpd" (
   set PIDFILE=%VIP_HTTPD_PID_DIR%/httpd.pid
+  if "%VIP_HTTPD_DEPLOY_ON_START%" == "1" ${VIP_DJANGO_PROJECT}/deploy.bsh
   if "%VIP_HTTPD_DEBUG_INDEXES%" == "1" set HTTPD_OPTIONS=%HTTPD_OPTIONS% -Ddebug_indexes
   if not exist %VIP_HTTPD_LOG_DIR:/=\% mkdir %VIP_HTTPD_LOG_DIR:/=\%
   httpd !HTTPD_OPTIONS! -f %VIP_HTTPD_CONF% > %VIP_HTTPD_LOG_DIR%/httpd_out.log 2> %VIP_HTTPD_LOG_DIR%/httpd_err.log
