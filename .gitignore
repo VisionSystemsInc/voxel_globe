@@ -8,3 +8,4 @@ vip.bsh
 .pydevproject
 .settings
 .ipynb_checkpoints
+*.zip
