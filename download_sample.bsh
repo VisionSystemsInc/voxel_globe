@@ -17,4 +17,12 @@ else
     echo "Unknown origin type, I can't handle that right now..."
     #Feel free to add more here, but git:// would not work well, since it's a 
     #sandbox really
+    exit 1
 fi
+
+if [ "`uname -s`" == "Linux" ]
+then
+  unzip purdue_sample.zip    
+else
+  ./external/bin_Windows_NT_AMD64/utils/extract.bat purdue_sample.zip
+fi 
