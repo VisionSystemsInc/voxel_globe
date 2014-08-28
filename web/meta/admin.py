@@ -10,9 +10,18 @@ import inspect
 
 ''' Non-VIPObjectModels ''' 
 admin.site.register(meta.models.WorkflowInstance)
+
+class VipInline(admin.TabularInline):
+  template = 'admin/edit_inline/vip.html'
+  fields = ('objectId',)
+  extra = 0;
+
+def VipInlineFactory(model):
+  return type(model._meta.model_name+'Inline', (VipInline,), {'model':model})
+
 class ServiceInstanceAdmin(admin.ModelAdmin):
   list_display = ('__unicode__', 'entryTime', 'finishTime', 'inputs', 'outputs');
-admin.site.register(meta.models.ServiceInstance, ServiceInstanceAdmin)
+  inlines = [];
 
 ''' Custom VipObjectModels ''' 
 class TiePointAdmin(admin.ModelAdmin):
@@ -33,5 +42,8 @@ for m in inspect.getmembers(meta.models):
    try:
     if issubclass(m[1], meta.models.VipObjectModel):
       admin.site.register(m[1]);
+      ServiceInstanceAdmin.inlines.append(VipInlineFactory(m[1]))
    except:
      pass 
+   
+admin.site.register(meta.models.ServiceInstance, ServiceInstanceAdmin)

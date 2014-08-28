@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.core.exceptions import FieldError
 from django.db.transaction import atomic;
+from django.db.models.fields.related import OneToOneField
 import json;
 
 from uuid import uuid4;
@@ -26,17 +27,19 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
 
 use_geography_points = False
 
-class Parameters:
-  def __init__(self, params=None, fromStr=None):
-    if fromStr:
-      params = json.loads(fromStr);
-    self.params = params;
-  def __str__(self):
-    return json.dumps(self.params)
-
 class VipCommonModel(models.Model):
   class Meta:
     abstract = True
+    
+  def get_subclasses(self):
+    rels = [rel.model.objects.filter(id=self.id) for rel in self._meta.get_all_related_objects()
+      if isinstance(rel.field, OneToOneField)
+      and issubclass(rel.field.model, self._meta.model)
+      and self._meta.model is not rel.field.model]
+    rels = [rel[0] for rel in rels
+            if len(rel)]
+    return rels
+    
 
   #Returns the string representation of the model. Documentation says I 
   #need to do this. __unicode__ on Python 2

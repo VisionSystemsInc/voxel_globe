@@ -32,10 +32,6 @@ def getArea(id):
   country = world.models.WorldBorder.objects.get(id=id)
   return country.area;
 
-
-
-
-
 class VipTask(Task):
   abstract = True
   
@@ -120,20 +116,82 @@ def updateTiePoint(self, id, xc, y, *args, **kwargs):
   tp.point = 'POINT(%s %s)' % (xc,y);
   tp.update();
   return tp.id;
-  
+
 @app.task(base=VipTask, bind=True)
 def injestImage(self, *args, **kwargs):
   pass
 
+def getKTL(image):
+  import numpy as np
+  camera = image.camera;
+  K_i = np.eye(3);
+  K_i[0,2] = camera.principlePointU;
+  K_i[1,2] = camera.principlePointV;
+  K_i[0,0] = camera.focalLengthU;
+  K_i[1,1] = camera.focalLengthV;
+  
+  llh = [None];
+  
+  coordinate_systems = [camera.coordinateSystem]
+  coordinate_transforms = [];
+  while len(coordinate_systems[0].coordinatetransform_to_set.all()):
+    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].get_subclasses()[0];
+    cs = ct.coordinateSystem_from.get_subclasses()[0];
+    coordinate_transforms = [ct]+coordinate_transforms;
+    coordinate_systems = [cs] + coordinate_systems;
+  
+  if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
+    llh = list(coordinate_systems[0].location);
+  
+  T_camera_0 = np.eye(4);
+  for ct in coordinate_transforms:
+    T = np.eye(4);
+    T[0,0:3] = ct.rodriguezX;
+    T[1,0:3] = ct.rodriguezY;
+    T[2,0:3] = ct.rodriguezZ;
+    T[0:3, 3] = ct.translation;
+    T_camera_0 = T.dot(T_camera_0);
+    
+  return (K_i, T_camera_0, llh);
+
+
 @app.task
 def projectRay(**kwargs):
+  import numpy as np;
+  import enu;
   imageId = int(kwargs["imageId"])
   image = meta.models.Image.objects.get(id=imageId)
   x = int(kwargs.pop('x', image.imageWidth/2))
   y = int(kwargs.pop('y', image.imageHeight/2))
-  distance = int(kwargs.pop('distance', 1000))
-  
-  return "%d %d %d %d" % (imageId, x, y, distance)
+  distance = int(kwargs.pop('distance', 2000))
+
+  if image.camera:
+    K, T, llh = getKTL(image);
+    print "K is ", K
+    print "T is ", T
+    print "llh is ", llh
+    R = T[0:3, 0:3];
+    t = T[0:3, 3]; t.shape=(3,1)
+    cam_center = -R.dot(t).flatten();
+    P = K.dot(np.concatenate((R,t), axis=1));
+    Pi = np.matrix(P).I;
+    ray = np.array(Pi).dot([[x],[y],[1]]);
+    ray = ray[0:3,0].flatten();
+    print "Ray is ", ray
+    t = (-llh[2] - cam_center[2])/ray[2]; #project to sea level
+    print 'ray * t is ', ray*t
+    ray = ray * t+cam_center;
+    llh2 = enu.enu2llh(llh, [ray[0], ray[1], ray[2]])
+    print "Ray is now ", ray
+    print "t is ", t
+    print "llh2 is ", llh2
+    #t = distance/ray[2];
+    
+    
+    return json.dumps((llh, llh2));
+  else:
+    return '';
+
 
 @app.task(base=VipTask, bind=True)
 def add_sample_images(self, imageDir, *args, **kwargs):
@@ -178,17 +236,17 @@ def add_sample_images(self, imageDir, *args, **kwargs):
 
       last_cs = grcs;
       for t in range(len(ts)):
-        cs = meta.models.CartesianCoordinateSystem(name='%s %d' % (os.path.splitext(filename)[0], t+1),
+        cs = meta.models.CartesianCoordinateSystem.create(name='%s %d' % (os.path.splitext(filename)[0], t+1),
                                                    service_id = self.request.id,
                                                    xUnit='m', yUnit='m', zUnit='m');
         cs.save();
 
         rx = geos.Point(*ts[t][0][0:3]);
-        ry = geos.Point(*ts[t][0][0:3]);
-        rz = geos.Point(*ts[t][0][0:3]);
+        ry = geos.Point(*ts[t][1][0:3]);
+        rz = geos.Point(*ts[t][2][0:3]);
         translation = geos.Point(ts[t][0][3], ts[t][1][3], ts[t][2][3]);
 
-        transform = meta.models.CartesianTransform(name='%s %d_%d' % (os.path.splitext(filename)[0], t+1, t),
+        transform = meta.models.CartesianTransform.create(name='%s %d_%d' % (os.path.splitext(filename)[0], t+1, t),
                                        service_id = self.request.id,
                                        rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
                                        translation=translation,

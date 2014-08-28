@@ -11,7 +11,7 @@ find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -pru
 -o -path '*/rpmbuild/RPMS' -prune \
 -o -path '*/rpmbuild/SRPMS' -prune \
 -o -path '*/rpmbuild/db' -prune \
--o -path '*/bin' -prune -o -path '*/sharef' -prune \
+-o -path '*/bin' -prune -o -path '*/share' -prune \
 -o -name 'static_deploy' -prune \
 -o -name cesium -prune -o -name jquery-ui -prune -o -name 'OpenLayers*' -prune \
 -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune \
