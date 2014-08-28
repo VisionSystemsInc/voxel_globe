@@ -73,3 +73,8 @@ def updateTiePoint(request):
     #"POINT(%s %s)" % (x, y), but until this is complete, it does not matter to me.
           
     return HttpResponse('');
+  
+def fetchCameraRay(request):
+  points = tasks.projectRay(**request.REQUEST);
+  
+  return HttpResponse(points);

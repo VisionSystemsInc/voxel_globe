@@ -19,6 +19,11 @@ class TiePointAdmin(admin.ModelAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.forms.widgets.TextInput }};
 admin.site.register(meta.models.TiePoint, TiePointAdmin)
 
+class CartesianTransformAdmin(admin.ModelAdmin):
+  formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.forms.widgets.TextInput }};
+admin.site.register(meta.models.CartesianTransform, CartesianTransformAdmin)
+
+
 class ControlPointAdmin(admin.ModelAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.contrib.gis.forms.widgets.OSMWidget }};
 admin.site.register(meta.models.ControlPoint, ControlPointAdmin)

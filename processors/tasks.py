@@ -125,6 +125,16 @@ def updateTiePoint(self, id, xc, y, *args, **kwargs):
 def injestImage(self, *args, **kwargs):
   pass
 
+@app.task
+def projectRay(**kwargs):
+  imageId = int(kwargs["imageId"])
+  image = meta.models.Image.objects.get(id=imageId)
+  x = int(kwargs.pop('x', image.imageWidth/2))
+  y = int(kwargs.pop('y', image.imageHeight/2))
+  distance = int(kwargs.pop('distance', 1000))
+  
+  return "%d %d %d %d" % (imageId, x, y, distance)
+
 @app.task(base=VipTask, bind=True)
 def add_sample_images(self, imageDir, *args, **kwargs):
   images = glob(path_join(imageDir, '2010*', ''));
@@ -148,8 +158,74 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
     ic.save();
     ic.images.add(*imageCollections[cam]);
-    
 
+#@app.task(base=VipTask, bind=True)
+#def add_sample_cameras(self):
+  with open(path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras.txt'), 'r') as fid:
+    for line in fid:
+      l = eval(line);
+    
+      filename = l[0];
+      llh = l[1];
+      ts = l[2:-1];
+      k_i = l[-1];
+
+      grcs = meta.models.GeoreferenceCoordinateSystem.create(name='%s 0' % os.path.splitext(filename)[0],
+                                                             xUnit='d', yUnit='d', zUnit='m',
+                                                             location='SRID=4326;POINT(%0.12f %0.12f %0.12f)' % tuple(llh),
+                                                             service_id = self.request.id)
+      grcs.save();
+
+      last_cs = grcs;
+      for t in range(len(ts)):
+        cs = meta.models.CartesianCoordinateSystem(name='%s %d' % (os.path.splitext(filename)[0], t+1),
+                                                   service_id = self.request.id,
+                                                   xUnit='m', yUnit='m', zUnit='m');
+        cs.save();
+
+        rx = geos.Point(*ts[t][0][0:3]);
+        ry = geos.Point(*ts[t][0][0:3]);
+        rz = geos.Point(*ts[t][0][0:3]);
+        translation = geos.Point(ts[t][0][3], ts[t][1][3], ts[t][2][3]);
+
+        transform = meta.models.CartesianTransform(name='%s %d_%d' % (os.path.splitext(filename)[0], t+1, t),
+                                       service_id = self.request.id,
+                                       rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
+                                       translation=translation,
+                                       coordinateSystem_from_id=last_cs.id,
+                                       coordinateSystem_to_id=cs.id)
+        transform.save()
+
+        last_cs = cs;
+
+      camera = meta.models.Camera.create(name=os.path.splitext(filename)[0],
+                                         service_id = self.request.id,
+                                         focalLengthU=k_i[0],
+                                         focalLengthV=k_i[1],
+                                         principlePointU=k_i[2],
+                                         principlePointV=k_i[3],
+                                         coordinateSystem=last_cs)
+      camera.save();
+
+      images = meta.models.Image.objects.filter(imageURL__contains=os.path.splitext(filename)[0]);
+      
+      for img in images:
+        #img.service_id = self.request.id;
+        img.camera_id = camera.id;
+        #img.update();
+        img.save()
+      #image.update(service=self.request.id, camera=camera.id);
+      
+      #map(lambda x:x.update(service=self.request.id, camera=camera), image);
+
+#      transform = meta.models.CartesianTransform(service_id = self.request.id,
+#                                       rodriguezX=geos.Point(0,0,0),
+#                                       rodriguezY=geos.Point(0,0,0),
+#                                       rodriguezZ=geos.Point(0,0,0),
+#                                       translation=geos.Point(0,0,0),
+#                                       coordinateSystem_from_id=last_cs.id,
+#                                       coordinateSystem_to_id=camera.id)
+#      transform.save()
 
 @app.task(base=VipTask, bind=True)
 def add_sample_data(self):
@@ -164,7 +240,7 @@ def add_sample_data(self):
                                     (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH']));
   img.service_id = self.request.id;
   img.save()
-  
+
   ic = meta.models.ImageCollection.create(name="Oxford Libraries", service_id = self.request.id);
   ic.save();
   ic.images.add(img);
@@ -179,6 +255,7 @@ def add_sample_data(self):
            #latitude=51.7534, longitude=-1.2539, altitude=89.2,
            apparentPoint=geos.Point(x=-1.254033, y=51.753416, z=71, srid=4326))
 #           apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
+
   gtp.service_id = self.request.id;
   gtp.save();
 
@@ -187,6 +264,28 @@ def add_sample_data(self):
   
   return [img.id, tp.id, gtp.id] 
 
+@app.task
+def deleteServiceInstance(service_id):
+  ''' Maintanence routine '''
+  serviceInstance = meta.models.ServiceInstance.objects.get(id=service_id);
+  
+  sets = filter(lambda x: x.endswith('_set'), dir(serviceInstance))
+  
+  for s in sets:
+    objects = getattr(serviceInstance, s).all();
+    for obj in objects:
+      #parents = getattr(objects, s).all();
+      #It will be called the same thing, I hope... The only way this wouldn't
+      #be true is if the model definition was REALLY messed up, which shouldn't
+      #Be possible with my inheritance schema. So this should always work
+      #for parent in parents:
+      print 'Dereferencing %s %s %d' % (type(obj), obj.name, obj.id)
+      obj.remove_reference();
+
+  print 'Deleting Service Instance tree'
+  serviceInstance.delete();
+
+  
 #TODO
 #Define Add task
 #--Addes a task, retrieve data from database, etc...

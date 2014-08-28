@@ -185,7 +185,7 @@ class VipObjectModel(VipCommonModel):
        
        This is the real tricky part, so make it atomic'''
     newest = self._findNewest();
-    print 'newest is', newest
+    #print 'newest is', newest
     self.newerVersion_id = None;
     #The most uptodate is ALWAYS the newest, so it should always be none
     self.save(*args, **kwargs);
@@ -225,7 +225,6 @@ class VipObjectModel(VipCommonModel):
     else:
       super(VipObjectModel, self).save(*args, **kwargs);
   
-  @atomic
   def delete(self, using=None, check_is_used=True):
     '''Remove this version of the object ID. 
     
@@ -236,17 +235,27 @@ class VipObjectModel(VipCommonModel):
        table to see if this instance is refered to. This is useful to skip if
        there is a global maintanence routine that will have already checked this
        and there is no reason to check here again, for speed.'''
-    
+
     if check_is_used:
       pass
+
+    self.remove_references(check_is_used);
+
+    super(VipObjectModel, self).delete(using);
+
+  @atomic
+  def remove_reference(self, check_is_used=True):
+    ''' This effectively unlinks this node from the history tree so that is can
+        later be safely removed '''
+    if check_is_used:
+      pass; #Not sure what to do here yet
     
     parent = self._meta.model.objects.filter(objectId=self.objectId, newerVersion_id=self.id);
-    
+
     if parent:
       parent[0].newerVersion_id = self.newerVersion_id;
       parent[0].save();
 
-    super(VipObjectModel, self).delete(using);
 
 class Session(VipCommonModel):
   '''Model to track everything in a processing session
@@ -264,10 +273,10 @@ class Session(VipCommonModel):
   name = models.CharField(max_length=32);
 
 ###  imageCollection = models.ForeignKey('ImageCollection')
-  cameraCollection = models.ForeignKey('CameraCollection');
+#  cameraCollection = models.ForeignKey('CameraCollection');
 
-class CameraCollection(VipObjectModel):
-  cameras = models.ManyToManyField('Camera');
+#class CameraCollection(VipObjectModel):
+#  cameras = models.ManyToManyField('Camera');
 
 class Camera(VipObjectModel):
   focalLengthU = models.FloatField();
@@ -280,10 +289,11 @@ class Camera(VipObjectModel):
 
 ''' Coordinate systems '''
 class CoordinateSystem(VipObjectModel):
-  csType = models.CharField(max_length=1, choices=COORDINATE_SYSTEM)
-  srid = models.IntegerField();
+  pass
+  #csType = models.CharField(max_length=1, choices=COORDINATE_SYSTEM)
+  #srid = models.IntegerField();
 
-class CartisianCoordinateSystem(CoordinateSystem):
+class CartesianCoordinateSystem(CoordinateSystem):
   xUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
   yUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
   zUnit = models.CharField(max_length=1, choices=LENGTH_UNIT)
@@ -294,9 +304,9 @@ class GeoreferenceCoordinateSystem(CoordinateSystem):
   zUnit = models.CharField(max_length=1, choices=LENGTH_UNIT+ANGLE_UNIT)
   location = models.PointField(dim=3)
   
-  def toCartisianCoordinateSystem(self, origin):
+  def toCartesianCoordinateSystem(self, origin):
     ''' Returns the transformation to go from this Georeference Coordinate
-        System to a Cartisian frame At the origin point'''
+        System to a Cartesian frame At the origin point'''
     pass;
   
   objects = models.GeoManager()
@@ -316,14 +326,16 @@ class CartesianTransform(CoordinateTransform):
 #   rodriguezX = models.FloatField();
 #   rodriguezY = models.FloatField();
 #   rodriguezZ = models.FloatField();
-  rodriguezX = models.PointField();
-  rodriguezY = models.PointField();
-  rodriguezZ = models.PointField();
+  rodriguezX = models.PointField(dim=3);
+  rodriguezY = models.PointField(dim=3);
+  rodriguezZ = models.PointField(dim=3);
   #TOTAL HACK until I get REAL Rodriguez vectors in here, I will Store R!
+
+  translation = models.PointField(dim=3);
   
-  translationX = models.FloatField();
-  translationY = models.FloatField();
-  translationZ = models.FloatField();
+#  translationX = models.FloatField();
+#  translationY = models.FloatField();
+#  translationZ = models.FloatField();
 
 ''' The rest '''
 
@@ -336,8 +348,14 @@ class Image(VipObjectModel):
   imageWidth = models.PositiveIntegerField('Image Width (pixels)');
   imageHeight = models.PositiveIntegerField('Image Height (pixels)');
   numberColorBands = models.PositiveIntegerField('Number of Color Bands');
-  imageURL = models.TextField(unique=True);
+  #imageURL = models.TextField(unique=True);
+  #I can't use unique with the current precedence implementation
+  imageURL = models.TextField();
   camera = models.ForeignKey('Camera', null=True, blank=True);
+  #coordinateSystem = models.ForeignKey('CoordinateSystem', null=True, blank=True);
+  #Question for Joe: Point at the camera, or point at the oppisite end of the
+  #transformation? 
+
 
 class TiePoint(VipObjectModel):
   #description = models.CharField(max_length=250)
