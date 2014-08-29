@@ -121,9 +121,9 @@ def updateTiePoint(self, id, xc, y, *args, **kwargs):
 def injestImage(self, *args, **kwargs):
   pass
 
-def getKTL(image):
+def getKTL(image, history=0):
   import numpy as np
-  camera = image.camera;
+  camera = image.camera.history(history);
   K_i = np.eye(3);
   K_i[0,2] = camera.principlePointU;
   K_i[1,2] = camera.principlePointV;
@@ -135,13 +135,13 @@ def getKTL(image):
   coordinate_systems = [camera.coordinateSystem]
   coordinate_transforms = [];
   while len(coordinate_systems[0].coordinatetransform_to_set.all()):
-    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].get_subclasses()[0];
+    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].get_subclasses()[0].history(history);
     cs = ct.coordinateSystem_from.get_subclasses()[0];
     coordinate_transforms = [ct]+coordinate_transforms;
     coordinate_systems = [cs] + coordinate_systems;
   
   if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
-    llh = list(coordinate_systems[0].location);
+    llh = list(coordinate_systems[0].history(history).location);
   
   T_camera_0 = np.eye(4);
   for ct in coordinate_transforms:
@@ -163,35 +163,38 @@ def projectRay(**kwargs):
   image = meta.models.Image.objects.get(id=imageId)
   x = int(kwargs.pop('x', image.imageWidth/2))
   y = int(kwargs.pop('y', image.imageHeight/2))
-  distance = int(kwargs.pop('distance', 2000))
+  height = int(kwargs.pop('height', 0))
+  history = int(kwargs.pop('history', 0))
 
   if image.camera:
-    K, T, llh = getKTL(image);
-    print "K is ", K
-    print "T is ", T
-    print "llh is ", llh
-    R = T[0:3, 0:3];
-    t = T[0:3, 3]; t.shape=(3,1)
-    cam_center = -R.dot(t).flatten();
-    P = K.dot(np.concatenate((R,t), axis=1));
-    Pi = np.matrix(P).I;
-    ray = np.array(Pi).dot([[x],[y],[1]]);
-    ray = ray[0:3,0].flatten();
-    print "Ray is ", ray
-    t = (-llh[2] - cam_center[2])/ray[2]; #project to sea level
-    print 'ray * t is ', ray*t
-    ray = ray * t+cam_center;
-    llh2 = enu.enu2llh([llh[1], llh[0], llh[2]], [ray[0], ray[1], ray[2]])
-    llh2 = [llh2[1], llh2[0], llh2[2]]
-    print "Ray is now ", ray
-    print "t is ", t
-    print "llh2 is ", llh2
-    #t = distance/ray[2];
-    
-    
-    return json.dumps((llh, llh2));
-  else:
-    return '';
+#    try:
+      K, T, llh = getKTL(image, history);
+#       print "K is ", K
+#       print "T is ", T
+#       print "llh is ", llh
+      R = T[0:3, 0:3];
+      t = T[0:3, 3]; t.shape=(3,1)
+      cam_center = -R.dot(t).flatten();
+      P = K.dot(np.concatenate((R,t), axis=1));
+      Pi = np.matrix(P).I;
+      ray = np.array(Pi).dot([[x],[y],[1]]);
+      ray = ray[0:3,0].flatten();
+#       print "Ray is ", ray
+      t = (-llh[2]+height - cam_center[2])/ray[2]; #project to sea level
+#       print 'ray * t is ', ray*t
+      ray = ray * t+cam_center;
+      llh2 = enu.enu2llh(lon_origin=llh[0], lat_origin=llh[1], h_origin=llh[2], east=ray[0], north=ray[1], up=ray[2])
+      llh2 = [llh2['lon'], llh2['lat'], llh2['h']]
+#       print "Ray is now ", ray
+#       print "t is ", t
+#       print "llh2 is ", llh2
+#       t = distance/ray[2];
+      return json.dumps((llh, llh2));
+
+#    except:
+      pass
+
+  return '';
 
 
 @app.task(base=VipTask, bind=True)
@@ -217,64 +220,89 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
     ic.save();
     ic.images.add(*imageCollections[cam]);
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt'))
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt'))
+  
+def add_sample_cameras(self, filename):
 
-#@app.task(base=VipTask, bind=True)
-#def add_sample_cameras(self):
-  with open(path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras.txt'), 'r') as fid:
+  with open(filename, 'r') as fid:
     for line in fid:
       l = eval(line);
     
-      filename = l[0];
+      pos_filename = l[0];
+      base_filename = os.path.splitext(os.path.split(pos_filename)[-1])[0]
+      
       llh = l[1];
       ts = l[2:-1];
       k_i = l[-1];
-
-      grcs = meta.models.GeoreferenceCoordinateSystem.create(name='%s 0' % os.path.splitext(filename)[0],
-                                                             xUnit='d', yUnit='d', zUnit='m',
-                                                             location='SRID=4326;POINT(%0.12f %0.12f %0.12f)' % tuple(llh),
-                                                             service_id = self.request.id)
-      grcs.save();
+      
+      try:
+        grcs = meta.models.GeoreferenceCoordinateSystem.objects.get(name='%s 0' % base_filename, newerVersion=None);
+        grcs.service_id = self.request.id;
+        grcs.update(location = 'SRID=4326;POINT(%0.12f %0.12f %0.12f)' % tuple(llh));
+      except meta.models.GeoreferenceCoordinateSystem.DoesNotExist:
+        grcs = meta.models.GeoreferenceCoordinateSystem.create(name='%s 0' % base_filename,
+                                                               xUnit='d', yUnit='d', zUnit='m',
+                                                               location='SRID=4326;POINT(%0.12f %0.12f %0.12f)' % tuple(llh),
+                                                               service_id = self.request.id)
+        grcs.save();
 
       last_cs = grcs;
       for t in range(len(ts)):
-        cs = meta.models.CartesianCoordinateSystem.create(name='%s %d' % (os.path.splitext(filename)[0], t+1),
+        try:
+          cs = meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
+        except meta.models.CartesianCoordinateSystem.DoesNotExist:
+          cs = meta.models.CartesianCoordinateSystem.create(name='%s %d' % (base_filename, t+1),
                                                    service_id = self.request.id,
                                                    xUnit='m', yUnit='m', zUnit='m');
-        cs.save();
+          cs.save();
 
         rx = geos.Point(*ts[t][0][0:3]);
         ry = geos.Point(*ts[t][1][0:3]);
         rz = geos.Point(*ts[t][2][0:3]);
         translation = geos.Point(ts[t][0][3], ts[t][1][3], ts[t][2][3]);
 
-        transform = meta.models.CartesianTransform.create(name='%s %d_%d' % (os.path.splitext(filename)[0], t+1, t),
+        try:
+          transform = meta.models.CartesianTransform.objects.get(name='%s %d_%d' % (base_filename, t+1, t), newerVersion=None)
+          transform.service_id = self.request.id;
+          transform.update(rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
+                           translation=translation);
+        except meta.models.CartesianTransform.DoesNotExist:
+          transform = meta.models.CartesianTransform.create(name='%s %d_%d' % (base_filename, t+1, t),
                                        service_id = self.request.id,
                                        rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
                                        translation=translation,
                                        coordinateSystem_from_id=last_cs.id,
                                        coordinateSystem_to_id=cs.id)
-        transform.save()
+          transform.save()
 
         last_cs = cs;
 
-      camera = meta.models.Camera.create(name=os.path.splitext(filename)[0],
+      try:
+        camera = meta.models.Camera.objects.get(name=base_filename, newerVersion=None);
+        camera.service_id = self.request.id;
+        camera.update(focalLengthU=k_i[0], focalLengthV=k_i[1],
+                      principlePointU=k_i[2], principlePointV=k_i[3])
+      except meta.models.Camera.DoesNotExist:
+        camera = meta.models.Camera.create(name=base_filename,
                                          service_id = self.request.id,
                                          focalLengthU=k_i[0],
                                          focalLengthV=k_i[1],
                                          principlePointU=k_i[2],
                                          principlePointV=k_i[3],
                                          coordinateSystem=last_cs)
-      camera.save();
+        camera.save();
 
-      images = meta.models.Image.objects.filter(imageURL__contains=os.path.splitext(filename)[0]);
-      
+      images = meta.models.Image.objects.filter(imageURL__contains=base_filename);
+
       for img in images:
         #img.service_id = self.request.id;
         img.camera_id = camera.id;
         #img.update();
         img.save()
+        
       #image.update(service=self.request.id, camera=camera.id);
-      
+
       #map(lambda x:x.update(service=self.request.id, camera=camera), image);
 
 #      transform = meta.models.CartesianTransform(service_id = self.request.id,
@@ -286,6 +314,11 @@ def add_sample_images(self, imageDir, *args, **kwargs):
 #                                       coordinateSystem_to_id=camera.id)
 #      transform.save()
 
+@app.task(base=VipTask, bind=True)
+def add_controlPoint(self, controlpoint_filename):
+  with fid(controlpoint_filename, 'r') as fid:
+    pass;
+  
 @app.task(base=VipTask, bind=True)
 def add_sample_data(self):
   '''Add regression data to database.

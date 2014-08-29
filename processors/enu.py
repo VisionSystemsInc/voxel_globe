@@ -25,15 +25,17 @@ def llh2enu_au(llh_origin, llh):
   
   return [de, dn, du]
 
-def llh2enu(llh_origin, llh):
-  xyz = llh2xyz(*llh);
-  enu = xyz2enu(llh_origin[0], llh_origin[1], llh_origin[2], *xyz)
+def llh2enu(lat_origin, lon_origin, h_origin, lat, lon, h):
+  xyz = llh2xyz(lat, lon, h);
+  enu = xyz2enu(lat_origin, lon_origin, h_origin, *xyz)
+  enu_dict = {'east':enu[0], 'north':enu[1], 'up':enu[2]}
   return enu
 
-def enu2llh(llh_origin, enu):
-  xyz = enu2xyz(llh_origin[0], llh_origin[1], llh_origin[2], *enu)
+def enu2llh(lat_origin, lon_origin, h_origin, east, north, up):
+  xyz = enu2xyz(lat_origin, lon_origin, h_origin, east, north, up)
   llh = xyz2llh(*xyz);
-  return llh;
+  llh_dict = {'lat':llh[0], 'lon':llh[1], 'h':llh[2]}
+  return llh_dict;
 
 def llh2xyz(lat,lon,h):
   # Convert lat, long, height in WGS84 to ECEF X,Y,Z

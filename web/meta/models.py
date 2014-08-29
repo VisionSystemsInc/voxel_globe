@@ -203,8 +203,9 @@ class VipObjectModel(VipCommonModel):
        
        Automatically saves unless _auto_save is set to False'''
 
+    self.pk = None;
     self.id = None;
-    #You know, the developer COULD set id, I mean, that would be BAD, but hey, 
+    #You know, the developer COULD set pk/id, I mean, that would be BAD, but hey, 
     #whatever. I won't prevent it.
 
     for name, val in kwargs.iteritems():
@@ -245,6 +246,24 @@ class VipObjectModel(VipCommonModel):
     self.remove_references(check_is_used);
 
     super(VipObjectModel, self).delete(using);
+    
+  def previous_version(self):
+    try:
+      return getattr(self, self._meta.model_name+'_set').get()
+    except self.DoesNotExist:
+      return None;
+  
+  def history(self, history=0):
+    if history:
+      hist = self;
+      for x in range(history):
+        try:
+          hist = getattr(hist, self._meta.model_name+'_set').get()
+        except hist.DoesNotExist:
+          return hist
+      return hist
+    else:
+      return self;
 
   @atomic
   def remove_reference(self, check_is_used=True):
