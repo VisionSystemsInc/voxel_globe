@@ -181,7 +181,8 @@ def projectRay(**kwargs):
     t = (-llh[2] - cam_center[2])/ray[2]; #project to sea level
     print 'ray * t is ', ray*t
     ray = ray * t+cam_center;
-    llh2 = enu.enu2llh(llh, [ray[0], ray[1], ray[2]])
+    llh2 = enu.enu2llh([llh[1], llh[0], llh[2]], [ray[0], ray[1], ray[2]])
+    llh2 = [llh2[1], llh2[0], llh2[2]]
     print "Ray is now ", ray
     print "t is ", t
     print "llh2 is ", llh2
