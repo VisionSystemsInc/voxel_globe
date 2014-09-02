@@ -135,7 +135,7 @@ def getKTL(image, history=0):
   coordinate_systems = [camera.coordinateSystem]
   coordinate_transforms = [];
   while len(coordinate_systems[0].coordinatetransform_to_set.all()):
-    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].get_subclasses()[0].history(history);
+    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].history(history);
     cs = ct.coordinateSystem_from.get_subclasses()[0];
     coordinate_transforms = [ct]+coordinate_transforms;
     coordinate_systems = [cs] + coordinate_systems;

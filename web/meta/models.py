@@ -105,7 +105,7 @@ class VipObjectModel(VipCommonModel):
   service = models.ForeignKey('ServiceInstance');
   name = models.TextField();
   objectId = models.CharField('Object ID', max_length=36);
-  newerVersion = models.ForeignKey('self', null=True, blank=True);
+  newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='history_set');
 
   class Meta:
     abstract = True
@@ -253,17 +253,23 @@ class VipObjectModel(VipCommonModel):
     except self.DoesNotExist:
       return None;
   
-  def history(self, history=0):
+  def history(self, history=0, get_subclass=True):
     if history:
-      hist = self;
+      hist = self._findNewest();
       for x in range(history):
         try:
-          hist = getattr(hist, self._meta.model_name+'_set').get()
+          hist = hist.history_set.get()
         except hist.DoesNotExist:
-          return hist
-      return hist
+          break;
     else:
-      return self;
+      hist = self._findNewest();
+    
+    if get_subclass:
+      try:
+        return hist.get_subclasses()[0];
+      except (TypeError, IndexError):
+        pass
+    return hist;
 
   @atomic
   def remove_reference(self, check_is_used=True):
