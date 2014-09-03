@@ -39,11 +39,16 @@ admin.site.register(meta.models.ControlPoint, ControlPointAdmin)
 
 ''' Register EVERYTHING else '''
 for m in inspect.getmembers(meta.models):
-   try:
+  ''' Add inlines for ALL VIP memebers '''
+  try:
     if issubclass(m[1], meta.models.VipObjectModel):
       admin.site.register(m[1]);
+  except:
+    pass 
+  
+  try:
+    if issubclass(m[1], meta.models.VipObjectModel) and not m[1] == meta.models.VipObjectModel:
       ServiceInstanceAdmin.inlines.append(VipInlineFactory(m[1]))
-   except:
-     pass 
-   
+  except:
+    pass; 
 admin.site.register(meta.models.ServiceInstance, ServiceInstanceAdmin)

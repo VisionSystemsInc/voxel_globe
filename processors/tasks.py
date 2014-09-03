@@ -316,9 +316,31 @@ def add_sample_cameras(self, filename):
 #      transform.save()
 
 @app.task(base=VipTask, bind=True)
-def add_controlPoint(self, controlpoint_filename):
-  with fid(controlpoint_filename, 'r') as fid:
-    pass;
+def add_control_point(self, controlpoint_filename):
+  from math import copysign
+  with open(controlpoint_filename, 'r') as fid:
+    lines = fid.readlines();
+  lines = map(lambda x: x.split(','), lines)
+  for line in lines:
+    name = line[0];
+    #Get just the name, the only text field
+    fields = map(float, line[1:])
+    #Float cast the rest
+    
+    latitude  = fields[0]
+    latitude += copysign(fields[1]/60.0 + fields[2]/3600.0, latitude);
+    longitude = fields[3]
+    longitude += copysign(fields[4]/60.0 + fields[5]/3600.0, longitude);
+    altitude  = fields[6]
+    point = 'SRID=4326;POINT(%0.12f %0.12f %0.12f)' % (longitude, latitude, altitude);
+
+    other = 'Utm %f %f %f Other %f %f %f' % tuple(fields[7:])
+    tp = meta.models.ControlPoint.create(name=name,
+                                         description=other,
+                                         point=point,
+                                         apparentPoint=point)
+    tp.service_id = self.request.id;
+    tp.save();
   
 @app.task(base=VipTask, bind=True)
 def add_sample_data(self):
