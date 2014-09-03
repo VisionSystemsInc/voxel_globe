@@ -341,43 +341,6 @@ def add_control_point(self, controlpoint_filename):
                                          apparentPoint=point)
     tp.service_id = self.request.id;
     tp.save();
-  
-@app.task(base=VipTask, bind=True)
-def add_sample_data(self):
-  '''Add regression data to database.
-  
-     This function is primarily used by initialize_database.py to create test
-     data for going into the database.'''
-
-  img = meta.models.Image.create(name="Oxford Codrington Library", imageWidth=999, imageHeight=749, 
-                                 numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                                 imageURL='http://%s/%s/camelot-UK_2012OxfordUniversity-42/' % 
-                                    (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH']));
-  img.service_id = self.request.id;
-  img.save()
-
-  ic = meta.models.ImageCollection.create(name="Oxford Libraries", service_id = self.request.id);
-  ic.save();
-  ic.images.add(img);
-  #No saving needed for this.
-
-  tp = meta.models.TiePoint.create(point=geos.Point(x=100, y=101), name='Some point', image = img);
-  tp.service_id = self.request.id;
-
-  gtp = meta.models.ControlPoint.create(name='Some geo point', 
-           description='None provided. Just some point trying to make a point in life',
-           point=geos.Point(x=-1.2539, y=51.7534, z=89.2, srid=4326),
-           #latitude=51.7534, longitude=-1.2539, altitude=89.2,
-           apparentPoint=geos.Point(x=-1.254033, y=51.753416, z=71, srid=4326))
-#           apparentLatitude=51.753416, apparentLongitude=-1.254033, apparentAltitude=71)
-
-  gtp.service_id = self.request.id;
-  gtp.save();
-
-  tp.geoPoint = gtp;
-  tp.save();
-  
-  return [img.id, tp.id, gtp.id] 
 
 @app.task
 def deleteServiceInstance(service_id):
