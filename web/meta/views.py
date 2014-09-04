@@ -78,3 +78,8 @@ def fetchCameraRay(request):
   points = tasks.projectRay(**request.REQUEST);
   
   return HttpResponse(points);
+
+def fetchCameraFiducial(request):
+  points = tasks.fetchCameraFiducial(**request.REQUEST);
+  
+  return HttpResponse(points);

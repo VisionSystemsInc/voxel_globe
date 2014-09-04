@@ -1,4 +1,5 @@
-from math import sin, cos, pi, atan2, atan
+#from math import sin, cos, pi, atan2, atan
+from numpy import sin, cos, pi, arctan, arctan2
 
 def llh2enu_au(llh_origin, llh):
   a = 6378137.0;
@@ -32,6 +33,8 @@ def llh2enu(lat_origin, lon_origin, h_origin, lat, lon, h):
   return enu
 
 def enu2llh(lat_origin, lon_origin, h_origin, east, north, up):
+  ''' llh origin can be 1x1 each
+      enu can be a numpy array each'''
   xyz = enu2xyz(lat_origin, lon_origin, h_origin, east, north, up)
   llh = xyz2llh(*xyz);
   llh_dict = {'lat':llh[0], 'lon':llh[1], 'h':llh[2]}
@@ -107,8 +110,8 @@ def xyz2llh(X,Y,Z):
   V = ( tmp + (1-e2)*Z**2 )**0.5;
   zo = (b**2*Z)/(a*V);
 
-  lat = atan( (Z + ep2*zo)/r )*180/pi;
-  lon = atan2(Y,X)*180/pi;
+  lat = arctan( (Z + ep2*zo)/r )*180/pi;
+  lon = arctan2(Y,X)*180/pi;
   h = U*( 1 - b**2/(a*V));
 
   return (lat, lon, h)

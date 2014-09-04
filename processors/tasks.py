@@ -122,9 +122,10 @@ def injestImage(self, *args, **kwargs):
   pass
 
 def getKTL(image, history=0):
-  import numpy as np
+  ''' returns K, T, llh (lon, lat, h)'''
+
   camera = image.camera.history(history);
-  K_i = np.eye(3);
+  K_i = numpy.eye(3);
   K_i[0,2] = camera.principlePointU;
   K_i[1,2] = camera.principlePointV;
   K_i[0,0] = camera.focalLengthU;
@@ -143,9 +144,9 @@ def getKTL(image, history=0):
   if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
     llh = list(coordinate_systems[0].history(history).location);
   
-  T_camera_0 = np.eye(4);
+  T_camera_0 = numpy.eye(4);
   for ct in coordinate_transforms:
-    T = np.eye(4);
+    T = numpy.eye(4);
     T[0,0:3] = ct.rodriguezX;
     T[1,0:3] = ct.rodriguezY;
     T[2,0:3] = ct.rodriguezZ;
@@ -154,10 +155,63 @@ def getKTL(image, history=0):
     
   return (K_i, T_camera_0, llh);
 
+def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
+  ''' Project a set of points xs, ys (Nx1 numpy array each) through the K (3x3) T (4x4) 
+      model at llh_xyz (3x1). You must either specify the distances to project
+      (scalar) or the z intersection planes (scalar)
+      
+      returns dictionary with lon, lat, h'''
+  import enu;
+
+  R = T[0:3, 0:3];
+  t = T[0:3, 3:]; #Extract 3x1, which is why the : is necessary
+  cam_center = -R.dot(t).flatten();
+  P = K.dot(numpy.concatenate((R,t), axis=1));
+  Pi = numpy.matrix(P).I;
+  ray = numpy.array(Pi).dot([xs,ys,numpy.ones(xs.shape)]);
+  ray = ray[0:3]; #cut off 4th row
+    
+
+  if distances is None:
+    for c in range(ray.shape[1]):
+      t = (-llh_xyz[2]+zs - cam_center[2])/ray[2,c]; #project to sea level
+      ray[:,c] = ray[:,c] * t+cam_center;
+  else:
+    for c in range(ray.shape[1]):
+      ray[:,c] /= numpy.linalg.norm(ray[:,c]) / distances;
+
+  llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], lat_origin=llh_xyz[1], h_origin=llh_xyz[2], east=ray[0,:], north=ray[1,:], up=ray[2,:])
+  return llh2_xyz
+
+class NumpyAwareJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 @app.task
+def fetchCameraFiducial(**kwargs):
+  imageId = int(kwargs["imageId"])
+  image = meta.models.Image.objects.get(id=imageId)
+  size = int(kwargs.pop('size', 100)); #Size in meters
+  history = int(kwargs.pop('history', 0))
+  if image.camera:
+    w = image.imageWidth;
+    h = image.imageHeight;
+    K, T, llh = getKTL(image, history);
+    llh2 = projectPoint(K, T, llh, numpy.array([0,w,w,0]), numpy.array([0,0,h,h]), distances=size)
+
+    llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
+    llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
+    llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
+    return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+  
+  return '';
+  
+  
+@app.task
 def projectRay(**kwargs):
-  import numpy as np;
+
   import enu;
   imageId = int(kwargs["imageId"])
   image = meta.models.Image.objects.get(id=imageId)
@@ -169,27 +223,33 @@ def projectRay(**kwargs):
   if image.camera:
 #    try:
       K, T, llh = getKTL(image, history);
-#       print "K is ", K
-#       print "T is ", T
-#       print "llh is ", llh
-      R = T[0:3, 0:3];
-      t = T[0:3, 3]; t.shape=(3,1)
-      cam_center = -R.dot(t).flatten();
-      P = K.dot(np.concatenate((R,t), axis=1));
-      Pi = np.matrix(P).I;
-      ray = np.array(Pi).dot([[x],[y],[1]]);
-      ray = ray[0:3,0].flatten();
-#       print "Ray is ", ray
-      t = (-llh[2]+height - cam_center[2])/ray[2]; #project to sea level
-#       print 'ray * t is ', ray*t
-      ray = ray * t+cam_center;
-      llh2 = enu.enu2llh(lon_origin=llh[0], lat_origin=llh[1], h_origin=llh[2], east=ray[0], north=ray[1], up=ray[2])
-      llh2 = [llh2['lon'], llh2['lat'], llh2['h']]
+# #       print "K is ", K
+# #       print "T is ", T
+# #       print "llh is ", llh
+#       R = T[0:3, 0:3];
+#       t = T[0:3, 3]; t.shape=(3,1)
+#       cam_center = -R.dot(t).flatten();
+#       P = K.dot(numpy.concatenate((R,t), axis=1));
+#       Pi = numpy.matrix(P).I;
+#       ray = numpy.array(Pi).dot([[x],[y],[1]]);
+#       ray = ray[0:3,0].flatten();
+# #       print "Ray is ", ray
+#       t = (-llh[2]+height - cam_center[2])/ray[2]; #project to sea level
+# #       print 'ray * t is ', ray*t
+#       ray = ray * t+cam_center;
+#       llh2 = enu.enu2llh(lon_origin=llh[0], lat_origin=llh[1], h_origin=llh[2], east=ray[0], north=ray[1], up=ray[2])
+#       print llh2
+      llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=height)
+#      llh2 = [llh2['lon'], llh2['lat'], llh2['h']]
 #       print "Ray is now ", ray
 #       print "t is ", t
 #       print "llh2 is ", llh2
 #       t = distance/ray[2];
-      return json.dumps((llh, llh2));
+      llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
+      llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
+      llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
+
+      return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
 
 #    except:
       pass
