@@ -170,7 +170,6 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   Pi = numpy.matrix(P).I;
   ray = numpy.array(Pi).dot([xs,ys,numpy.ones(xs.shape)]);
   ray = ray[0:3]; #cut off 4th row
-    
 
   if distances is None:
     for c in range(ray.shape[1]):
@@ -184,10 +183,10 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   return llh2_xyz
 
 class NumpyAwareJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+  def default(self, obj):
+    if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
+      return obj.tolist()
+    return json.JSONEncoder.default(self, obj)
 
 @app.task
 def fetchCameraFiducial(**kwargs):
@@ -221,41 +220,15 @@ def projectRay(**kwargs):
   history = int(kwargs.pop('history', 0))
 
   if image.camera:
-#    try:
       K, T, llh = getKTL(image, history);
-# #       print "K is ", K
-# #       print "T is ", T
-# #       print "llh is ", llh
-#       R = T[0:3, 0:3];
-#       t = T[0:3, 3]; t.shape=(3,1)
-#       cam_center = -R.dot(t).flatten();
-#       P = K.dot(numpy.concatenate((R,t), axis=1));
-#       Pi = numpy.matrix(P).I;
-#       ray = numpy.array(Pi).dot([[x],[y],[1]]);
-#       ray = ray[0:3,0].flatten();
-# #       print "Ray is ", ray
-#       t = (-llh[2]+height - cam_center[2])/ray[2]; #project to sea level
-# #       print 'ray * t is ', ray*t
-#       ray = ray * t+cam_center;
-#       llh2 = enu.enu2llh(lon_origin=llh[0], lat_origin=llh[1], h_origin=llh[2], east=ray[0], north=ray[1], up=ray[2])
-#       print llh2
-      llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=height)
-#      llh2 = [llh2['lon'], llh2['lat'], llh2['h']]
-#       print "Ray is now ", ray
-#       print "t is ", t
-#       print "llh2 is ", llh2
-#       t = distance/ray[2];
+
       llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
       llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
       llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
 
       return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
 
-#    except:
-      pass
-
   return '';
-
 
 @app.task(base=VipTask, bind=True)
 def add_sample_images(self, imageDir, *args, **kwargs):
@@ -361,19 +334,6 @@ def add_sample_cameras(self, filename):
         img.camera_id = camera.id;
         #img.update();
         img.save()
-        
-      #image.update(service=self.request.id, camera=camera.id);
-
-      #map(lambda x:x.update(service=self.request.id, camera=camera), image);
-
-#      transform = meta.models.CartesianTransform(service_id = self.request.id,
-#                                       rodriguezX=geos.Point(0,0,0),
-#                                       rodriguezY=geos.Point(0,0,0),
-#                                       rodriguezZ=geos.Point(0,0,0),
-#                                       translation=geos.Point(0,0,0),
-#                                       coordinateSystem_from_id=last_cs.id,
-#                                       coordinateSystem_to_id=camera.id)
-#      transform.save()
 
 @app.task(base=VipTask, bind=True)
 def add_control_point(self, controlpoint_filename):
