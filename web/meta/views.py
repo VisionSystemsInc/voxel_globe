@@ -29,7 +29,7 @@ def fetchVideoList(request):
     return HttpResponse( serializers.serialize('geojson', imgs) , content_type="application/json")
 
 def fetchImages(request):
-    print("Requested images for video collection id ", request.REQUEST["videoId"])
+  try:
     videoId = request.REQUEST["videoId"]
     video = meta.models.ImageCollection.objects.get(id=videoId)
 #    return HttpResponse( serializers.serialize('geojson', video.images.all(), fields=('name',)), 
@@ -37,17 +37,18 @@ def fetchImages(request):
     return HttpResponse( serializers.serialize('geojson', video.images.all()), 
                          content_type="application/json")
     #based off of video_list_example.ipynb
+  except meta.models.ImageCollection.DoesNotExist:
+    return HttpResponse('')
     
 def fetchControlPointList(request):    
     geoPoints = meta.models.ControlPoint.objects.all()    
     return HttpResponse( serializers.serialize('geojson', geoPoints) , content_type="application/json")
   
-def fetchTiePoints(request):    
-    print("Requested tie points for image id ", request.REQUEST["imageId"])
-    imageId = request.REQUEST["imageId"]
-    tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId)
-    serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint'))
-    return HttpResponse( serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint')) , content_type="application/json")
+def fetchTiePoints(request):
+  imageId = request.REQUEST["imageId"]
+  tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId)
+  serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint'))
+  return HttpResponse( serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint')) , content_type="application/json")
      
 #  API for updating data in the database
 def createTiePoint(request):
@@ -75,7 +76,7 @@ def updateTiePoint(request):
     return HttpResponse('');
   
 def fetchCameraRay(request):
-  points = tasks.projectRay(**request.REQUEST);
+  points = tasks.fetchCameraRay(**request.REQUEST);
   
   return HttpResponse(points);
 

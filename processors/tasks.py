@@ -190,43 +190,50 @@ class NumpyAwareJSONEncoder(json.JSONEncoder):
 
 @app.task
 def fetchCameraFiducial(**kwargs):
-  imageId = int(kwargs["imageId"])
-  image = meta.models.Image.objects.get(id=imageId)
-  size = int(kwargs.pop('size', 100)); #Size in meters
-  history = int(kwargs.pop('history', 0))
-  if image.camera:
-    w = image.imageWidth;
-    h = image.imageHeight;
-    K, T, llh = getKTL(image, history);
-    llh2 = projectPoint(K, T, llh, numpy.array([0,w,w,0]), numpy.array([0,0,h,h]), distances=size)
-
-    llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
-    llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
-    llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
-    return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+  try:
+    imageId = int(kwargs["imageId"])
+    image = meta.models.Image.objects.get(id=imageId)
+    size = int(kwargs.pop('size', 100)); #Size in meters
+    history = int(kwargs.pop('history', 0))
+    if image.camera:
+      w = image.imageWidth;
+      h = image.imageHeight;
+      K, T, llh = getKTL(image, history);
+      llh2 = projectPoint(K, T, llh, numpy.array([0,w,w,0]), numpy.array([0,0,h,h]), distances=size)
+  
+      llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
+      llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
+      llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
+      return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+  except meta.models.Image.DoesNotExist:
+    pass;
   
   return '';
   
   
 @app.task
-def projectRay(**kwargs):
-
+def fetchCameraRay(**kwargs):
   import enu;
-  imageId = int(kwargs["imageId"])
-  image = meta.models.Image.objects.get(id=imageId)
-  x = int(kwargs.pop('x', image.imageWidth/2))
-  y = int(kwargs.pop('y', image.imageHeight/2))
-  height = int(kwargs.pop('height', 0))
-  history = int(kwargs.pop('history', 0))
 
-  if image.camera:
+  try:
+    imageId = int(kwargs["imageId"])
+    image = meta.models.Image.objects.get(id=imageId)
+    x = int(kwargs.pop('x', image.imageWidth/2))
+    y = int(kwargs.pop('y', image.imageHeight/2))
+    height = int(kwargs.pop('height', 0))
+    history = int(kwargs.pop('history', 0))
+  
+    if image.camera:
       K, T, llh = getKTL(image, history);
+      llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=numpy.array([height]))
 
       llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
       llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
       llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
 
       return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+  except meta.models.Image.DoesNotExist:
+    pass
 
   return '';
 
