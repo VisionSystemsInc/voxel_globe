@@ -46,7 +46,7 @@ def fetchControlPointList(request):
   
 def fetchTiePoints(request):
   imageId = request.REQUEST["imageId"]
-  tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId)
+  tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId, newerVersion=None, deleted=False)
   serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint'))
   return HttpResponse( serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint')) , content_type="application/json")
      
@@ -61,9 +61,9 @@ def createTiePoint(request):
     y = request.REQUEST["y"];
     name = request.REQUEST["name"];
     tasks.addTiePoint.apply(kwargs={'point':'POINT(%s %s)' % (x,y), 
-                               'image_id':imageId, 
-                               'geoPoint_id':controlPointId,
-                               'name': name});
+                                    'image_id':imageId, 
+                                    'geoPoint_id':controlPointId,
+                                    'name': name});
     return HttpResponse('');
 
 def updateTiePoint(request):
@@ -75,6 +75,15 @@ def updateTiePoint(request):
     #"POINT(%s %s)" % (x, y), but until this is complete, it does not matter to me.
           
     return HttpResponse('');
+
+def deleteTiePoint(request):
+  tiePointId = request.REQUEST['id']
+  object = meta.models.TiePoint.objects.get(id=tiePointId).history();
+  #Get the latest version of that tiepoint
+  object.deleted = True;
+  super(object._meta.model, object).save();
+  #Do not use the VIPModel save, since this is a strict change in a status flag
+  return HttpResponse('');
   
 def fetchCameraRay(request):
   points = tasks.fetchCameraRay(**request.REQUEST);

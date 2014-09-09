@@ -21,4 +21,5 @@ urlpatterns = patterns('',
 #   modifications to data
     url(r'^createTiePoint$', views.createTiePoint, name='createTiePoint'),
     url(r'^updateTiePoint$', views.updateTiePoint, name='updateTiePoint'),
+    url(r'^deleteTiePoint$', views.deleteTiePoint, name='deleteTiePoint'),
 )

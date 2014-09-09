@@ -100,12 +100,13 @@ class ServiceInstance(VipCommonModel):
   def __unicode__(self):
     return '%s [%s]' % (self.serviceName, self.id)
 
-#Abtract common model
+#Abtract common model - GOOD inheritance
 class VipObjectModel(VipCommonModel):
   service = models.ForeignKey('ServiceInstance');
   name = models.TextField();
   objectId = models.CharField('Object ID', max_length=36);
   newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='history_set');
+  deleted = models.BooleanField('Object deleted', default=False);
 
   class Meta:
     abstract = True
@@ -228,6 +229,7 @@ class VipObjectModel(VipCommonModel):
       self.__update(*args, **kwargs);
     else:
       super(VipObjectModel, self).save(*args, **kwargs);
+    
   
   def delete(self, using=None, check_is_used=True):
     '''Remove this version of the object ID. 
@@ -316,6 +318,7 @@ class Camera(VipObjectModel):
   #and no image Collection... Ask Joe
 
 ''' Coordinate systems '''
+#this is where the inheritance becomes less good... I worked around it, but still...
 class CoordinateSystem(VipObjectModel):
   pass
   #csType = models.CharField(max_length=1, choices=COORDINATE_SYSTEM)
