@@ -386,6 +386,9 @@ class Image(VipObjectModel):
   #coordinateSystem = models.ForeignKey('CoordinateSystem', null=True, blank=True);
   #Question for Joe: Point at the camera, or point at the oppisite end of the
   #transformation? 
+  class Meta:
+    ordering=('name',)
+    #Temporary fix, until I get a through class working
 
 
 class TiePoint(VipObjectModel):
