@@ -369,6 +369,30 @@ def add_control_point(self, controlpoint_filename):
     tp.service_id = self.request.id;
     tp.save();
 
+@app.task(base=VipTask, bind=True)
+def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, frames):
+  from tools.xml_dict import load_xml
+  control_point_names = [];
+  with open(lvcs_selected_filename, 'r') as fid:
+    for line in fid:
+      control_point_names.append(line.split(' ')[0])
+  tie_point_data = load_xml(site_filename);
+  
+  for control_point_index in range(len(control_point_names)):
+    cpn = control_point_names[control_point_index];
+    cp = meta.models.ControlPoint.objects.get(name=cpn);
+    for frame in frames:
+      tp = tie_point_data['Correspondences']['Correspondence'][control_point_index]['CE'].find_at(fr__is='%d'%frame);
+      if tp:
+        tp = tp[0].at;
+        name = '%s Camera:%d Frame:%03d' % (cpn, camera, int(frame))
+        point = 'POINT(%s %s)' % (tp['u'], tp['v']);
+        image = meta.models.Image.objects.get(name__contains='Camera:%d Frame:%03d' % (camera, frame))
+        tp = meta.models.TiePoint.create(name=name, point=point, image=image, geoPoint=cp)
+        tp.service_id = self.request.id;
+        tp.save();
+  
+
 @app.task
 def deleteServiceInstance(service_id):
   ''' Maintanence routine '''
