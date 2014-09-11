@@ -85,6 +85,7 @@ admin.site.register(meta.models.TiePoint, TiePointAdmin)
 
 class CartesianTransformAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.forms.widgets.TextInput }};
+  search_fields = ('name',) #Add this to all VIP?
 admin.site.register(meta.models.CartesianTransform, CartesianTransformAdmin)
 
 class ControlPointAdmin(VipAdmin):
