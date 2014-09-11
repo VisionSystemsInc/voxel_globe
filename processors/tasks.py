@@ -262,7 +262,7 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     ic.images.add(*imageCollections[cam]);
   add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt'))
   add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt'))
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt'))
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_3.txt'))
   
 def add_sample_cameras(self, filename):
 
