@@ -73,7 +73,7 @@ class VipAdmin(admin.ModelAdmin):
       #This MAY explode, if EVERY instance is kept in memory, it's for dev only, so I'm ok with this
     return super(VipAdmin, self).formfield_for_dbfield(db_field, **kwargs);
   history_link = history_link;
-  
+
   search_fields = ('name','objectId')
 
   readonly_fields=('history_link', 'service')
