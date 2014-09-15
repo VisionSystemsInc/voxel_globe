@@ -6,7 +6,7 @@
 {% block includes %}
 <link rel="stylesheet" href="{% static 'meta/OpenLayers-3.0.0/css/ol.css' %}" type="text/css">
 
-<script src="{% static 'meta/cesium/Cesium/Cesium.js' %}"></script>
+<script src="{% static 'meta/cesium/Build/Cesium/Cesium.js' %}"></script>
 <script src="{% static 'meta/OpenLayers-3.0.0/build/ol-debug.js' %}"></script>
 
 <!-- Include the client side javascript code -->
@@ -16,7 +16,8 @@
 <script src="{% static 'meta/js/tiePoint/paginator.js' %}"></script>
 <script src="{% static 'meta/js/tiePoint/controlPointOptions.js' %}"></script>
 <style>
-    @import url({% static 'meta/cesium/Cesium/Widgets/CesiumWidget/CesiumWidget.css' %});
+    @import url({% static 'meta/cesium/Build/Cesium/Widgets/shared.css' %});
+    @import url({% static 'meta/cesium/Build/Cesium/Widgets/widgets.css' %});
 
     #mainContainer {
         vertical-align: top;
@@ -42,7 +43,7 @@
         display: inline-block;
         position: relative;
         height: 98%;
-        width: 28%;
+        width: 35%;
         margin: 0;
         overflow: hidden;
         margin: 0px 0px 0px 22px;
@@ -54,7 +55,7 @@
         display: inline-block;
         position: relative;
         height: 98%;
-        width: 70%;
+        width: 63%;
         overflow: auto;
         padding: 0;
     }
@@ -119,6 +120,7 @@
 
 {%block globalfunctions %}
 // Global functions defined outside of the jquery document ready function can be put here.
+var iconFolderUrl = "{% static 'meta/icons/' %}";
 var mainViewer = new TiePointMain();
 {% endblock %}
 
@@ -170,10 +172,10 @@ var mainViewer = new TiePointMain();
     <div id="sideBuffer">
     </div>
     <div id="mapContainer">
-        <div id="mapWidget">
+       <div id="mapWidget" class="fullSize">
             <!--<canvas id="zoomSlider" style="z-index:15;position:absolute;top:0;right:0;width:50px;height:100px;background-color:yellow;opacity:0.75;"></canvas> -->
-        </div>
-        <div id="mapToolbar">            
+       </div>
+       <div id="mapToolbar">            
         </div>
     </div>
     <div id="imageContainer">           
@@ -196,16 +198,6 @@ Display <input type="number" value="1" id="numImagesPerPage" min="1" max="8" sty
 <div id="debugInfo">
 </div>
 
-
-<div id="tiePointAdderDialog" title="Add a tie point to an image.">
-    Put a list of available tie points to add..allow creation of one...
 </div>
-
-<div id="tiePointRemoverDialog" title="Remove a tie point from an image.">
-    Put a list of available tie points to remove
-</div>
-
-</div>
-
 
 {% endblock %}
