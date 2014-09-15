@@ -29,7 +29,25 @@ use_geography_points = False
 
 class History(models.Model):
   name = models.TextField();
-  history = models.TextField(); 
+  history = models.TextField(); #json field
+  
+  def __unicode__(self):
+    return '%s[%s]' % (self.name, self.id)
+  
+  @classmethod
+  def to_dict(cls, history=None):
+    '''Convert a History object, history string, history index or history
+       dictionary (idenity case) into a history dictionary'''
+    if history is None:
+      return None
+    elif isinstance(history, dict):
+      return history
+    elif isinstance(history, str):
+      return json.loads(history);
+    elif isinstance(history, cls):
+      return json.loads(history.history);
+    else: #assume it's a number
+      return json.loads(cls.objects.get(id=history).history);
 
 class VipCommonModel(models.Model):
   class Meta:
@@ -259,14 +277,9 @@ class VipObjectModel(VipCommonModel):
     except self.DoesNotExist:
       return None;
   
-  def history(self, history=0, get_subclass=True):
-    if history:
-      hist = self._findNewest();
-      for x in range(history):
-        try:
-          hist = hist.history_set.get()
-        except hist.DoesNotExist:
-          break;
+  def history(self, history=None, get_subclass=True):
+    if history and self.objectId in history:
+      hist = self._meta.model.objects.get(id=history[self.objectId])
     else:
       hist = self._findNewest();
     

@@ -121,10 +121,12 @@ def updateTiePoint(self, id, xc, y, *args, **kwargs):
 def injestImage(self, *args, **kwargs):
   pass
 
-def getKTL(image, history=0):
+def getKTL(image, history=None):
   ''' returns K, T, llh (lon, lat, h)'''
 
   camera = image.camera.history(history);
+  print "Camera"
+  print repr(camera);
   K_i = numpy.eye(3);
   K_i[0,2] = camera.principlePointU;
   K_i[1,2] = camera.principlePointV;
@@ -133,16 +135,25 @@ def getKTL(image, history=0):
   
   llh = [None];
   
-  coordinate_systems = [camera.coordinateSystem]
+  coordinate_systems = [camera.coordinateSystem.history(history)]
+  print "CS1"
+  print repr(coordinate_systems)  
   coordinate_transforms = [];
   while len(coordinate_systems[0].coordinatetransform_to_set.all()):
     ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].history(history);
-    cs = ct.coordinateSystem_from.get_subclasses()[0];
+    print "CT"
+    print repr(ct)
+    #cs = ct.coordinateSystem_from.get_subclasses()[0];
+    cs = ct.coordinateSystem_from.history(history);
+    print "CS"
+    print repr(cs)
     coordinate_transforms = [ct]+coordinate_transforms;
     coordinate_systems = [cs] + coordinate_systems;
   
   if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
     llh = list(coordinate_systems[0].history(history).location);
+    print "llh"
+    print llh
   
   T_camera_0 = numpy.eye(4);
   for ct in coordinate_transforms:
@@ -152,6 +163,9 @@ def getKTL(image, history=0):
     T[2,0:3] = ct.rodriguezZ;
     T[0:3, 3] = ct.translation;
     T_camera_0 = T.dot(T_camera_0);
+    
+  print 'Final T'
+  print T_camera_0
     
   return (K_i, T_camera_0, llh);
 
@@ -166,10 +180,13 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   R = T[0:3, 0:3];
   t = T[0:3, 3:]; #Extract 3x1, which is why the : is necessary
   cam_center = -R.dot(t).flatten();
+  print 'Cam_center', cam_center
   P = K.dot(numpy.concatenate((R,t), axis=1));
   Pi = numpy.matrix(P).I;
   ray = numpy.array(Pi).dot([xs,ys,numpy.ones(xs.shape)]);
   ray = ray[0:3]; #cut off 4th row
+  
+  print 'ray was', ray
 
   if distances is None:
     for c in range(ray.shape[1]):
@@ -177,7 +194,8 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
       ray[:,c] = ray[:,c] * t+cam_center;
   else:
     for c in range(ray.shape[1]):
-      ray[:,c] /= numpy.linalg.norm(ray[:,c]) / distances;
+      ray[:,c] /= numpy.linalg.norm(ray[:,c]) / distances + cam_center;
+  print 'ray is now', ray 
 
   llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], lat_origin=llh_xyz[1], h_origin=llh_xyz[2], east=ray[0,:], north=ray[1,:], up=ray[2,:])
   return llh2_xyz
@@ -189,12 +207,15 @@ class NumpyAwareJSONEncoder(json.JSONEncoder):
     return json.JSONEncoder.default(self, obj)
 
 @app.task
-def fetchCameraFiducial(**kwargs):
+def fetchCameraFrustum(**kwargs):
   try:
     imageId = int(kwargs["imageId"])
     image = meta.models.Image.objects.get(id=imageId)
     size = int(kwargs.pop('size', 100)); #Size in meters
-    history = int(kwargs.pop('history', 0))
+    historyId = kwargs.pop('history', None)
+    if historyId:
+      historyId = int(historyId);
+    history = meta.models.History.to_dict(historyId)
     if image.camera:
       w = image.imageWidth;
       h = image.imageHeight;
@@ -221,11 +242,18 @@ def fetchCameraRay(**kwargs):
     x = int(kwargs.pop('x', image.imageWidth/2))
     y = int(kwargs.pop('y', image.imageHeight/2))
     height = int(kwargs.pop('height', 0))
-    history = int(kwargs.pop('history', 0))
+    historyId = kwargs.pop('history', None)
+    if historyId:
+      historyId = int(historyId);
+    history = meta.models.History.to_dict(historyId)
   
     if image.camera:
       K, T, llh = getKTL(image, history);
       llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=numpy.array([height]))
+
+      print llh
+      print projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), distances=numpy.array([0]))
+      print llh2
 
       llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
       llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
@@ -260,13 +288,15 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
     ic.save();
     ic.images.add(*imageCollections[cam]);
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt'))
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt'))
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_3.txt'))
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt')) #history = 2
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt')) #history = 1
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_3.txt')) #history = 0
   
 def add_sample_cameras(self, filename):
 
   with open(filename, 'r') as fid:
+    history = dict();
+    #create a history object for the entire file for the demo
     for line in fid:
       l = eval(line);
     
@@ -287,16 +317,28 @@ def add_sample_cameras(self, filename):
                                                                location='SRID=4326;POINT(%0.12f %0.12f %0.12f)' % tuple(llh),
                                                                service_id = self.request.id)
         grcs.save();
+        
+      history[grcs.objectId] = grcs.id;
 
       last_cs = grcs;
       for t in range(len(ts)):
+# This logic just doesn't work with the cheap getKTL and history tricks currently implemented, NEEDS TO BE REDONE
+# Basically reverse FK'd don't work well with history... YET
+# My JSON trick SHOULD work.... Maybe
+#        try:
+#          cs = meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
+#        except meta.models.CartesianCoordinateSystem.DoesNotExist:
         try:
           cs = meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
-        except meta.models.CartesianCoordinateSystem.DoesNotExist:
+          cs.service_id = self.request.id;
+          cs.update();
+        except:
           cs = meta.models.CartesianCoordinateSystem.create(name='%s %d' % (base_filename, t+1),
-                                                   service_id = self.request.id,
-                                                   xUnit='m', yUnit='m', zUnit='m');
+                                                    service_id = self.request.id,
+                                                    xUnit='m', yUnit='m', zUnit='m');
           cs.save();
+          
+        history[cs.objectId] = cs.id;
 
         rx = geos.Point(*ts[t][0][0:3]);
         ry = geos.Point(*ts[t][1][0:3]);
@@ -306,6 +348,8 @@ def add_sample_cameras(self, filename):
         try:
           transform = meta.models.CartesianTransform.objects.get(name='%s %d_%d' % (base_filename, t+1, t), newerVersion=None)
           transform.service_id = self.request.id;
+          transform.coordinateSystem_from_id=last_cs.id;
+          transform.coordinateSystem_to_id=cs.id;
           transform.update(rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
                            translation=translation);
         except meta.models.CartesianTransform.DoesNotExist:
@@ -316,14 +360,16 @@ def add_sample_cameras(self, filename):
                                        coordinateSystem_from_id=last_cs.id,
                                        coordinateSystem_to_id=cs.id)
           transform.save()
-
+          
+        history[transform.objectId] = transform.id;
         last_cs = cs;
 
       try:
         camera = meta.models.Camera.objects.get(name=base_filename, newerVersion=None);
         camera.service_id = self.request.id;
         camera.update(focalLengthU=k_i[0], focalLengthV=k_i[1],
-                      principlePointU=k_i[2], principlePointV=k_i[3])
+                      principlePointU=k_i[2], principlePointV=k_i[3],
+                      coordinateSystem=last_cs)
       except meta.models.Camera.DoesNotExist:
         camera = meta.models.Camera.create(name=base_filename,
                                          service_id = self.request.id,
@@ -333,6 +379,11 @@ def add_sample_cameras(self, filename):
                                          principlePointV=k_i[3],
                                          coordinateSystem=last_cs)
         camera.save();
+        
+      history[camera.objectId] = camera.id;
+        
+        
+      #No longer necessary with the Django inspired "Leave the FK alone" technique
 
       images = meta.models.Image.objects.filter(imageURL__contains=base_filename);
 
@@ -341,6 +392,11 @@ def add_sample_cameras(self, filename):
         img.camera_id = camera.id;
         #img.update();
         img.save()
+        
+        history[img.objectId] = img.id;
+        
+  history = meta.models.History(name=filename, history=json.dumps(history))
+  history.save();
 
 @app.task(base=VipTask, bind=True)
 def add_control_point(self, controlpoint_filename):

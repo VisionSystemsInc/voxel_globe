@@ -108,3 +108,4 @@ for m in inspect.getmembers(meta.models):
   except:
     pass; 
 admin.site.register(meta.models.ServiceInstance, ServiceInstanceAdmin)
+admin.site.register(meta.models.History);
