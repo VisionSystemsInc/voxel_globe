@@ -27,10 +27,14 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
 
 use_geography_points = False
 
+class History(models.Model):
+  name = models.TextField();
+  history = models.TextField(); 
+
 class VipCommonModel(models.Model):
   class Meta:
     abstract = True
-    
+
   def get_subclasses(self):
     rels = [rel.model.objects.filter(id=self.id) for rel in self._meta.get_all_related_objects()
       if isinstance(rel.field, OneToOneField)
