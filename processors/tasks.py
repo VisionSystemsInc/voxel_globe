@@ -123,10 +123,12 @@ def injestImage(self, *args, **kwargs):
 
 def getKTL(image, history=None):
   ''' returns K, T, llh (lon, lat, h)'''
-
+  debug= 0;
+  
   camera = image.camera.history(history);
-  print "Camera"
-  print repr(camera);
+  if debug:
+    print "Camera"
+    print repr(camera);
   K_i = numpy.eye(3);
   K_i[0,2] = camera.principlePointU;
   K_i[1,2] = camera.principlePointV;
@@ -136,24 +138,28 @@ def getKTL(image, history=None):
   llh = [None];
   
   coordinate_systems = [camera.coordinateSystem.history(history)]
-  print "CS1"
-  print repr(coordinate_systems)  
+  if debug:
+    print "CS1"
+    print repr(coordinate_systems)  
   coordinate_transforms = [];
   while len(coordinate_systems[0].coordinatetransform_to_set.all()):
     ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].history(history);
-    print "CT"
-    print repr(ct)
+    if debug:
+      print "CT"
+      print repr(ct)
     #cs = ct.coordinateSystem_from.get_subclasses()[0];
     cs = ct.coordinateSystem_from.history(history);
-    print "CS"
-    print repr(cs)
+    if debug:
+      print "CS"
+      print repr(cs)
     coordinate_transforms = [ct]+coordinate_transforms;
     coordinate_systems = [cs] + coordinate_systems;
   
   if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
     llh = list(coordinate_systems[0].history(history).location);
-    print "llh"
-    print llh
+    if debug:
+      print "llh"
+      print llh
   
   T_camera_0 = numpy.eye(4);
   for ct in coordinate_transforms:
@@ -164,8 +170,9 @@ def getKTL(image, history=None):
     T[0:3, 3] = ct.translation;
     T_camera_0 = T.dot(T_camera_0);
     
-  print 'Final T'
-  print T_camera_0
+  if debug:
+    print 'Final T'
+    print T_camera_0
     
   return (K_i, T_camera_0, llh);
 
@@ -177,41 +184,61 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
       returns dictionary with lon, lat, h'''
   import enu;
   
-  print 'xyz', xs,ys,zs
+  debug = 0;
+  
+  if debug:
+    print 'xyz', xs,ys,zs
 
   R = T[0:3, 0:3];
   t = T[0:3, 3:]; #Extract 3x1, which is why the : is necessary
   cam_center = -R.T.dot(t);
-  print 'Cam_center', cam_center
+  if debug:
+    print 'Cam_center', cam_center
   P = K.dot(numpy.concatenate((R,t), axis=1));
   Pi = numpy.matrix(P).I;
-  print 'P'
-  print repr(P)
-  print numpy.linalg.pinv(P)
-  print 'Pi', Pi
-  print [xs,ys,numpy.ones(xs.shape)]
+  if debug:
+    print 'P'
+    print repr(P)
+    print numpy.linalg.pinv(P)
+    print 'Pi', Pi
+    print [xs,ys,numpy.ones(xs.shape)]
   ray = numpy.array(Pi).dot([xs,ys,numpy.ones(xs.shape)]);
-  print 'ray is currently', ray
+  if debug:
+    print 'ray is currently', ray
+  
+
 
   if abs(ray[3,0]) < 1e-6:
     ray = cam_center + ray[0:3,0:]
   else:
-    ray = ray[0:3,0:]/ray[3,:]; #dehomoginize
+    ray = ray[0:,:]/ray[3,:]; #dehomoginize
   
-  print llh_xyz
-  print 'ray was', ray
+  if debug:
+    print llh_xyz
+    print 'ray was', ray
   
-  ray = cam_center-ray
+  #dp = (P[2:3,:].T * ray[:]).sum(axis=0);
+  # Principle plane dot ray
+  # NOT WORKING
+  #if ray[3] < 0:
+  #  dp *= -1;
+  #print 'dot',dp 
+
+  ray = cam_center-ray[0:3,:]
+
 
   for c in range(ray.shape[1]):
     if distances is None:
       t = (zs - llh_xyz[2] - cam_center[2])/ray[2,c]; #project to sea level
     else:
-      t = distances / numpy.linalg.norm(ray[:,c]);
-    print 't', t
-    print 'cam_center', cam_center
+      t = -distances / numpy.linalg.norm(ray[:,c]);
+      #WHY is that minus sign there? Tried the dot product test above, didn't help
+    if debug:
+      print 't', t
+      print 'cam_center', cam_center
     ray[:,c:c+1] = ray[:,c:c+1] * t + cam_center;
-  print 'ray is now', ray 
+  if debug:
+    print 'ray is now', ray 
 
   llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], lat_origin=llh_xyz[1], h_origin=llh_xyz[2], east=ray[0,:], north=ray[1,:], up=ray[2,:])
   return llh2_xyz
@@ -229,6 +256,8 @@ def fetchCameraFrustum(**kwargs):
     image = meta.models.Image.objects.get(id=imageId)
     size = int(kwargs.pop('size', 100)); #Size in meters
     historyId = kwargs.pop('history', None)
+    output = kwargs.pop('output', 'json')
+    
     if historyId:
       historyId = int(historyId);
     history = meta.models.History.to_dict(historyId)
@@ -236,12 +265,63 @@ def fetchCameraFrustum(**kwargs):
       w = image.imageWidth;
       h = image.imageHeight;
       K, T, llh = getKTL(image, history);
+      llh1 = projectPoint(K, T, llh, numpy.array([0]), numpy.array([0]), distances=0) 
       llh2 = projectPoint(K, T, llh, numpy.array([0,w,w,0]), numpy.array([0,0,h,h]), distances=size)
   
-      llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
-      llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
-      llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
-      return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+      llh2['lon'] = numpy.concatenate((llh1['lon'], llh2['lon']))
+      llh2['lat'] = numpy.concatenate((llh1['lat'], llh2['lat']))
+      llh2['h']   = numpy.concatenate((llh1['h'],   llh2['h']))
+      
+      if output == 'json':
+        return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
+      elif output == 'kml':
+        kml = '''<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+  <name>KmlFile</name>
+  <Style id="s_ylw-pushpin">
+    <IconStyle>
+      <scale>1.1</scale>
+      <Icon>
+        <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+      </Icon>
+      <hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+    </IconStyle>
+  </Style>
+  <StyleMap id="m_ylw-pushpin">
+    <Pair>
+      <key>normal</key>
+      <styleUrl>#s_ylw-pushpin</styleUrl>
+    </Pair>
+    <Pair>
+      <key>highlight</key>
+      <styleUrl>#s_ylw-pushpin_hl</styleUrl>
+    </Pair>
+  </StyleMap>
+  <Style id="s_ylw-pushpin_hl">
+    <IconStyle>
+      <scale>1.3</scale>
+      <Icon>
+        <href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+      </Icon>
+      <hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+    </IconStyle>
+  </Style>
+  <Placemark>
+    <name>Untitled Path</name>
+    <styleUrl>#m_ylw-pushpin</styleUrl>
+    <LineString>
+      <tessellate>1</tessellate>
+      <altitudeMode>absolute</altitudeMode>
+      <coordinates>'''
+        for x in [0,1,0,2,0,3,0,4,3,2,1,4]:
+          kml += '%0.12g,%0.12g,%0.12g ' % (llh2['lon'][x], llh2['lat'][x], llh2['h'][x]);
+        kml += '''      </coordinates>
+    </LineString>
+  </Placemark>
+</Document>
+</kml>'''
+        return kml;
   except meta.models.Image.DoesNotExist:
     pass;
   
