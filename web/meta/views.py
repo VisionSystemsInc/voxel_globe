@@ -90,7 +90,7 @@ def fetchCameraRay(request):
   
   return HttpResponse(points);
 
-def fetchCameraFiducial(request):
-  points = tasks.fetchCameraFiducial(**request.REQUEST);
+def fetchCameraFrustum(request):
+  points = tasks.fetchCameraFrustum(**request.REQUEST);
   
   return HttpResponse(points);
