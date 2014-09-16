@@ -1,0 +1,2 @@
+local_npr.env merge=ours
+local_npr.bat merge=ours

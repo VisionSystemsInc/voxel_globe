@@ -176,25 +176,41 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
       
       returns dictionary with lon, lat, h'''
   import enu;
+  
+  print 'xyz', xs,ys,zs
 
   R = T[0:3, 0:3];
   t = T[0:3, 3:]; #Extract 3x1, which is why the : is necessary
-  cam_center = -R.dot(t).flatten();
+  cam_center = -R.T.dot(t);
   print 'Cam_center', cam_center
   P = K.dot(numpy.concatenate((R,t), axis=1));
   Pi = numpy.matrix(P).I;
+  print 'P'
+  print repr(P)
+  print numpy.linalg.pinv(P)
+  print 'Pi', Pi
+  print [xs,ys,numpy.ones(xs.shape)]
   ray = numpy.array(Pi).dot([xs,ys,numpy.ones(xs.shape)]);
-  ray = ray[0:3]; #cut off 4th row
-  
-  print 'ray was', ray
+  print 'ray is currently', ray
 
-  if distances is None:
-    for c in range(ray.shape[1]):
-      t = (-llh_xyz[2]+zs - cam_center[2])/ray[2,c]; #project to sea level
-      ray[:,c] = ray[:,c] * t+cam_center;
+  if abs(ray[3,0]) < 1e-6:
+    ray = cam_center + ray[0:3,0:]
   else:
-    for c in range(ray.shape[1]):
-      ray[:,c] /= numpy.linalg.norm(ray[:,c]) / distances + cam_center;
+    ray = ray[0:3,0:]/ray[3,:]; #dehomoginize
+  
+  print llh_xyz
+  print 'ray was', ray
+  
+  ray = cam_center-ray
+
+  for c in range(ray.shape[1]):
+    if distances is None:
+      t = (zs - llh_xyz[2] - cam_center[2])/ray[2,c]; #project to sea level
+    else:
+      t = distances / numpy.linalg.norm(ray[:,c]);
+    print 't', t
+    print 'cam_center', cam_center
+    ray[:,c:c+1] = ray[:,c:c+1] * t + cam_center;
   print 'ray is now', ray 
 
   llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], lat_origin=llh_xyz[1], h_origin=llh_xyz[2], east=ray[0,:], north=ray[1,:], up=ray[2,:])
@@ -249,15 +265,12 @@ def fetchCameraRay(**kwargs):
   
     if image.camera:
       K, T, llh = getKTL(image, history);
+      llh1 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), distances=0) 
       llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=numpy.array([height]))
 
-      print llh
-      print projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), distances=numpy.array([0]))
-      print llh2
-
-      llh2['lon'] = numpy.concatenate(([llh[0]], llh2['lon']))
-      llh2['lat'] = numpy.concatenate(([llh[1]], llh2['lat']))
-      llh2['h']   = numpy.concatenate(([llh[2]], llh2['h']))
+      llh2['lon'] = numpy.concatenate((llh1['lon'], llh2['lon']))
+      llh2['lat'] = numpy.concatenate((llh1['lat'], llh2['lat']))
+      llh2['h']   = numpy.concatenate((llh1['h'], llh2['h']))
 
       return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
   except meta.models.Image.DoesNotExist:
