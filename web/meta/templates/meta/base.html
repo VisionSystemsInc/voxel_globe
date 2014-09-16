@@ -11,7 +11,25 @@
     <link rel="stylesheet" href="{% static 'meta/css/styles.css' %}" />
     <title>{% block title %}NGA Meta4{% endblock %}</title>
     <script>
-    {% block globalfunctions %} {% endblock %}
+    /**
+     *  Add a global function for grabbing URL parameters
+     **/
+    function grabParams() {
+        var paramString = window.location.search;
+    var params = {};
+    if (paramString) {
+        var prmstr = paramString.substr(1);
+        var prmarr = prmstr.split("&");
+
+        for (var i = 0; i < prmarr.length; i++) {
+            	var tmparr = prmarr[i].split("=");
+            	params[tmparr[0]] = tmparr[1];
+        	}
+    	}
+    	return params;
+	}
+    {% block globalfunctions %}{% endblock %}
+    
     $(document).ready(function() {
     	$("button").button();
         $("select").addClass("ui-widget");
