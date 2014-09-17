@@ -520,6 +520,7 @@ def add_control_point(self, controlpoint_filename):
 
 @app.task(base=VipTask, bind=True)
 def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, frames):
+  ''' Demo ware only, really '''
   from tools.xml_dict import load_xml
   control_point_names = [];
   with open(lvcs_selected_filename, 'r') as fid:
@@ -540,6 +541,22 @@ def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, fr
         tp = meta.models.TiePoint.create(name=name, point=point, image=image, geoPoint=cp)
         tp.service_id = self.request.id;
         tp.save();
+        
+@app.task(base=VipTask, bind=True)
+def update_sample_tie_point(self, tiepoint_filename):
+  ''' Demo ware only, really '''
+  with open(tiepoint_filename, 'r') as fid:
+    lines = fid.readlines();
+  lines = map(lambda x: x.split('\x00'), lines)
+  
+  for tp in lines:
+    img = meta.models.Image.objects.get(name=tp[0], newerVersion=None)
+    cp = meta.models.ControlPoint.objects.get(name=tp[1], newerVersion=None)
+    TP = meta.models.TiePoint.objects.get(geoPoint=cp, image=img, newerVersion=None)
+    
+    TP.service_id = self.request.id;
+    TP.point = 'POINT(%s %s)' % (tp[2], tp[3].strip())
+    TP.update()
   
 
 @app.task
