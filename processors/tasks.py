@@ -335,8 +335,8 @@ def fetchCameraRay(**kwargs):
   try:
     imageId = int(kwargs["imageId"])
     image = meta.models.Image.objects.get(id=imageId)
-    x = int(kwargs.pop('x', image.imageWidth/2))
-    y = int(kwargs.pop('y', image.imageHeight/2))
+    x = int(kwargs.pop('X', image.imageWidth/2))
+    y = int(kwargs.pop('Y', image.imageHeight/2))
     height = int(kwargs.pop('height', 0))
     historyId = kwargs.pop('history', None)
     if historyId:
