@@ -94,3 +94,9 @@ def fetchCameraFrustum(request):
   points = tasks.fetchCameraFrustum(**request.REQUEST);
   
   return HttpResponse(points);
+
+def ingestArducopterData(request):
+  t = tasks.add_arducopter_images.apply();
+  if t.failed():
+    raise t.result
+  return HttpResponse('Success');
