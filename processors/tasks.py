@@ -381,9 +381,10 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
     ic.save();
     ic.images.add(*imageCollections[cam]);
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt')) #history = 2
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt')) #history = 1
-  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_3.txt')) #history = 0
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_1.txt')) #history = 1
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_2.txt')) #history = 2
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_3.txt')) #history = 3
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'purdue_cameras_4.txt')) #history = 4
   
 def add_sample_cameras(self, filename):
 
