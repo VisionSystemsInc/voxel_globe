@@ -96,7 +96,23 @@ def fetchCameraFrustum(request):
   return HttpResponse(points);
 
 def ingestArducopterData(request):
+  import os
+  from os import environ as env
   t = tasks.add_arducopter_images.apply();
   if t.failed():
     raise t.result
+    
+  t = tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.xml'),
+                                             os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_control_points.txt'),
+                                             None,
+                                             range(519)));
+  if t.failed():
+    raise t.result
+
+#   t = tasks.update_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.txt'),));
+#   if t.failed():
+#     raise t.result
+# Too much is different for this to work, and quite frankly, I don't care!
+
+  
   return HttpResponse('Success');

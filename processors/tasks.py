@@ -373,17 +373,17 @@ def add_arducopter_images(self, *args, **kwargs):
                              imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
     img.save();
-    
+     
     imageCollection.append(img.id);
-    
+     
   ic = meta.models.ImageCollection.create(name="Arducopter Mission 2", service_id = self.request.id);
   ic.save();
   ic.images.add(*imageCollection);
-  
+   
   with open(path_join(os.environ['VIP_DATABASE_DIR'], 'Contractor_Survey_NorthA_List.csv'), 'r') as fid:
     lines = fid.readlines();
   lines = map(lambda x: x.split(','), lines);
-  
+   
   for line in lines[3:]:
     name = line[1];
     desc = line[2];
@@ -394,15 +394,17 @@ def add_arducopter_images(self, *args, **kwargs):
     if line[11] == 'W':
       lon = -lon;
     alt = float(line[13]);
-    
+     
     point = geos.Point(lon, lat, alt)
-      
+       
     tp = meta.models.ControlPoint.create(name=name,
                                          description=desc,
                                          point=point,
                                          apparentPoint=point)
     tp.service_id = self.request.id;
     tp.save();
+     
+  add_sample_cameras(self, path_join(os.environ['VIP_DATABASE_DIR'], 'cannon_cameras_1.txt')) #history = 1
 
 @app.task(base=VipTask, bind=True)
 def add_sample_images(self, imageDir, *args, **kwargs):
@@ -573,19 +575,27 @@ def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, fr
   control_point_names = [];
   with open(lvcs_selected_filename, 'r') as fid:
     for line in fid:
-      control_point_names.append(line.split(' ')[0])
+      control_point_names.append(line.split(' ')[0].strip())
   tie_point_data = load_xml(site_filename);
   
   for control_point_index in range(len(control_point_names)):
     cpn = control_point_names[control_point_index];
     cp = meta.models.ControlPoint.objects.get(name=cpn);
     for frame in frames:
+      frame_num = int(frame);
       tp = tie_point_data['Correspondences']['Correspondence'][control_point_index]['CE'].find_at(fr__is='%d'%frame);
       if tp:
         tp = tp[0].at;
-        name = '%s Camera:%d Frame:%03d' % (cpn, camera, int(frame))
+        if camera is not None:
+          name = '%s Camera:%d Frame:%03d' % (cpn, camera, frame_num)
+          img_name = 'Camera:%d Frame:%03d' % (camera, frame_num)
+        else:
+          name = '%s Frame:%03d' % (cpn, frame_num+1)
+          img_name = 'Mission 2 Frame:%04d' % (frame_num+1)
+
         point = 'POINT(%s %s)' % (tp['u'], tp['v']);
-        image = meta.models.Image.objects.get(name__contains='Camera:%d Frame:%03d' % (camera, frame))
+        image = meta.models.Image.objects.get(name__contains=img_name)
+
         tp = meta.models.TiePoint.create(name=name, point=point, image=image, geoPoint=cp)
         tp.service_id = self.request.id;
         tp.save();
