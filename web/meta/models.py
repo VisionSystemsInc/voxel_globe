@@ -328,8 +328,8 @@ class Session(VipCommonModel):
 class Camera(VipObjectModel):
   focalLengthU = models.FloatField();
   focalLengthV = models.FloatField();
-  principlePointU = models.FloatField();
-  principlePointV = models.FloatField();
+  principalPointU = models.FloatField();
+  principalPointV = models.FloatField();
   coordinateSystem = models.ForeignKey('CoordinateSystem')
   #Should the camera point to the image instead? Meaning Camera Collection only
   #and no image Collection... Ask Joe

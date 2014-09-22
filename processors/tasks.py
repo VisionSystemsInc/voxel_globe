@@ -130,8 +130,8 @@ def getKTL(image, history=None):
     print "Camera"
     print repr(camera);
   K_i = numpy.eye(3);
-  K_i[0,2] = camera.principlePointU;
-  K_i[1,2] = camera.principlePointV;
+  K_i[0,2] = camera.principalPointU;
+  K_i[1,2] = camera.principalPointV;
   K_i[0,0] = camera.focalLengthU;
   K_i[1,1] = camera.focalLengthV;
   
@@ -218,7 +218,7 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
     print 'ray was', ray
   
   #dp = (P[2:3,:].T * ray[:]).sum(axis=0);
-  # Principle plane dot ray
+  # Principal plane dot ray
   # NOT WORKING
   #if ray[3] < 0:
   #  dp *= -1;
@@ -509,15 +509,15 @@ def add_sample_cameras(self, filename):
         camera = meta.models.Camera.objects.get(name=base_filename, newerVersion=None);
         camera.service_id = self.request.id;
         camera.update(focalLengthU=k_i[0], focalLengthV=k_i[1],
-                      principlePointU=k_i[2], principlePointV=k_i[3],
+                      principalPointU=k_i[2], principalPointV=k_i[3],
                       coordinateSystem=last_cs)
       except meta.models.Camera.DoesNotExist:
         camera = meta.models.Camera.create(name=base_filename,
                                          service_id = self.request.id,
                                          focalLengthU=k_i[0],
                                          focalLengthV=k_i[1],
-                                         principlePointU=k_i[2],
-                                         principlePointV=k_i[3],
+                                         principalPointU=k_i[2],
+                                         principalPointV=k_i[3],
                                          coordinateSystem=last_cs)
         camera.save();
         
