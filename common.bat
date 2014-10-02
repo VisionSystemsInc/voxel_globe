@@ -32,6 +32,13 @@ set VIP_LOCK_DIR=%VIP_LOCALSTATEDIR%/lock/subsys
 REM Currently only Linux even uses the lock dir
 set VIP_DATABASE_DIR=%VIP_PROJECT_ROOT%/data
 
+REM ### Vxl Settings ###
+set VIP_VXL_DIR=%VIP_PROJECT_ROOT%/vxl
+set VIP_CMAKE=cmake
+REM set VIP_CMAKE_PLATFORM=Visual Studio 11
+REM For example:
+REM set VIP_VXL_CMAKE_OPTIONS='"-D", "var:type=value"'
+
 REM ### Python settings ###
 set PYTHONSTARTUP=%VIP_CONF_DIR%/pythonrc.py
 set VIP_NOTEBOOK_PORT=8888
