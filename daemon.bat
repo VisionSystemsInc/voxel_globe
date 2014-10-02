@@ -70,6 +70,13 @@ admin account.
 )
 del %~dp0\OEgetPrivileges.vbs > NUL 2>&1
 
+REM Create log directories incase they don't exist.
+if not exist %VIP_POSTGRESQL_LOG_DIR:/=\% mkdir %VIP_POSTGRESQL_LOG_DIR:/=\%
+if not exist %VIP_RABBITMQ_LOG_DIR:/=\% mkdir %VIP_RABBITMQ_LOG_DIR:/=\%
+if not exist %VIP_CELERY_LOG_DIR:/=\% mkdir %VIP_CELERY_LOG_DIR:/=\%
+if not exist %VIP_NOTEBOOK_LOG_DIR:/=\% mkdir %VIP_NOTEBOOK_LOG_DIR:/=\%
+if not exist %VIP_HTTPD_LOG_DIR:/=\% mkdir %VIP_HTTPD_LOG_DIR:/=\%
+
 goto %NEXT%
 goto usage
 ::Just in case something went REALLY wrong?!
@@ -87,6 +94,7 @@ for %%t in (%TASKS%) do (
     if not errorlevel 1 (
       echo Stray postgresql detected, cleaning up
       pg_ctl stop -D %VIP_POSTGRESQL_DATABASE% -m fast 2>&1 >> %VIP_POSTGRESQL_LOG_DIR%/postgresql_stop_stray.log
+      if errorlevel 1 taskkill /im postgres.exe /f
     )
   )
 )

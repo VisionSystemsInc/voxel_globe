@@ -1,6 +1,7 @@
-from math import sin, cos, pi, atan2, atan
+from numpy import sin, cos, pi, arctan, arctan2
 
 def llh2enu_au(llh_origin, llh):
+  ''' someone else's code''' 
   a = 6378137.0;
   b = 6356752.3142;
   e2 = 1 - (b/a)**2;
@@ -26,12 +27,16 @@ def llh2enu_au(llh_origin, llh):
   return [de, dn, du]
 
 def llh2enu(lat_origin, lon_origin, h_origin, lat, lon, h):
+  ''' Take a lon lat height (degrees and meters) origin point and lat lon 
+      height number or numpy array) and returns the e, n, u, at the origin'''
   xyz = llh2xyz(lat, lon, h);
   enu = xyz2enu(lat_origin, lon_origin, h_origin, *xyz)
   enu_dict = {'east':enu[0], 'north':enu[1], 'up':enu[2]}
   return enu
 
 def enu2llh(lat_origin, lon_origin, h_origin, east, north, up):
+  ''' llh origin can be 1x1 each
+      enu can be a numpy array each'''
   xyz = enu2xyz(lat_origin, lon_origin, h_origin, east, north, up)
   llh = xyz2llh(*xyz);
   llh_dict = {'lat':llh[0], 'lon':llh[1], 'h':llh[2]}
@@ -85,6 +90,7 @@ def enu2xyz(refLat, refLong, refH, e, n, u):
   return (X, Y, Z)
 
 def xyz2llh(X,Y,Z):
+  ''' go from x, y, z, (nunpy array in meters) and converts to lon, lat, height '''
   a = 6378137.0; # earth semimajor axis in meters
   f = 1/298.257223563; # reciprocal flattening
   b = a*(1-f);# semi-minor axis
@@ -107,8 +113,8 @@ def xyz2llh(X,Y,Z):
   V = ( tmp + (1-e2)*Z**2 )**0.5;
   zo = (b**2*Z)/(a*V);
 
-  lat = atan( (Z + ep2*zo)/r )*180/pi;
-  lon = atan2(Y,X)*180/pi;
+  lat = arctan( (Z + ep2*zo)/r )*180/pi;
+  lon = arctan2(Y,X)*180/pi;
   h = U*( 1 - b**2/(a*V));
 
   return (lat, lon, h)

@@ -27,10 +27,32 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
 
 use_geography_points = False
 
+class History(models.Model):
+  name = models.TextField();
+  history = models.TextField(); #json field
+  
+  def __unicode__(self):
+    return '%s[%s]' % (self.name, self.id)
+  
+  @classmethod
+  def to_dict(cls, history=None):
+    '''Convert a History object, history string, history index or history
+       dictionary (idenity case) into a history dictionary'''
+    if history is None:
+      return None
+    elif isinstance(history, dict):
+      return history
+    elif isinstance(history, str):
+      return json.loads(history);
+    elif isinstance(history, cls):
+      return json.loads(history.history);
+    else: #assume it's a number
+      return json.loads(cls.objects.get(id=history).history);
+
 class VipCommonModel(models.Model):
   class Meta:
     abstract = True
-    
+
   def get_subclasses(self):
     rels = [rel.model.objects.filter(id=self.id) for rel in self._meta.get_all_related_objects()
       if isinstance(rel.field, OneToOneField)
@@ -100,12 +122,13 @@ class ServiceInstance(VipCommonModel):
   def __unicode__(self):
     return '%s [%s]' % (self.serviceName, self.id)
 
-#Abtract common model
+#Abtract common model - GOOD inheritance
 class VipObjectModel(VipCommonModel):
   service = models.ForeignKey('ServiceInstance');
   name = models.TextField();
   objectId = models.CharField('Object ID', max_length=36);
   newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='history_set');
+  deleted = models.BooleanField('Object deleted', default=False);
 
   class Meta:
     abstract = True
@@ -228,6 +251,7 @@ class VipObjectModel(VipCommonModel):
       self.__update(*args, **kwargs);
     else:
       super(VipObjectModel, self).save(*args, **kwargs);
+    
   
   def delete(self, using=None, check_is_used=True):
     '''Remove this version of the object ID. 
@@ -253,14 +277,9 @@ class VipObjectModel(VipCommonModel):
     except self.DoesNotExist:
       return None;
   
-  def history(self, history=0, get_subclass=True):
-    if history:
-      hist = self._findNewest();
-      for x in range(history):
-        try:
-          hist = hist.history_set.get()
-        except hist.DoesNotExist:
-          break;
+  def history(self, history=None, get_subclass=True):
+    if history and self.objectId in history:
+      hist = self._meta.model.objects.get(id=history[self.objectId])
     else:
       hist = self._findNewest();
     
@@ -309,13 +328,14 @@ class Session(VipCommonModel):
 class Camera(VipObjectModel):
   focalLengthU = models.FloatField();
   focalLengthV = models.FloatField();
-  principlePointU = models.FloatField();
-  principlePointV = models.FloatField();
+  principalPointU = models.FloatField();
+  principalPointV = models.FloatField();
   coordinateSystem = models.ForeignKey('CoordinateSystem')
   #Should the camera point to the image instead? Meaning Camera Collection only
   #and no image Collection... Ask Joe
 
 ''' Coordinate systems '''
+#this is where the inheritance becomes less good... I worked around it, but still...
 class CoordinateSystem(VipObjectModel):
   pass
   #csType = models.CharField(max_length=1, choices=COORDINATE_SYSTEM)
@@ -383,6 +403,9 @@ class Image(VipObjectModel):
   #coordinateSystem = models.ForeignKey('CoordinateSystem', null=True, blank=True);
   #Question for Joe: Point at the camera, or point at the oppisite end of the
   #transformation? 
+  class Meta:
+    ordering=('name',)
+    #Temporary fix, until I get a through class working
 
 
 class TiePoint(VipObjectModel):

@@ -16,8 +16,12 @@ urlpatterns = patterns('',
     url(r'^fetchTiePoints$', views.fetchTiePoints, name='fetchTiePoints'),
     url(r'^fetchImages$', views.fetchImages, name='fetchImages'),
     url(r'^fetchCameraRay$', views.fetchCameraRay, name='fetchCameraRay'),
+    url(r'^fetchCameraFrustum$', views.fetchCameraFrustum, name='fetchCameraFrustum'),
+    
+    url(r'^ingestArducopterData$', views.ingestArducopterData, name='ingestArducopterData'),
     
 #   modifications to data
     url(r'^createTiePoint$', views.createTiePoint, name='createTiePoint'),
     url(r'^updateTiePoint$', views.updateTiePoint, name='updateTiePoint'),
+    url(r'^deleteTiePoint$', views.deleteTiePoint, name='deleteTiePoint'),
 )
