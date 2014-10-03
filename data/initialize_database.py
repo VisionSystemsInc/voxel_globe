@@ -187,6 +187,7 @@ if __name__=='__main__':
   print '********** Populating database WorldBorder **********'
   load_world_data();
 
+  """
   print '********** Checking for sample meta data **********'
   if not os.path.exists(path_join(env['VIP_PROJECT_ROOT'], 'images', '20100427161943-04003009-05-VIS')):
     import Tkinter
@@ -232,7 +233,7 @@ if __name__=='__main__':
   t = tasks.update_sample_tie_point.apply(args=(path_join(env['VIP_DATABASE_DIR'], 'latest_tiepoints.txt'),));
   if t.failed():
     print t.traceback;
-    raise t.result;
+    raise t.result;"""
  
   print '********** Stopping database **********'
   pg_stopdb();
