@@ -38,6 +38,14 @@ set VIP_CMAKE=cmake
 REM set VIP_CMAKE_PLATFORM=Visual Studio 11
 REM For example:
 REM set VIP_VXL_CMAKE_OPTIONS='"-D", "var:type=value"'
+set VIP_VXL_CMAKE_ENTRIES='BUILD_VGUI=ON'
+set VIP_VXL_BUILD_TYPE=Release
+
+REM Must be set in local env for GDAL and vxl if not nvidia default
+REM set VIP_OPENCL_INCLUDE_PATH=/usr/local/cuda/include
+REM set VIP_OPENCL_LIBRARY_PATH=/usr/local/cuda/lib64
+REM set VIP_OPENCL_LIBRARY=OpenCl
+
 
 REM ### Python settings ###
 set PYTHONSTARTUP=%VIP_CONF_DIR%/pythonrc.py
