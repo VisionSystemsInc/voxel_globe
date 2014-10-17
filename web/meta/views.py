@@ -4,7 +4,7 @@ from django.template import RequestContext, loader
 
 from django.core import serializers
 import meta.models
-import tasks
+import tiepoint_tasks
 
 def index(request):
     return render(request, 'meta/html/index.html')
@@ -60,7 +60,7 @@ def createTiePoint(request):
     x = request.REQUEST["x"];
     y = request.REQUEST["y"];
     name = request.REQUEST["name"];
-    tasks.addTiePoint.apply(kwargs={'point':'POINT(%s %s)' % (x,y), 
+    tiepoint_tasks.addTiePoint.apply(kwargs={'point':'POINT(%s %s)' % (x,y), 
                                     'image_id':imageId, 
                                     'geoPoint_id':controlPointId,
                                     'name': name});
@@ -70,7 +70,7 @@ def updateTiePoint(request):
     print("Requested to update a tie point with id ", request.REQUEST["tiePointId"],           
           " with x=", request.REQUEST["x"], " and y=", request.REQUEST["y"])    
 
-    tasks.updateTiePoint.apply(args=(request.REQUEST["tiePointId"], request.REQUEST["x"], request.REQUEST["y"]))
+    tiepoint_tasks.updateTiePoint.apply(args=(request.REQUEST["tiePointId"], request.REQUEST["x"], request.REQUEST["y"]))
     #Eventually when the REAL update function is written, it may be EASIEST to say
     #"POINT(%s %s)" % (x, y), but until this is complete, it does not matter to me.
           
@@ -86,30 +86,30 @@ def deleteTiePoint(request):
   return HttpResponse('');
   
 def fetchCameraRay(request):
-  points = tasks.fetchCameraRay(**request.REQUEST);
+  points = tiepoint_tasks.fetchCameraRay(**request.REQUEST);
   
   return HttpResponse(points);
 
 def fetchCameraFrustum(request):
-  points = tasks.fetchCameraFrustum(**request.REQUEST);
+  points = tiepoint_tasks.fetchCameraFrustum(**request.REQUEST);
   
   return HttpResponse(points);
 
 def ingestArducopterData(request):
   import os
   from os import environ as env
-  t = tasks.add_arducopter_images.apply();
+  t = tiepoint_tasks.add_arducopter_images.apply();
   if t.failed():
     raise t.result
     
-  t = tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.xml'),
+  t = tiepoint_tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.xml'),
                                              os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_control_points.txt'),
                                              None,
                                              range(519)));
   if t.failed():
     raise t.result
 
-#   t = tasks.update_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.txt'),));
+#   t = tiepoint_tasks.update_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.txt'),));
 #   if t.failed():
 #     raise t.result
 # Too much is different for this to work, and quite frankly, I don't care!
