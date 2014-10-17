@@ -12,6 +12,7 @@ from django.contrib.gis.utils.ogrinspect import mapping
 from django.contrib.gis.utils import LayerMapping
 from django.contrib.gis.gdal import DataSource
 from django.core import management
+import django
 
 logStdOut = None;
 logStdErr = None;
@@ -167,7 +168,8 @@ if __name__=='__main__':
   pg_createdb(env['VIP_POSTGRESQL_DATABASE_NAME'], otherArgs=['-T', 'template_postgis'])
 
   print '********** Creating django tables in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
-  management.call_command('syncdb', interactive=False, stdout=logStdOut)
+  django.setup(); #New in 1.7, need to load app registry yourself.
+  management.call_command('migrate', interactive=False, stdout=logStdOut)
   #syncdb will become migrate in django 1.7
   
   print '********** Creating Djanjo Superuser %s **********' % env['VIP_DJANGO_USER']
@@ -186,54 +188,6 @@ if __name__=='__main__':
 
   print '********** Populating database WorldBorder **********'
   load_world_data();
-
-  """
-  print '********** Checking for sample meta data **********'
-  if not os.path.exists(path_join(env['VIP_PROJECT_ROOT'], 'images', '20100427161943-04003009-05-VIS')):
-    import Tkinter
-    import tkMessageBox
-    top = Tkinter.Tk();
-    top.withdraw();
-    tkMessageBox.showinfo("Download needed", "Images missing. Please download:\n"+
-                          "/pgm/finderdata2/projects/nga_p2/purdue_sample.zip\n"+
-                          "And extract into %s" % env['VIP_PROJECT_ROOT'])
-    exit(1);
-
-  if False and not os.path.exists(path_join(env['VIP_DATABASE_DIR'], 'meta', '20100427161943-04003009-05-VIS')):
-    '''Use this for when you have camera models in the database dir to add'''
-    import Tkinter
-    import tkMessageBox
-    top = Tkinter.Tk();
-    top.withdraw();
-    tkMessageBox.showinfo("Download needed", "Images missing. Please download:\n"+
-                          "/pgm/finderdata2/projects/nga_p2/purdue_sample.zip\n"+
-                          "And extract into %s" % env['VIP_PROJECT_ROOT'])
-    exit(1);
-
-  print '********** Populating sample meta databases **********'
-  
-  import tasks;
-  t = tasks.add_control_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'NGASBIR.txt'),));
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-  t = tasks.add_sample_images.apply((os.path.join(env['VIP_PROJECT_ROOT'], 'images'),))
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-
-  
-  t = tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'Purdue_Sample9_all_meta.xml'),
-                                             os.path.join(env['VIP_DATABASE_DIR'], 'survey_pts_in_lvcs_selected.txt'),
-                                             0,
-                                             range(10)));
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-  t = tasks.update_sample_tie_point.apply(args=(path_join(env['VIP_DATABASE_DIR'], 'latest_tiepoints.txt'),));
-  if t.failed():
-    print t.traceback;
-    raise t.result;"""
  
   print '********** Stopping database **********'
   pg_stopdb();

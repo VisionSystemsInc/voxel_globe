@@ -1,7 +1,6 @@
 from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
-admin.autodiscover()
 
 #handler400 = 'world.views.error400page'
 #AEN: THIS doesn't work!
