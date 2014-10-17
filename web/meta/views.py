@@ -6,6 +6,13 @@ from django.core import serializers
 import meta.models
 import tiepoint_tasks
 
+from rest_framework import viewsets
+import meta.serializers
+
+class ImageViewSet(viewsets.ModelViewSet):
+  queryset = meta.models.Image.objects.all()
+  serializer_class = meta.serializers.ImageSerializer
+
 def index(request):
     return render(request, 'meta/html/index.html')
 

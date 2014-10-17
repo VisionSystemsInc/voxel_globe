@@ -42,11 +42,14 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'rest_framework',
     'django.contrib.gis',
     'meta',
     'world',
-)
+    'django.contrib.staticfiles',
+) #Staticfiles MUST come last, or else it might skip some files
+  #at collectstatic deploy time!!!! This is one of the rare times
+  #it matters
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -63,6 +66,11 @@ ROOT_URLCONF = 'nga.urls'
 WSGI_APPLICATION = 'nga.wsgi.application'
 
 SERIALIZATION_MODULES = { 'geojson' : 'geojson' }
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'PAGINATE_BY': 10
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
@@ -92,6 +100,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
+
+###STATICFILES_DIRS = [os.path.join(env['VIP_PYTHON_DIR'], 'lib', 'site-packages', '']
 
 STATIC_URL = '/'+env['VIP_DJANGO_STATIC_URL_PATH']+'/';
 STATIC_ROOT = env['VIP_DJANGO_STATIC_ROOT'];
