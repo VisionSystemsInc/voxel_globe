@@ -46,6 +46,8 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     'meta',
     'world',
+    'main',
+    'tiepoint',
     'django.contrib.staticfiles',
 ) #Staticfiles MUST come last, or else it might skip some files
   #at collectstatic deploy time!!!! This is one of the rare times
@@ -104,6 +106,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 ###STATICFILES_DIRS = [os.path.join(env['VIP_PYTHON_DIR'], 'lib', 'site-packages', '']
+STATICFILES_DIRS = [env['VIP_DJANGO_STATIC_COMMON']]
 
 STATIC_URL = '/'+env['VIP_DJANGO_STATIC_URL_PATH']+'/';
 STATIC_ROOT = env['VIP_DJANGO_STATIC_ROOT'];

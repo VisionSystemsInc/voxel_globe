@@ -5,14 +5,26 @@ from django.contrib import admin
 #handler400 = 'world.views.error400page'
 #AEN: THIS doesn't work!
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'nga.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+import main.views
 
+urlpatterns = patterns('',
+    #Admin site apps
     url(r'^admin/', include(admin.site.urls)),
+    #Test app for development reasons
     url(r'^world/', include('world.urls', namespace='world')),
-    url(r'^$', include('meta.urls', namespace='meta')),
-    url(r'^meta/rest/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    
+    # pages
+    #Main home page    
+    url(r'^$', main.views.index, name='index'),
+    #Placeholders
+    url(r'^apps/imageIngest/$', main.views.imageIngest, name='imageIngest'),
+    url(r'^apps/voxelCreator/$', main.views.voxelCreator, name='voxelCreator'),
+    url(r'^apps/voxelWorldViewer/$', main.views.voxelWorldViewer, name='voxelWorldViewer'),
+    #REST auth endpoint
+    url(r'^rest/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    #apps
     url(r'^meta/', include('meta.urls', namespace='meta')),
+    url(r'^apps/tiepoint/', include('tiepoint.urls', namespace='tiepoint')),
+
 )

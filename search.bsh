@@ -13,7 +13,7 @@ find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -pru
 -o -path '*/rpmbuild/db' -prune \
 -o -path '*/bin' -prune -o -path '*/share' -prune \
 -o -name 'static_deploy' -prune \
--o -name cesium -prune -o -name jquery-ui -prune -o -name 'OpenLayers*' -prune \
+-o -name 'static_common' -prune \
 -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune \
 -o -path './data/*/*' -prune -o -path '*/.git' -prune \
 -o -path './external/bin_Windows_NT_AMD64/postgresql/*' -prune \

@@ -4,7 +4,6 @@ from django.template import RequestContext, loader
 
 from django.core import serializers
 import meta.models
-import tiepoint_tasks
 
 import rest_framework.filters
 import rest_framework.status
@@ -17,6 +16,8 @@ import rest_framework.routers
 import meta.serializers
 
 import inspect
+
+### Django REST Framework setup ###
 
 class AutoViewSet(rest_framework.mixins.CreateModelMixin,
                   rest_framework.mixins.RetrieveModelMixin,
@@ -87,21 +88,9 @@ for m in inspect.getmembers(meta.models):
       #pass
       auto_router.register(m[1]._meta.model_name, ViewSetFactory(m[1], meta.serializers.serializerFactory(m[1])))
       
-def index(request):
-    return render(request, 'meta/html/index.html')
 
-def imageIngest(request):
-    return render(request, 'meta/html/imageIngest.html')
-
-def tiePointCreator(request):
-    return render(request, 'meta/html/tiePointCreator.html')
-
-def voxelCreator(request):
-    return render(request, 'meta/html/voxelCreator.html')
-
-def voxelWorldViewer(request):
-    return render(request, 'meta/html/voxelWorldViewer.html')
-
+### Old Arcaic getters/setters, TODO: Remove EVERYTHING after this line
+      
 #
 # API for grabbing data in the database
 #
@@ -133,6 +122,8 @@ def fetchTiePoints(request):
      
 #  API for updating data in the database
 def createTiePoint(request):
+    import tiepoint_tasks
+
     imageId = request.REQUEST["imageId"];
     if 'controlPointId' in request.REQUEST:
       controlPointId = request.REQUEST["controlPointId"];
@@ -148,6 +139,8 @@ def createTiePoint(request):
     return HttpResponse('');
 
 def updateTiePoint(request):
+    import tiepoint_tasks
+
     print("Requested to update a tie point with id ", request.REQUEST["tiePointId"],           
           " with x=", request.REQUEST["x"], " and y=", request.REQUEST["y"])    
 
@@ -165,35 +158,3 @@ def deleteTiePoint(request):
   super(object._meta.model, object).save();
   #Do not use the VIPModel save, since this is a strict change in a status flag
   return HttpResponse('');
-  
-def fetchCameraRay(request):
-  points = tiepoint_tasks.fetchCameraRay(**request.REQUEST);
-  
-  return HttpResponse(points);
-
-def fetchCameraFrustum(request):
-  points = tiepoint_tasks.fetchCameraFrustum(**request.REQUEST);
-  
-  return HttpResponse(points);
-
-def ingestArducopterData(request):
-  import os
-  from os import environ as env
-  t = tiepoint_tasks.add_arducopter_images.apply();
-  if t.failed():
-    raise t.result
-    
-  t = tiepoint_tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.xml'),
-                                             os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_control_points.txt'),
-                                             None,
-                                             range(519)));
-  if t.failed():
-    raise t.result
-
-#   t = tiepoint_tasks.update_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'arducopter_tie_points.txt'),));
-#   if t.failed():
-#     raise t.result
-# Too much is different for this to work, and quite frankly, I don't care!
-
-  
-  return HttpResponse('Success');
