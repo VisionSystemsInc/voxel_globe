@@ -40,6 +40,13 @@ class AutoViewSet(rest_framework.mixins.CreateModelMixin,
       #pk may have been None, or obj may have been None.
       return rest_framework.response.Response(status=rest_framework.status.HTTP_400_BAD_REQUEST);
 
+  def get_queryset(self):
+    ''' Get Queryset that supports "newestVersion" as a PARAM to newerVerion==None '''
+    if self.request.QUERY_PARAMS.has_key('newestVersion'):
+      return super(AutoViewSet, self).get_queryset().filter(newerVersion=None);
+    else:
+      return super(AutoViewSet, self).get_queryset();
+
 #  def list(self, request):
 #    print 'LIST';
 #    #Called by main endpoint GET, to list (a page if) the objects
@@ -69,28 +76,8 @@ def ViewSetFactory(model, serilizer):
 
 auto_router = rest_framework.routers.DefaultRouter()
 router = rest_framework.routers.DefaultRouter()
-
-import rest_framework.generics
-
-class TiePointViewSet(rest_framework.viewsets.ModelViewSet):
-  queryset = meta.models.TiePoint.objects.all();
-  serializer_class = meta.serializers.TiePointSerializer;
-#  filter_backends = (rest_framework.filters.SearchFilter,);
-  filter_fields = ['id', 'objectId', 'newerVersion'];
-  filter_backends = (rest_framework.filters.DjangoFilterBackend,);
-#  filter_fields = map(lambda x: x[0].name, meta.models.TiePoint._meta.get_fields_with_model())+['newerVersion__isnull'];
-  
-  def destroy(self, request, pk=None):
-    print 'DESTROY!DESTROY!DESTROY!DESTROY!'
-    import rpdb2; rpdb2.start_embedded_debugger('vsi');
-  def get_queryset(self):
-    if self.request.QUERY_PARAMS.has_key('newestVersion'):
-      return super(TiePointViewSet, self).get_queryset().filter(newerVersion=None);
-    else:
-      return super(TiePointViewSet, self).get_queryset();
-
-router.register('tiepoint', TiePointViewSet);
-#Either register custom serializers here
+#router.register('tiepoint', TiePointViewSet);
+#Register custom views/viewsets here
 #May need to add if to for loop to check if already registered
 
 ''' Create serializers for all VIP object models '''
@@ -99,8 +86,6 @@ for m in inspect.getmembers(meta.models):
     if issubclass(m[1], meta.models.VipObjectModel) and not m[1] == meta.models.VipObjectModel:
       #pass
       auto_router.register(m[1]._meta.model_name, ViewSetFactory(m[1], meta.serializers.serializerFactory(m[1])))
-
-#Either register custom serializers or here. I won't know which is right until I try
       
 def index(request):
     return render(request, 'meta/html/index.html')
