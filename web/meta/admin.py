@@ -17,11 +17,6 @@ class ModelLinkWidget(django.forms.Select):
         super(ModelLinkWidget,self).__init__(attrs, choices)
 
     def render(self, name, value, attrs=None, choices=()):
-        print self.foreign_key
-        print self.foreign_key.model._meta.model_name
-        
-        #import rpdb2; rpdb2.start_embedded_debugger('vsi', fAllowRemote=True)
-
         if self.foreign_key is not None and value is not None:
           link = '&nbsp;&nbsp;&nbsp;Link:<a href="%s/%s/%s/%d">%d</a>' % ('/admin', #I don't know how to un hard code this
                                self.foreign_key.rel.to._meta.app_label, 

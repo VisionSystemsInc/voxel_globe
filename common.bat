@@ -54,6 +54,7 @@ set VIP_DJANGO_SITE=%VIP_DJANGO_PROJECT%/nga
 set VIP_DJANGO_STATIC_ROOT=%VIP_DJANGO_PROJECT%/static_deploy
 set VIP_DJANGO_SETTINGS_MODULE=nga.settings
 set VIP_DJANGO_STATIC_URL_PATH=static
+set VIP_DJANGO_STATIC_COMMON=%VIP_DJANGO_PROJECT%/static_common
 set VIP_DJANGO_MEDIA_ROOT=%VIP_DJANGO_PROJECT%/media_root
 REM Note: Since environment variables are process-wide, this doesn’t work when you
 REM run multiple Django sites in the same process. This happens with mod_wsgi.
@@ -130,6 +131,7 @@ set VIP_HTTPD_LOG_DIR=%VIP_LOG_DIR%/httpd
 set VIP_HTTPD_LOCK_DIR=%VIP_LOCK_DIR%/httpd
 set VIP_HTTPD_LOG_LEVEL=info
 set VIP_HTTPD_DEPLOY_ON_START=1
+set VIP_HTTPD_SERVER_NAME=www.vsi-ri.com
 
 set VIP_WSGI_PYTHON_DIR=%VIP_PYTHON_DIR%
 REM THIS was annoying, WSGI auto adds bin in linux, SO my roam isn't used, however

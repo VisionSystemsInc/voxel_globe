@@ -13,9 +13,15 @@ find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -pru
 -o -path '*/rpmbuild/db' -prune \
 -o -path '*/bin' -prune -o -path '*/share' -prune \
 -o -name 'static_deploy' -prune \
--o -name cesium -prune -o -name jquery-ui -prune -o -name 'OpenLayers*' -prune \
+-o -name 'static_common' -prune \
 -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune \
 -o -path './data/*/*' -prune -o -path '*/.git' -prune \
+-o -path './external/bin_Windows_NT_AMD64/postgresql/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/Apache24/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/erlang/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/python/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/rabbitmq_server/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/vips/*' -prune \
 -o \( -not -path '*/roam/roam' -a -path '*/roam/*' \) \
 -o -type f -not -name \*.exe -not -name \*.msi -not -name \*.gz \
 -not -name \*.tgz -not -name \*.zip -not -name \*.bz2 -not -name \*.rpm \

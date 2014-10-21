@@ -26,24 +26,3 @@ class WorldBorder(models.Model):
 
     def closeToUS(self):
       return abs(self.lon+98.606)+abs(self.lat-39.622)<50
-
-class TestTable(models.Model):
-  name = models.CharField(max_length=50)
-  bookId = models.IntegerField()
-
-  def __unicode__(self):
-    return self.name;
-
-  def __repr__(self):
-    return 'Book:\t%s\nId:\t%s\n' % (self.name, self.bookId)
-
-class Favorites(models.Model):
-  name = models.CharField(max_length=200);
-  favoriteBook = models.ForeignKey(TestTable)
-
-  def __unicode__(self):
-    return self.name
-
-  def __repr__(self):
-    return 'Name:\t%s\nFavorite Books:\t%s\n' % (self.name, self.favoriteBook)
-

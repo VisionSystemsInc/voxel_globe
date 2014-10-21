@@ -1,13 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.contrib.gis.measure import Distance
-from django.template import RequestContext, loader
 
 from pprint import pformat;
 
 from world.models import WorldBorder
 
-import tasks
+import world_tasks as tasks
 
 # Create your views here.
 
@@ -46,8 +45,8 @@ def result2(request, lat, lon='33.00'):
   countriesNearUS = filter(lambda x:x.closeToUS(), WorldBorder.objects.all())
   
   if not country:
-    context = RequestContext(request, {'lat':lat, 'lon':lon,
-                                       'countriesNearUnitedStates':countriesNearUS})
+    context = {'lat':lat, 'lon':lon,
+               'countriesNearUnitedStates':countriesNearUS}
     return render(request, 'world/result.html', context);
 
   d=Distance(m=500);
@@ -59,16 +58,13 @@ def result2(request, lat, lon='33.00'):
   t.wait(); #This should be something far more complicated, like a long pull,Perhaps USING rabbitmq to check based on the task.id!
   area = str(t.result);
 
-  context = RequestContext(request, {'country':country, 'lat':lat, 'lon':lon,
-                                     'touching':touching, 'neighbors':neighbors, 
-                                     'distance':d, 'area':area,
-                                     'countriesNearUnitedStates':countriesNearUS})
+  context = {'country':country, 'lat':lat, 'lon':lon,
+             'touching':touching, 'neighbors':neighbors, 
+             'distance':d, 'area':area,
+             'countriesNearUnitedStates':countriesNearUS}
   
   return render(request, 'world/result.html', context);
-
-#  template = loader.get_template('world/result.html')
-#  s= template.render(context);
-  
+ 
   '''if not country:
     s+= "{None}\n\n"
   else:
