@@ -13,5 +13,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^world/', include('world.urls', namespace='world')),
     url(r'^$', include('meta.urls', namespace='meta')),
+    url(r'^meta/rest/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^meta/', include('meta.urls', namespace='meta')),
 )

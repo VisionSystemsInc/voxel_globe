@@ -6,13 +6,102 @@ from django.core import serializers
 import meta.models
 import tiepoint_tasks
 
-from rest_framework import viewsets
+import rest_framework.filters
+import rest_framework.status
+import rest_framework.response
+import rest_framework.mixins
+import rest_framework.views
+import rest_framework.viewsets
+import rest_framework.routers
+
 import meta.serializers
 
-class ImageViewSet(viewsets.ModelViewSet):
-  queryset = meta.models.Image.objects.all()
-  serializer_class = meta.serializers.ImageSerializer
+import inspect
 
+class AutoViewSet(rest_framework.mixins.CreateModelMixin,
+                  rest_framework.mixins.RetrieveModelMixin,
+                  rest_framework.mixins.UpdateModelMixin,
+                  rest_framework.mixins.ListModelMixin,
+                  rest_framework.viewsets.GenericViewSet):
+  filter_backends = (rest_framework.filters.DjangoFilterBackend,);
+  filter_fields = map(lambda x: x[0].name, meta.models.TiePoint._meta.get_fields_with_model());
+  
+  def destroy(self, request, pk=None, *args, **kwargs):
+    ''' Destroy that sets delete to true, but does not actually delete to support history'''
+    try:
+      obj = self.get_queryset().get(pk=pk).history();
+      #obj = meta.models.TiePoint.objects.get(id=tiePointId).history();
+      #Get the latest version of that tiepoint
+      obj.deleted = True;
+      super(obj._meta.model, obj).save();
+      #Do not use the VIPModel save, since this is a strict change in a status flag
+      return rest_framework.response.Response(status=rest_framework.status.HTTP_204_NO_CONTENT)
+    except:
+      #pk may have been None, or obj may have been None.
+      return rest_framework.response.Response(status=rest_framework.status.HTTP_400_BAD_REQUEST);
+
+#  def list(self, request):
+#    print 'LIST';
+#    #Called by main endpoint GET, to list (a page if) the objects
+
+#  def retrieve(self, request, pk=None):
+#    print 'RETREIVE';
+#    #Called by the individual id endpoint GET
+  
+#  def create(self, request):
+#    print 'CREATE';
+#    Called by main endpoint POST
+
+#  def update(self, request, pk=None):
+#    print 'UPDATE';
+#    #Individual id endpoint PUT
+    
+#  def partial_update(self, request, pk=None):
+#    print 'PARTIAL_UPDATE'
+#    #Individual id endpoint PATCH
+
+
+def ViewSetFactory(model, serilizer):
+  return type('AutoViewSet_%s' % model._meta.model_name, (AutoViewSet,), {'queryset':model.objects.all(), 'serializer_class':serilizer})
+  
+
+#Define custom view sets here
+
+auto_router = rest_framework.routers.DefaultRouter()
+router = rest_framework.routers.DefaultRouter()
+
+import rest_framework.generics
+
+class TiePointViewSet(rest_framework.viewsets.ModelViewSet):
+  queryset = meta.models.TiePoint.objects.all();
+  serializer_class = meta.serializers.TiePointSerializer;
+#  filter_backends = (rest_framework.filters.SearchFilter,);
+  filter_fields = ['id', 'objectId', 'newerVersion'];
+  filter_backends = (rest_framework.filters.DjangoFilterBackend,);
+#  filter_fields = map(lambda x: x[0].name, meta.models.TiePoint._meta.get_fields_with_model())+['newerVersion__isnull'];
+  
+  def destroy(self, request, pk=None):
+    print 'DESTROY!DESTROY!DESTROY!DESTROY!'
+    import rpdb2; rpdb2.start_embedded_debugger('vsi');
+  def get_queryset(self):
+    if self.request.QUERY_PARAMS.has_key('newestVersion'):
+      return super(TiePointViewSet, self).get_queryset().filter(newerVersion=None);
+    else:
+      return super(TiePointViewSet, self).get_queryset();
+
+router.register('tiepoint', TiePointViewSet);
+#Either register custom serializers here
+#May need to add if to for loop to check if already registered
+
+''' Create serializers for all VIP object models '''
+for m in inspect.getmembers(meta.models):
+  if inspect.isclass(m[1]):
+    if issubclass(m[1], meta.models.VipObjectModel) and not m[1] == meta.models.VipObjectModel:
+      #pass
+      auto_router.register(m[1]._meta.model_name, ViewSetFactory(m[1], meta.serializers.serializerFactory(m[1])))
+
+#Either register custom serializers or here. I won't know which is right until I try
+      
 def index(request):
     return render(request, 'meta/html/index.html')
 

@@ -1,10 +1,5 @@
 from django.conf.urls import patterns, url, include
-
 from meta import views
-
-from rest_framework import routers
-router = routers.DefaultRouter()
-router.register(r'images', views.ImageViewSet)
 
 urlpatterns = patterns('',
 # pages                       
@@ -30,6 +25,6 @@ urlpatterns = patterns('',
     url(r'^deleteTiePoint$', views.deleteTiePoint, name='deleteTiePoint'),
 
 #   RESTful end points
-    url(r'^rest/', include(router.urls)),
-    url(r'^rest/api-auth/', include('rest_framework.urls', namespace='rest_framework'), name='rest_framework'),
+    url(r'^rest/', include(views.router.urls)),
+    url(r'^rest/auto/', include(views.auto_router.urls)),
 )
