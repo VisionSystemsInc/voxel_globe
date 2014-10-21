@@ -8,7 +8,7 @@
     {% block includes %}{% endblock %}	
 	
     <link rel="stylesheet" href="{% static 'jquery-ui/css/ui-lightness/jquery-ui-1.10.4.css' %}" />	
-    <link rel="stylesheet" href="{% static 'tiepoint/css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'main/css/styles.css' %}" />
     <title>{% block title %}Voxel Globe{% endblock %}</title>
     <script>
     /**
@@ -48,6 +48,26 @@
         <div id="debugOptions" style="display:inline-block; position:absolute; top: 10px; right:200px;vertical-align:top;">
             {% block debugOptions %}{% endblock %}
         </div>      
+		{% if user.is_active and user.is_staff %}
+		<div id="user-tools">
+            {% block welcome-msg %}
+                'Welcome'
+                <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+            {% endblock %}
+            {% block userlinks %}
+                {% url 'django-admindocs-docroot' as docsroot %}
+                {% if docsroot %}
+                    <a href="{{ docsroot }}">Documentation</a> /
+                {% endif %}
+                {% if user.has_usable_password %}
+                <a href="{% url 'admin:password_change' %}">Change password</a> /
+                {% endif %}
+                <a href="{% url 'admin:logout' %}">Log out</a>
+            {% endblock %}
+        </div>
+		{% endif %}
+        {% block nav-global %}{% endblock %}
+
 	</div>
     
     <div id="sidebar">

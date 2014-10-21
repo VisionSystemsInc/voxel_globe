@@ -61,6 +61,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'nga.middleware.RequireLoginMiddleware',
 )
 
 ROOT_URLCONF = 'nga.urls'
@@ -72,7 +73,7 @@ SERIALIZATION_MODULES = { 'geojson' : 'geojson' }
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
 #    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',), I set this in the viewSet instead
-    'PAGINATE_BY': 10,
+#    'PAGINATE_BY': 10, Leave default as get all
     'PAGINATE_BY_PARAM': 'page_size',
 }
 
@@ -113,3 +114,12 @@ STATIC_ROOT = env['VIP_DJANGO_STATIC_ROOT'];
 MEDIA_ROOT = env['VIP_DJANGO_MEDIA_ROOT'];
 
 TEMPLATE_DIRS = [path.join(BASE_DIR, 'templates')]
+
+LOGIN_REQUIRED_URLS = (r'/(.*)$',)
+
+LOGIN_REQUIRED_URLS_EXCEPTIONS = (
+  r'/login.html(.*)$',
+  r'/admin(.*)$', #Admin already does its own thing, leave it alone, even though I don't have to
+)
+
+LOGIN_URL = '/admin/login'

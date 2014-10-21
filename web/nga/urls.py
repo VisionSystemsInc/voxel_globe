@@ -20,8 +20,9 @@ urlpatterns = patterns('',
     url(r'^apps/imageIngest/$', main.views.imageIngest, name='imageIngest'),
     url(r'^apps/voxelCreator/$', main.views.voxelCreator, name='voxelCreator'),
     url(r'^apps/voxelWorldViewer/$', main.views.voxelWorldViewer, name='voxelWorldViewer'),
+
     #REST auth endpoint
-    url(r'^rest/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    #url(r'^rest/', include('rest_framework.urls', namespace='rest_framework')),
 
     #apps
     url(r'^meta/', include('meta.urls', namespace='meta')),

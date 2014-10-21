@@ -4,7 +4,8 @@
 {% block title %}{{ title }} | {% trans 'VSI site admin' %}{% endblock %}
 
 {% block branding %}
-VSI_LOGO<h1 id="site-name">{% trans 'VSI administration' %}</h1>
+<div style="display:inline-block;padding: 0px 10px;vertical-align:top;"><img height="40px" src="/static/world/images/VSI_Logo.png"/></div>
+<div style="display:inline-block;vertical-align:top;"><h1 id="site-name2">{% block headerTitle %}{% trans 'Voxel Globe Administration' %}{% endblock %}</h1></div>
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
