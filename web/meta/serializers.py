@@ -12,7 +12,8 @@ class VipModelSerializer(serializers_gis.GeoModelSerializer):
     obj.update(**kwargs)
 
 def serializerFactory(model):
-  return type('AutoSerializer_%s' % model._meta.model_name, (VipModelSerializer,), {'Meta': type('AutoMeta',  (object,), {'model':model})})
+  return type('AutoSerializer_%s' % model._meta.model_name, (VipModelSerializer,), 
+              {'Meta': type('AutoMeta',  (object,), {'model':model})})
 
 class TiePointSerializer(serializers_gis.GeoModelSerializer):
   class Meta:

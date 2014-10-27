@@ -6,9 +6,6 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     return render(request, 'main/html/index.html')
 
-def imageIngest(request):
-    return render(request, 'main/html/imageIngest.html')
-
 def voxelCreator(request):
     return render(request, 'main/html/voxelCreator.html')
 
