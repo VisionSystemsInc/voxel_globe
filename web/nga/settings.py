@@ -72,7 +72,8 @@ WSGI_APPLICATION = 'nga.wsgi.application'
 SERIALIZATION_MODULES = { 'geojson' : 'geojson' }
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    #Eventually, 'DjangoModelPermissions' may be good?
 #    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',), I set this in the viewSet instead
 #    'PAGINATE_BY': 10, Leave default as get all
     'PAGINATE_BY_PARAM': 'page_size',
@@ -121,6 +122,8 @@ LOGIN_REQUIRED_URLS = (r'/(.*)$',)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
   r'/login.html(.*)$',
   r'/admin(.*)$', #Admin already does its own thing, leave it alone, even though I don't have to
+  r'/rest/login(.*)$',
+  r'/rest/logout(.*)$',
 )
 
-LOGIN_URL = '/admin/login'
+LOGIN_URL = '/rest/login'
