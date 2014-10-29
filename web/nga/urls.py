@@ -24,7 +24,7 @@ urlpatterns = patterns('',
 #    url(r'^apps/ingest/$', 'ingest.views.blah'),
 
     #REST auth endpoint
-    #url(r'^rest/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^rest/', include('rest_framework.urls', namespace='rest_framework')),
 
     #apps
     url(r'^meta/', include('meta.urls', namespace='meta')),
