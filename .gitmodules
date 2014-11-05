@@ -10,3 +10,6 @@
 [submodule "external/bin_Windows_NT_AMD64"]
 	path = external/bin_Windows_NT_AMD64
 	url = git@bitbucket.org:visionsystemsinc/vip_external_bin_windows_nt_amd64.git
+[submodule "external/data"]
+	path = external/data
+	url = git@bitbucket.org:visionsystemsinc/vip_external_data.git
