@@ -82,7 +82,35 @@ goto usage
 ::Just in case something went REALLY wrong?!
 
 :start
-for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+for %%t in (%TASKS%) do (
+  schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+  
+  if /i "%%t"=="postgresql" (
+    :waitforpostgresqlstart
+    pg_isready %VIP_POSTGRESQL_CREDENTIALS% > nul
+    if "!errorlevel!" NEQ "0" (
+      echo Waiting for database to come up...
+      timeout /T 1 /NOBREAK > nul
+      goto waitforpostgresqlstart
+    )
+  )
+
+  if /i "%%t"=="httpd" (
+    for /l %%q in (1, 1, 5) do (
+      python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
+      if "!errorlevel!"=="0" (
+        goto httpd_started
+	  )
+      echo Waiting for httpd server to come up... %%q
+      timeout /T 1 /NOBREAK > nul
+    )
+    echo Either httpd has failed to start, or it is doing its initial deploy that may
+    echo take a long time. This should only happen once. If you are continuing to see
+    echo this, please contact an administrator.
+    :httpd_started
+    REM WTF. You can't have a label in the end of a ()????
+  )
+)
 goto done
 
 :stop
