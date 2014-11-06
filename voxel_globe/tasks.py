@@ -6,7 +6,7 @@
 '''
 
 #import celery app
-from .common_task import app, VipTask
+from .common_tasks import app, VipTask
 
 #Add additional tasks to the list here
 import voxel_globe.world.tasks

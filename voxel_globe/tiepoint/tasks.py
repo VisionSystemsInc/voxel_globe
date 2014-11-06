@@ -1,4 +1,5 @@
-from ..common_task import app, VipTask, NumpyAwareJSONEncoder
+from ..common_tasks import app, VipTask
+from voxel_globe.serializers.numpyjson import NumpyAwareJSONEncoder
 import voxel_globe.meta.models
 
 import numpy

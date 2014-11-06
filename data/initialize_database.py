@@ -80,7 +80,7 @@ def psql(databaseName, sqlCmd):
   return runCommand(cmd, haltOnFail=False);
 
 def load_world_data():
-  from world import models
+  from voxel_globe.world import models
   #Chicken egg problem. You can't import until after postgres has started
   
   world_shp = env['VIP_DJANGO_REGRESSION_SHAPEFILE']

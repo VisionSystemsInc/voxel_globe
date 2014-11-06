@@ -1,5 +1,4 @@
 import json;
-import numpy;
 
 import voxel_globe.meta.models
 
@@ -94,11 +93,7 @@ def deleteServiceInstance(service_id):
   print 'Deleting Service Instance tree'
   serviceInstance.delete();
 
-class NumpyAwareJSONEncoder(json.JSONEncoder):
-  def default(self, obj):
-    if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
-      return obj.tolist()
-    return json.JSONEncoder.default(self, obj)
+
 
 #TODO
 #Define Add task
