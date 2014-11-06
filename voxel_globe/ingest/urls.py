@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url, include
-from ingest import views
+from voxel_globe.ingest import views
 
 urlpatterns = patterns('',
     url(r'^$', views.ingest, name='ingest'),

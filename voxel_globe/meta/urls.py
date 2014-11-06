@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url, include
-from meta import views
+from voxel_globe.meta import views
 
 urlpatterns = patterns('',
 # json API calls    

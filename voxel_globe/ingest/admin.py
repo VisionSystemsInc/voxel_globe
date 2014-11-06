@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ingest import models
+from voxel_globe.ingest import models
 
 ### import meta.admin #Get some common admin tricks
 

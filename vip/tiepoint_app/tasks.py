@@ -1,19 +1,19 @@
 from ..common_task import app, VipTask, NumpyAwareJSONEncoder
-import meta.models
+import voxel_globe.meta.models
 
 import numpy
 import json
 
 @app.task(base=VipTask, bind=True)
 def addTiePoint(self, *args, **kwargs):
-  tp = meta.models.TiePoint.create(*args, **kwargs);
+  tp = voxel_globe.meta.models.TiePoint.create(*args, **kwargs);
   tp.service_id = self.request.id;
   tp.save();
   return tp.id;
 
 @app.task(base=VipTask, bind=True)
 def updateTiePoint(self, id, xc, y, *args, **kwargs):
-  tp = meta.models.TiePoint.objects.get(id=id);
+  tp = voxel_globe.meta.models.TiePoint.objects.get(id=id);
   tp.service_id = self.request.id;
   #for key, val in kwargs.iteritems():
   #  tp.
@@ -55,7 +55,7 @@ def getKTL(image, history=None):
     coordinate_transforms = [ct]+coordinate_transforms;
     coordinate_systems = [cs] + coordinate_systems;
   
-  if isinstance(coordinate_systems[0], meta.models.GeoreferenceCoordinateSystem):
+  if isinstance(coordinate_systems[0], voxel_globe.meta.models.GeoreferenceCoordinateSystem):
     llh = list(coordinate_systems[0].history(history).location);
     if debug:
       print "llh"
@@ -152,14 +152,14 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
 def fetchCameraFrustum(**kwargs):
   try:
     imageId = int(kwargs["imageId"])
-    image = meta.models.Image.objects.get(id=imageId)
+    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
     size = int(kwargs.pop('size', 100)); #Size in meters
     historyId = kwargs.pop('history', None)
     output = kwargs.pop('output', 'json')
     
     if historyId:
       historyId = int(historyId);
-    history = meta.models.History.to_dict(historyId)
+    history = voxel_globe.meta.models.History.to_dict(historyId)
     if image.camera:
       w = image.imageWidth;
       h = image.imageHeight;
@@ -221,7 +221,7 @@ def fetchCameraFrustum(**kwargs):
 </Document>
 </kml>'''
         return kml;
-  except meta.models.Image.DoesNotExist:
+  except voxel_globe.meta.models.Image.DoesNotExist:
     pass;
   
   return '';
@@ -231,14 +231,14 @@ def fetchCameraFrustum(**kwargs):
 def fetchCameraRay(**kwargs):
   try:
     imageId = int(kwargs["imageId"])
-    image = meta.models.Image.objects.get(id=imageId)
+    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
     x = int(kwargs.pop('X', image.imageWidth/2))
     y = int(kwargs.pop('Y', image.imageHeight/2))
     height = int(kwargs.pop('height', 0))
     historyId = kwargs.pop('history', None)
     if historyId:
       historyId = int(historyId);
-    history = meta.models.History.to_dict(historyId)
+    history = voxel_globe.meta.models.History.to_dict(historyId)
   
     if image.camera:
       K, T, llh = getKTL(image, history);
@@ -250,7 +250,7 @@ def fetchCameraRay(**kwargs):
       llh2['h']   = numpy.concatenate((llh1['h'], llh2['h']))
 
       return json.dumps(llh2, cls=NumpyAwareJSONEncoder);
-  except meta.models.Image.DoesNotExist:
+  except voxel_globe.meta.models.Image.DoesNotExist:
     pass
 
   return '';

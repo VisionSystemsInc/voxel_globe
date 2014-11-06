@@ -9,7 +9,7 @@
 from .common_task import app, VipTask
 
 #Add additional tasks to the list here
-import world_app.tasks
-import tiepoint_app.tasks
-import arducopter.tasks
-import visualsfm.tasks
+import vip.world_app.tasks
+import vip.tiepoint_app.tasks
+import vip.arducopter.tasks
+import vip.visualsfm.tasks

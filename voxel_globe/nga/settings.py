@@ -44,11 +44,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'rest_framework',
     'django.contrib.gis',
-    'meta',
-    'world',
-    'main',
-    'tiepoint',
-    'ingest',
+    'voxel_globe.meta',
+    'voxel_globe.world',
+    'voxel_globe.main',
+    'voxel_globe.tiepoint',
+    'voxel_globe.ingest',
     'django.contrib.staticfiles',
 ) #Staticfiles MUST come last, or else it might skip some files
   #at collectstatic deploy time!!!! This is one of the rare times
@@ -62,12 +62,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'nga.middleware.RequireLoginMiddleware',
+    'voxel_globe.nga.middleware.RequireLoginMiddleware',
 )
 
-ROOT_URLCONF = 'nga.urls'
+ROOT_URLCONF = 'voxel_globe.nga.urls'
 
-WSGI_APPLICATION = 'nga.wsgi.application'
+WSGI_APPLICATION = 'voxel_globe.nga.wsgi.application'
 
 SERIALIZATION_MODULES = { 'geojson' : 'vip.tools.geojson' }
 

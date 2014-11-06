@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template import RequestContext, loader
 
 from django.core import serializers
-import meta.models
+import voxel_globe.meta.models
 
 import rest_framework.filters
 import rest_framework.status
@@ -13,7 +13,7 @@ import rest_framework.views
 import rest_framework.viewsets
 import rest_framework.routers
 
-import meta.serializers
+import voxel_globe.meta.serializers
 
 import inspect
 
@@ -25,13 +25,13 @@ class AutoViewSet(rest_framework.mixins.CreateModelMixin,
                   rest_framework.mixins.ListModelMixin,
                   rest_framework.viewsets.GenericViewSet):
   filter_backends = (rest_framework.filters.DjangoFilterBackend,);
-  filter_fields = map(lambda x: x[0].name, meta.models.TiePoint._meta.get_fields_with_model());
+  filter_fields = map(lambda x: x[0].name, voxel_globe.meta.models.TiePoint._meta.get_fields_with_model());
   
   def destroy(self, request, pk=None, *args, **kwargs):
     ''' Destroy that sets delete to true, but does not actually delete to support history'''
     try:
       obj = self.get_queryset().get(pk=pk).history();
-      #obj = meta.models.TiePoint.objects.get(id=tiePointId).history();
+      #obj = voxel_globe.meta.models.TiePoint.objects.get(id=tiePointId).history();
       #Get the latest version of that tiepoint
       obj.deleted = True;
       super(obj._meta.model, obj).save();
@@ -82,11 +82,11 @@ router = rest_framework.routers.DefaultRouter()
 #May need to add if to for loop to check if already registered
 
 ''' Create serializers for all VIP object models '''
-for m in inspect.getmembers(meta.models):
+for m in inspect.getmembers(voxel_globe.meta.models):
   if inspect.isclass(m[1]):
-    if issubclass(m[1], meta.models.VipObjectModel) and not m[1] == meta.models.VipObjectModel:
+    if issubclass(m[1], voxel_globe.meta.models.VipObjectModel) and not m[1] == voxel_globe.meta.models.VipObjectModel:
       #pass
-      auto_router.register(m[1]._meta.model_name, ViewSetFactory(m[1], meta.serializers.serializerFactory(m[1])))
+      auto_router.register(m[1]._meta.model_name, ViewSetFactory(m[1], voxel_globe.meta.serializers.serializerFactory(m[1])))
       
 
 ### Old Arcaic getters/setters, TODO: Remove EVERYTHING after this line
@@ -95,28 +95,28 @@ for m in inspect.getmembers(meta.models):
 # API for grabbing data in the database
 #
 def fetchVideoList(request):
-    imgs = meta.models.ImageCollection.objects.all()
+    imgs = voxel_globe.meta.models.ImageCollection.objects.all()
     return HttpResponse( serializers.serialize('geojson', imgs) , content_type="application/json")
 
 def fetchImages(request):
   try:
     videoId = request.REQUEST["videoId"]
-    video = meta.models.ImageCollection.objects.get(id=videoId)
+    video = voxel_globe.meta.models.ImageCollection.objects.get(id=videoId)
 #    return HttpResponse( serializers.serialize('geojson', video.images.all(), fields=('name',)), 
 #                         content_type="application/json")
     return HttpResponse( serializers.serialize('geojson', video.images.all()), 
                          content_type="application/json")
     #based off of video_list_example.ipynb
-  except meta.models.ImageCollection.DoesNotExist:
+  except voxel_globe.meta.models.ImageCollection.DoesNotExist:
     return HttpResponse('')
     
 def fetchControlPointList(request):    
-    geoPoints = meta.models.ControlPoint.objects.all()    
+    geoPoints = voxel_globe.meta.models.ControlPoint.objects.all()    
     return HttpResponse( serializers.serialize('geojson', geoPoints) , content_type="application/json")
   
 def fetchTiePoints(request):
   imageId = request.REQUEST["imageId"]
-  tiePoints = meta.models.TiePoint.objects.filter(image_id=imageId, newerVersion=None, deleted=False)
+  tiePoints = voxel_globe.meta.models.TiePoint.objects.filter(image_id=imageId, newerVersion=None, deleted=False)
   serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint'))
   return HttpResponse( serializers.serialize('geojson', tiePoints, fields=('name', 'point', 'geoPoint')) , content_type="application/json")
      
@@ -152,7 +152,7 @@ def updateTiePoint(request):
 
 def deleteTiePoint(request):
   tiePointId = request.REQUEST['id']
-  object = meta.models.TiePoint.objects.get(id=tiePointId).history();
+  object = voxel_globe.meta.models.TiePoint.objects.get(id=tiePointId).history();
   #Get the latest version of that tiepoint
   object.deleted = True;
   super(object._meta.model, object).save();

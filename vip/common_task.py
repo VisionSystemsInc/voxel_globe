@@ -1,18 +1,14 @@
 import json;
 import numpy;
 
-import meta.models
+import voxel_globe.meta.models
 
 from celery import Celery, Task, group
 
-app = Celery('tasks');
-app.config_from_object('celeryconfig') #Don't need this because celeryd does it for me
+from os import environ as env
 
-@app.task
-def getArea(id):
-  import world.models
-  country = world.models.WorldBorder.objects.get(id=id)
-  return country.area;
+app = Celery(env['VIP_CELERY_APP']);
+app.config_from_object(env['VIP_CELERY_CONFIG_MODULE']) #Don't need this because celeryd does it for me?
 
 class VipTask(Task):
   ''' Create an auto tracking task, aka serviceInstance ''' 
@@ -21,7 +17,7 @@ class VipTask(Task):
   def __createServiceIntanceEntry(self, inputs=None, user="NAY"):
     '''Create initial database entry for service instance, and return the ID'''
     
-    serviceInstance = meta.models.ServiceInstance(
+    serviceInstance = voxel_globe.meta.models.ServiceInstance(
                           inputs=json.dumps(inputs),
                           status="Creating",
                           user=user,
@@ -33,13 +29,13 @@ class VipTask(Task):
   def __updateServiceIntanceEntry(self, output, task_id, status,
                                         args=None, kwargs=None):
     try:
-      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
-      #serviceInstance = meta.models.ServiceInstance.objects.get_for_id(task_id);
-    except meta.models.ServiceInstance.DoesNotExist:
+      serviceInstance = voxel_globe.meta.models.ServiceInstance.objects.get(id=task_id);
+      #serviceInstance = voxel_globe.meta.models.ServiceInstance.objects.get_for_id(task_id);
+    except voxel_globe.meta.models.ServiceInstance.DoesNotExist:
       #Else it's just missing, create it
       status="Impromptu:"+status;
       task_id = self.__createServiceIntanceEntry((args, kwargs));
-      serviceInstance = meta.models.ServiceInstance.objects.get(id=task_id);
+      serviceInstance = voxel_globe.meta.models.ServiceInstance.objects.get(id=task_id);
 
     serviceInstance.outputs = json.dumps(output)
     serviceInstance.status = status;
@@ -80,7 +76,7 @@ class VipTask(Task):
 @app.task
 def deleteServiceInstance(service_id):
   ''' Maintanence routine '''
-  serviceInstance = meta.models.ServiceInstance.objects.get(id=service_id);
+  serviceInstance = voxel_globe.meta.models.ServiceInstance.objects.get(id=service_id);
   
   sets = filter(lambda x: x.endswith('_set'), dir(serviceInstance))
   

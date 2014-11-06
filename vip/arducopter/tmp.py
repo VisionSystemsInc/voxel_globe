@@ -1,7 +1,7 @@
 import os
 import vip.tasks as tasks
 from glob import glob
-import meta.models
+import voxel_globe.meta.models
 from os import environ as env
 from os.path import join as path_join
 
@@ -19,9 +19,9 @@ def add_arducopter_images(self, *args, **kwargs):
   for image in images:
     image = os.path.basename(os.path.dirname(image));
     frameNum = image[11:15]
-    if meta.models.Image.objects.filter(name="Arducopter Mission 2 Frame:%s" % frameNum):
+    if voxel_globe.meta.models.Image.objects.filter(name="Arducopter Mission 2 Frame:%s" % frameNum):
       raise Exception('Already exists');
-    img = meta.models.Image.create(name="Arducopter Mission 2 Frame:%s" % frameNum, imageWidth=4096, imageHeight=2160, 
+    img = voxel_globe.meta.models.Image.create(name="Arducopter Mission 2 Frame:%s" % frameNum, imageWidth=4096, imageHeight=2160, 
                              numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
                              imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
@@ -29,7 +29,7 @@ def add_arducopter_images(self, *args, **kwargs):
      
     imageCollection.append(img.id);
      
-  ic = meta.models.ImageCollection.create(name="Arducopter Mission 2", service_id = self.request.id);
+  ic = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Mission 2", service_id = self.request.id);
   ic.save();
   ic.images.add(*imageCollection);
    
@@ -50,7 +50,7 @@ def add_arducopter_images(self, *args, **kwargs):
      
     point = geos.Point(lon, lat, alt)
        
-    tp = meta.models.ControlPoint.create(name=name,
+    tp = voxel_globe.meta.models.ControlPoint.create(name=name,
                                          description=desc,
                                          point=point,
                                          apparentPoint=point)

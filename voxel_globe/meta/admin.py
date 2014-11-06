@@ -1,5 +1,5 @@
 from django.contrib import admin
-import meta.models;
+import voxel_globe.meta.models;
 
 import django.forms
 import django.contrib.gis.forms.widgets
@@ -28,7 +28,7 @@ class ModelLinkWidget(django.forms.Select):
         return super(ModelLinkWidget, self).render(name, value, attrs) + link;
                                                                 
 ''' Non-VIPObjectModels ''' 
-admin.site.register(meta.models.WorkflowInstance)
+admin.site.register(voxel_globe.meta.models.WorkflowInstance)
 
 def fk_link(self, obj):
   return '<a href="/admin/%s/%s/%d/">Link</a>' % (obj._meta.app_label, obj._meta.model_name, obj.pk)
@@ -76,31 +76,31 @@ class VipAdmin(admin.ModelAdmin):
   
 class TiePointAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.forms.widgets.TextInput }};
-admin.site.register(meta.models.TiePoint, TiePointAdmin)
+admin.site.register(voxel_globe.meta.models.TiePoint, TiePointAdmin)
 
 class CartesianTransformAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.forms.widgets.TextInput }};
   search_fields = ('name',) #Add this to all VIP?
-admin.site.register(meta.models.CartesianTransform, CartesianTransformAdmin)
+admin.site.register(voxel_globe.meta.models.CartesianTransform, CartesianTransformAdmin)
 
 class ControlPointAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.contrib.gis.forms.widgets.OSMWidget }};
-admin.site.register(meta.models.ControlPoint, ControlPointAdmin)
+admin.site.register(voxel_globe.meta.models.ControlPoint, ControlPointAdmin)
 
 ''' Register EVERYTHING else '''
-for m in inspect.getmembers(meta.models):
+for m in inspect.getmembers(voxel_globe.meta.models):
   ''' Add inlines for ALL VIP memebers '''
   try:
-    if issubclass(m[1], meta.models.VipObjectModel):
-      if not admin.site._registry.has_key(meta.models.Image):
+    if issubclass(m[1], voxel_globe.meta.models.VipObjectModel):
+      if not admin.site._registry.has_key(voxel_globe.meta.models.Image):
         admin.site.register(m[1], VipAdmin);
   except (TypeError, admin.sites.AlreadyRegistered):
     pass 
   
   try:
-    if issubclass(m[1], meta.models.VipObjectModel) and not m[1] == meta.models.VipObjectModel:
+    if issubclass(m[1], voxel_globe.meta.models.VipObjectModel) and not m[1] == voxel_globe.meta.models.VipObjectModel:
       ServiceInstanceAdmin.inlines.append(VipInlineFactory(m[1]))
   except:
     pass; 
-admin.site.register(meta.models.ServiceInstance, ServiceInstanceAdmin)
-admin.site.register(meta.models.History);
+admin.site.register(voxel_globe.meta.models.ServiceInstance, ServiceInstanceAdmin)
+admin.site.register(voxel_globe.meta.models.History);

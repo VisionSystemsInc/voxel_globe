@@ -5,10 +5,10 @@ from django.template import RequestContext
 
 from .forms import UploadFileForm
 
-from ingest import models
+from voxel_globe.ingest import models
 
 ### Rest API setup
-import ingest.serializers
+import voxel_globe.ingest.serializers
 import rest_framework.routers
 import rest_framework.viewsets
 router = rest_framework.routers.DefaultRouter()
@@ -25,11 +25,11 @@ class IngestViewSet(rest_framework.viewsets.ModelViewSet):
 def ViewSetFactory(model, serializer):
   return type('ViewSet_%s' % model._meta.model_name, (IngestViewSet,), {'queryset':model.objects.all(), 'serializer_class':serializer})
 
-router.register(models.File._meta.model_name, ViewSetFactory(models.File, ingest.serializers.FileSerializer))
-router.register(models.Directory._meta.model_name, ViewSetFactory(models.Directory, ingest.serializers.DirectorySerializer))
-router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models.Directory, ingest.serializers.NestFactory(ingest.serializers.DirectorySerializer)))
-router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, ingest.serializers.UploadSessionSerializer));
-router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, ingest.serializers.NestFactory(ingest.serializers.UploadSessionSerializer)));
+router.register(models.File._meta.model_name, ViewSetFactory(models.File, voxel_globe.ingest.serializers.FileSerializer))
+router.register(models.Directory._meta.model_name, ViewSetFactory(models.Directory, voxel_globe.ingest.serializers.DirectorySerializer))
+router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models.Directory, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.DirectorySerializer)))
+router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.UploadSessionSerializer));
+router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.UploadSessionSerializer)));
 
 
 def ingest(request):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from world.models import WorldBorder
+from voxel_globe.world.models import WorldBorder
 
 class WorldBorderAdmin(admin.ModelAdmin):
   list_display = ('name', 'lat', 'lon', 'closeToUS');

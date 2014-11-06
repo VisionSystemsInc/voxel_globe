@@ -1,7 +1,7 @@
 import os
 import vip.tasks as tasks
 from glob import glob
-import meta.models
+import voxel_globe.meta.models
 from os import environ as env
 from os.path import join as path_join
 
@@ -21,7 +21,7 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     other = image[-16:-11]
     frameNum = image[-11:-8]
     image = os.path.basename(os.path.dirname(image));
-    img = meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
+    img = voxel_globe.meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
                              numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
                              imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
@@ -30,7 +30,7 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     imageCollections[cam] = imageCollections.pop(cam, ())+(img.id,);
     
   for cam in range(6):
-    ic = meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
+    ic = voxel_globe.meta.models.ImageCollection.create(name="Purdue Dataset Camera %d" % cam, service_id = self.request.id);
     ic.save();
     ic.images.add(*imageCollections[cam]);
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'purdue_cameras_1.txt')) #history = 1
@@ -53,11 +53,11 @@ def add_sample_cameras(self, filename, srid=4326):
       k_i = l[-1];
       
       try:
-        grcs = meta.models.GeoreferenceCoordinateSystem.objects.get(name='%s 0' % base_filename, newerVersion=None);
+        grcs = voxel_globe.meta.models.GeoreferenceCoordinateSystem.objects.get(name='%s 0' % base_filename, newerVersion=None);
         grcs.service_id = self.request.id;
         grcs.update(location = 'SRID=%d;POINT(%0.12f %0.12f %0.12f)' % ((srid,)+tuple(llh)));
-      except meta.models.GeoreferenceCoordinateSystem.DoesNotExist:
-        grcs = meta.models.GeoreferenceCoordinateSystem.create(name='%s 0' % base_filename,
+      except voxel_globe.meta.models.GeoreferenceCoordinateSystem.DoesNotExist:
+        grcs = voxel_globe.meta.models.GeoreferenceCoordinateSystem.create(name='%s 0' % base_filename,
                                                                xUnit='d', yUnit='d', zUnit='m',
                                                                location='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % ((srid,)+tuple(llh)),
                                                                service_id = self.request.id)
@@ -71,14 +71,14 @@ def add_sample_cameras(self, filename, srid=4326):
 # Basically reverse FK'd don't work well with history... YET
 # My JSON trick SHOULD work.... Maybe
 #        try:
-#          cs = meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
-#        except meta.models.CartesianCoordinateSystem.DoesNotExist:
+#          cs = voxel_globe.meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
+#        except voxel_globe.meta.models.CartesianCoordinateSystem.DoesNotExist:
         try:
-          cs = meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
+          cs = voxel_globe.meta.models.CartesianCoordinateSystem.objects.get(name='%s %d' % (base_filename, t+1), newerVersion=None)
           cs.service_id = self.request.id;
           cs.update();
         except:
-          cs = meta.models.CartesianCoordinateSystem.create(name='%s %d' % (base_filename, t+1),
+          cs = voxel_globe.meta.models.CartesianCoordinateSystem.create(name='%s %d' % (base_filename, t+1),
                                                     service_id = self.request.id,
                                                     xUnit='m', yUnit='m', zUnit='m');
           cs.save();
@@ -91,14 +91,14 @@ def add_sample_cameras(self, filename, srid=4326):
         translation = geos.Point(ts[t][0][3], ts[t][1][3], ts[t][2][3]);
 
         try:
-          transform = meta.models.CartesianTransform.objects.get(name='%s %d_%d' % (base_filename, t+1, t), newerVersion=None)
+          transform = voxel_globe.meta.models.CartesianTransform.objects.get(name='%s %d_%d' % (base_filename, t+1, t), newerVersion=None)
           transform.service_id = self.request.id;
           transform.coordinateSystem_from_id=last_cs.id;
           transform.coordinateSystem_to_id=cs.id;
           transform.update(rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
                            translation=translation);
-        except meta.models.CartesianTransform.DoesNotExist:
-          transform = meta.models.CartesianTransform.create(name='%s %d_%d' % (base_filename, t+1, t),
+        except voxel_globe.meta.models.CartesianTransform.DoesNotExist:
+          transform = voxel_globe.meta.models.CartesianTransform.create(name='%s %d_%d' % (base_filename, t+1, t),
                                        service_id = self.request.id,
                                        rodriguezX=rx,rodriguezY=ry,rodriguezZ=rz,
                                        translation=translation,
@@ -110,13 +110,13 @@ def add_sample_cameras(self, filename, srid=4326):
         last_cs = cs;
 
       try:
-        camera = meta.models.Camera.objects.get(name=base_filename, newerVersion=None);
+        camera = voxel_globe.meta.models.Camera.objects.get(name=base_filename, newerVersion=None);
         camera.service_id = self.request.id;
         camera.update(focalLengthU=k_i[0], focalLengthV=k_i[1],
                       principalPointU=k_i[2], principalPointV=k_i[3],
                       coordinateSystem=last_cs)
-      except meta.models.Camera.DoesNotExist:
-        camera = meta.models.Camera.create(name=base_filename,
+      except voxel_globe.meta.models.Camera.DoesNotExist:
+        camera = voxel_globe.meta.models.Camera.create(name=base_filename,
                                          service_id = self.request.id,
                                          focalLengthU=k_i[0],
                                          focalLengthV=k_i[1],
@@ -130,7 +130,7 @@ def add_sample_cameras(self, filename, srid=4326):
         
       #No longer necessary with the Django inspired "Leave the FK alone" technique
 
-      images = meta.models.Image.objects.filter(imageURL__contains=base_filename);
+      images = voxel_globe.meta.models.Image.objects.filter(imageURL__contains=base_filename);
 
       for img in images:
         #img.service_id = self.request.id;
@@ -140,7 +140,7 @@ def add_sample_cameras(self, filename, srid=4326):
         
         history[img.objectId] = img.id;
         
-  history = meta.models.History(name=filename, history=json.dumps(history))
+  history = voxel_globe.meta.models.History(name=filename, history=json.dumps(history))
   history.save();
 
   
@@ -164,7 +164,7 @@ def add_control_point(self, controlpoint_filename):
     point = 'SRID=4326;POINT(%0.12f %0.12f %0.12f)' % (longitude, latitude, altitude);
 
     other = 'Utm %f %f %f Other %f %f %f' % tuple(fields[7:])
-    tp = meta.models.ControlPoint.create(name=name,
+    tp = voxel_globe.meta.models.ControlPoint.create(name=name,
                                          description=other,
                                          point=point,
                                          apparentPoint=point)
@@ -183,7 +183,7 @@ def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, fr
   
   for control_point_index in range(len(control_point_names)):
     cpn = control_point_names[control_point_index];
-    cp = meta.models.ControlPoint.objects.get(name=cpn);
+    cp = voxel_globe.meta.models.ControlPoint.objects.get(name=cpn);
     for frame in frames:
       frame_num = int(frame);
       tp = tie_point_data['Correspondences']['Correspondence'][control_point_index]['CE'].find_at(fr__is='%d'%frame);
@@ -197,9 +197,9 @@ def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, fr
           img_name = 'Mission 2 Frame:%04d' % (frame_num+1)
 
         point = 'POINT(%s %s)' % (tp['u'], tp['v']);
-        image = meta.models.Image.objects.get(name__contains=img_name)
+        image = voxel_globe.meta.models.Image.objects.get(name__contains=img_name)
 
-        tp = meta.models.TiePoint.create(name=name, point=point, image=image, geoPoint=cp)
+        tp = voxel_globe.meta.models.TiePoint.create(name=name, point=point, image=image, geoPoint=cp)
         tp.service_id = self.request.id;
         tp.save();
 
@@ -211,9 +211,9 @@ def update_sample_tie_point(self, tiepoint_filename):
   lines = map(lambda x: x.split('\x00'), lines)
   
   for tp in lines:
-    img = meta.models.Image.objects.get(name=tp[0], newerVersion=None)
-    cp = meta.models.ControlPoint.objects.get(name=tp[1], newerVersion=None)
-    TP = meta.models.TiePoint.objects.get(geoPoint=cp, image=img, newerVersion=None)
+    img = voxel_globe.meta.models.Image.objects.get(name=tp[0], newerVersion=None)
+    cp = voxel_globe.meta.models.ControlPoint.objects.get(name=tp[1], newerVersion=None)
+    TP = voxel_globe.meta.models.TiePoint.objects.get(geoPoint=cp, image=img, newerVersion=None)
     
     TP.service_id = self.request.id;
     TP.point = 'POINT(%s %s)' % (tp[2], tp[3].strip())

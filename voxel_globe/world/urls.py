@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from world import views
+from voxel_globe.world import views
 
 urlpatterns = patterns('',
     #url(r'^d/ok.html$', views.index, name='index')

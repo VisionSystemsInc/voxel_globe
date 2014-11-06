@@ -1,5 +1,3 @@
-import meta.models
-
 from rest_framework import serializers
 from rest_framework_gis import serializers as serializers_gis
 
@@ -15,8 +13,10 @@ def serializerFactory(model):
   return type('AutoSerializer_%s' % model._meta.model_name, (VipModelSerializer,), 
               {'Meta': type('AutoMeta',  (object,), {'model':model})})
 
-class TiePointSerializer(serializers_gis.GeoModelSerializer):
-  class Meta:
-    model = meta.models.TiePoint;
+
+#import voxel_globe.meta.models
+#class TiePointSerializer(serializers_gis.GeoModelSerializer):
+#  class Meta:
+#    model = voxel_globe.meta.models.TiePoint;
   
 #Define custom serializers here

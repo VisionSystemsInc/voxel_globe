@@ -4,7 +4,7 @@ from django.contrib.gis.measure import Distance
 
 from pprint import pformat;
 
-from world.models import WorldBorder
+from voxel_globe.world.models import WorldBorder
 
 import vip.world_app.tasks as tasks
 

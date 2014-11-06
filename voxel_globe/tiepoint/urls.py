@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, url, include
-from tiepoint import views
+from voxel_globe.tiepoint import views
 
 urlpatterns = patterns('',
 # pages

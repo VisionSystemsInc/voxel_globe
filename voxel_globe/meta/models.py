@@ -289,7 +289,7 @@ class VipObjectModel(VipCommonModel):
     return hist;
 
   @atomic
-  def remove_reference(self, check_is_used=True):
+  def remove_references(self, check_is_used=True):
     ''' This effectively unlinks this node from the history tree so that is can
         later be safely removed '''
     if check_is_used:
