@@ -50,9 +50,10 @@ set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 
 REM ### Django settings
-set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/web
+set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe
+REM I am adding the namespace voxel_globe to ALL web content, so this and celery_processors will eventual be merged into JUST VIP_PROJECT_ROOT, and that will be the only thing added to pythonpath in env.bat
 set VIP_DJANGO_SITE=%VIP_DJANGO_PROJECT%/nga
-set VIP_DJANGO_STATIC_ROOT=%VIP_DJANGO_PROJECT%/static_deploy
+set VIP_DJANGO_STATIC_ROOT=%VIP_PROJECT_ROOT%/static_deploy
 set VIP_DJANGO_SETTINGS_MODULE=nga.settings
 set VIP_DJANGO_STATIC_URL_PATH=static
 set VIP_DJANGO_STATIC_COMMON=%VIP_DJANGO_PROJECT%/static_common
@@ -96,6 +97,7 @@ REM ### Celery Settings ###
 set VIP_CELERY_DEFAULT_NODES=npr
 set VIP_CELERY_DAEMON_USER=npr_celery
 set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%/processors
+REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
 set VIP_CELERY_TASK_LOG_DIR=%VIP_LOG_DIR%/tasks
