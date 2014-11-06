@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>blah</title>
+</head>
+<body>
+{% if image_collection_list %}
+    <ul>
+    {% for image_collection in image_collection_list %}
+        <li><a href="{% url 'order_visualsfm:order' image_collection.id %}">{{ image_collection.name }} - [{{ image_collection.id }}]</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No image collections are available.</p>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>blah</title>
+</head>
+<body>
+{% if image_list %}
+    I will process:
+    <ul>
+    {% for image in image_list %}
+        <li>{{ image.name }} - [{{ image.id }}]</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No images are available.</p>
+{% endif %}
+</body>
+</html>
