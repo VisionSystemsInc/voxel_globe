@@ -1,4 +1,4 @@
-from common_task import app, VipTask, NumpyAwareJSONEncoder
+from ..common_task import app, VipTask, NumpyAwareJSONEncoder
 import meta.models
 
 import numpy
@@ -82,7 +82,7 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
       (scalar) or the z intersection planes (scalar)
       
       returns dictionary with lon, lat, h'''
-  import enu;
+  import vip.tools.enu as enu;
   
   debug = 0;
   
@@ -140,7 +140,12 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   if debug:
     print 'ray is now', ray 
 
-  llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], lat_origin=llh_xyz[1], h_origin=llh_xyz[2], east=ray[0,:], north=ray[1,:], up=ray[2,:])
+  llh2_xyz = enu.enu2llh(lon_origin=llh_xyz[0], 
+                         lat_origin=llh_xyz[1], 
+                         h_origin=llh_xyz[2], 
+                         east=ray[0,:], 
+                         north=ray[1,:], 
+                         up=ray[2,:])
   return llh2_xyz
 
 @app.task
@@ -224,8 +229,6 @@ def fetchCameraFrustum(**kwargs):
   
 @app.task
 def fetchCameraRay(**kwargs):
-  import enu;
-
   try:
     imageId = int(kwargs["imageId"])
     image = meta.models.Image.objects.get(id=imageId)

@@ -1,4 +1,4 @@
-from common_task import app
+from vip.common_task import app
 import world.models
 
 @app.task

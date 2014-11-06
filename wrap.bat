@@ -41,7 +41,7 @@ if "%1"=="start_httpd" (
 	goto waitfordatabase
   )
 
-  celery worker -A tasks --logfile=%VIP_LOG_DIR%/celery_log.log --loglevel=INFO > %VIP_LOG_DIR%/celery_out.log 2> %VIP_LOG_DIR%/celery_err.log
+  celery worker -A %VIP_CELERY_APP% --logfile=%VIP_LOG_DIR%/celery_log.log --loglevel=INFO > %VIP_LOG_DIR%/celery_out.log 2> %VIP_LOG_DIR%/celery_err.log
 ) else if "%1"=="start_rabbitmq" (
   rabbitmq-server > %VIP_RABBITMQ_LOG_DIR%/rabbitmq_out.log 2> %VIP_RABBITMQ_LOG_DIR%/rabbitmq_err.log
 ) else if "%1"=="start_postgresql" (

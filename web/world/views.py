@@ -6,7 +6,7 @@ from pprint import pformat;
 
 from world.models import WorldBorder
 
-import world_tasks as tasks
+import vip.world_app.tasks as tasks
 
 # Create your views here.
 

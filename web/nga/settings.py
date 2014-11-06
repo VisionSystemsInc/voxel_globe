@@ -69,7 +69,7 @@ ROOT_URLCONF = 'nga.urls'
 
 WSGI_APPLICATION = 'nga.wsgi.application'
 
-SERIALIZATION_MODULES = { 'geojson' : 'geojson' }
+SERIALIZATION_MODULES = { 'geojson' : 'vip.tools.geojson' }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
