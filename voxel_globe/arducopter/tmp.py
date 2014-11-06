@@ -1,5 +1,5 @@
 import os
-import vip.tasks as tasks
+import voxel_globe.tasks as tasks
 from glob import glob
 import voxel_globe.meta.models
 from os import environ as env

@@ -6,15 +6,15 @@ def tiePointCreator(request):
     return render(request, 'tiepoint/html/tiePointCreator.html')
 
 def fetchCameraRay(request):
-  import vip.tiepoint_app.tasks
+  import voxel_globe.tiepoint.tasks
   
-  points = vip.tiepoint_app.tasks.fetchCameraRay(**request.REQUEST);
+  points = voxel_globe.tiepoint.tasks.fetchCameraRay(**request.REQUEST);
   
   return HttpResponse(points);
 
 def fetchCameraFrustum(request):
-  import vip.tiepoint_app.tasks
+  import voxel_globe.tiepoint.tasks
 
-  points = vip.tiepoint_app.tasks.fetchCameraFrustum(**request.REQUEST);
+  points = voxel_globe.tiepoint.tasks.fetchCameraFrustum(**request.REQUEST);
   
   return HttpResponse(points);

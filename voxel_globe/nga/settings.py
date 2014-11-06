@@ -69,7 +69,7 @@ ROOT_URLCONF = 'voxel_globe.nga.urls'
 
 WSGI_APPLICATION = 'voxel_globe.nga.wsgi.application'
 
-SERIALIZATION_MODULES = { 'geojson' : 'vip.tools.geojson' }
+SERIALIZATION_MODULES = { 'geojson' : 'voxel_globe.serializers.geojson' }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),

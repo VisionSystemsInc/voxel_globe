@@ -1,5 +1,5 @@
 import os
-import vip.tasks as tasks
+import voxel_globe.tasks as tasks
 from glob import glob
 import voxel_globe.meta.models
 from os import environ as env
@@ -174,7 +174,7 @@ def add_control_point(self, controlpoint_filename):
 @tasks.app.task(base=tasks.VipTask, bind=True)
 def add_sample_tie_point(self, site_filename, lvcs_selected_filename, camera, frames):
   ''' Demo ware only, really '''
-  from vip.tools.xml_dict import load_xml
+  from voxel_globe.tools.xml_dict import load_xml
   control_point_names = [];
   with open(lvcs_selected_filename, 'r') as fid:
     for line in fid:

@@ -1,4 +1,4 @@
-from vip.common_task import app
+from voxel_globe.common_task import app
 import voxel_globe.world.models
 
 @app.task

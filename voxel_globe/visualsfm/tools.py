@@ -173,7 +173,7 @@ def writeGcpFileEcef(inputs, outputGps):
   ''' Same as writeGpsFile, except ecef
       inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename '''
-  import vip.tools.enu
+  import voxel_globe.tools.enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:
@@ -190,7 +190,7 @@ def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
       lat_origin, lon_origin, h_origin 
         - origin of enu cooridinate system, in degrees/meters'''
 
-  import vip.tools.enu
+  import voxel_globe.tools.enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:

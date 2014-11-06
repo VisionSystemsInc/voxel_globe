@@ -82,7 +82,7 @@ def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
       (scalar) or the z intersection planes (scalar)
       
       returns dictionary with lon, lat, h'''
-  import vip.tools.enu as enu;
+  import voxel_globe.tools.enu as enu;
   
   debug = 0;
   

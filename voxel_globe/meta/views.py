@@ -122,7 +122,7 @@ def fetchTiePoints(request):
      
 #  API for updating data in the database
 def createTiePoint(request):
-    import vip.tiepoint_app.tasks
+    import voxel_globe.tiepoint.tasks
 
     imageId = request.REQUEST["imageId"];
     if 'controlPointId' in request.REQUEST:
@@ -132,19 +132,19 @@ def createTiePoint(request):
     x = request.REQUEST["x"];
     y = request.REQUEST["y"];
     name = request.REQUEST["name"];
-    vip.tiepoint_app.tasks.addTiePoint.apply(kwargs={'point':'POINT(%s %s)' % (x,y), 
+    voxel_globe.tiepoint.tasks.addTiePoint.apply(kwargs={'point':'POINT(%s %s)' % (x,y), 
                                     'image_id':imageId, 
                                     'geoPoint_id':controlPointId,
                                     'name': name});
     return HttpResponse('');
 
 def updateTiePoint(request):
-    import vip.tiepoint_app.tasks
+    import voxel_globe.tiepoint.tasks
 
     print("Requested to update a tie point with id ", request.REQUEST["tiePointId"],           
           " with x=", request.REQUEST["x"], " and y=", request.REQUEST["y"])    
 
-    vip.tiepoint_app.tasks.updateTiePoint.apply(args=(request.REQUEST["tiePointId"], request.REQUEST["x"], request.REQUEST["y"]))
+    voxel_globe.tiepoint.tasks.updateTiePoint.apply(args=(request.REQUEST["tiePointId"], request.REQUEST["x"], request.REQUEST["y"]))
     #Eventually when the REAL update function is written, it may be EASIEST to say
     #"POINT(%s %s)" % (x, y), but until this is complete, it does not matter to me.
           

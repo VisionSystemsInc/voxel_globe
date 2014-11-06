@@ -6,7 +6,7 @@ from pprint import pformat;
 
 from voxel_globe.world.models import WorldBorder
 
-import vip.world_app.tasks as tasks
+import voxel_globe.world.tasks as tasks
 
 # Create your views here.
 
