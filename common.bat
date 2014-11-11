@@ -31,6 +31,7 @@ set VIP_LOG_DIR=%VIP_PROJECT_ROOT%/logs
 set VIP_LOCK_DIR=%VIP_LOCALSTATEDIR%/lock/subsys
 REM Currently only Linux even uses the lock dir
 set VIP_DATABASE_DIR=%VIP_PROJECT_ROOT%/data
+set VIP_EXTERNAL_DATA_DIR=%VIP_PROJECT_ROOT%/external/data
 
 REM ### Vxl Settings ###
 set VIP_VXL_DIR=%VIP_PROJECT_ROOT%/vxl
@@ -49,10 +50,11 @@ set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 
 REM ### Django settings
-set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/web
+set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe
+REM I am adding the namespace voxel_globe to ALL web content, so this and celery_processors will eventual be merged into JUST VIP_PROJECT_ROOT, and that will be the only thing added to pythonpath in env.bat
 set VIP_DJANGO_SITE=%VIP_DJANGO_PROJECT%/nga
-set VIP_DJANGO_STATIC_ROOT=%VIP_DJANGO_PROJECT%/static_deploy
-set VIP_DJANGO_SETTINGS_MODULE=nga.settings
+set VIP_DJANGO_STATIC_ROOT=%VIP_PROJECT_ROOT%/static_deploy
+set VIP_DJANGO_SETTINGS_MODULE=voxel_globe.nga.settings
 set VIP_DJANGO_STATIC_URL_PATH=static
 set VIP_DJANGO_STATIC_COMMON=%VIP_DJANGO_PROJECT%/static_common
 set VIP_DJANGO_MEDIA_ROOT=%VIP_DJANGO_PROJECT%/media_root
@@ -94,10 +96,14 @@ REM db-namespace is needed, in which case we will switch over to ssl connections
 REM ### Celery Settings ###
 set VIP_CELERY_DEFAULT_NODES=npr
 set VIP_CELERY_DAEMON_USER=npr_celery
-set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%/processors
+set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%
+REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
+set VIP_CELERY_TASK_LOG_DIR=%VIP_LOG_DIR%/tasks
 set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
+set VIP_CELERY_APP=voxel_globe.tasks
+set VIP_CELERY_CONFIG_MODULE=voxel_globe.celeryconfig
 
 set VIP_NOTEBOOK_RUN_DIR=%VIP_CELERY_PROCESSORS%
 
@@ -147,6 +153,7 @@ REM These parameters are not protected by the VIP Prefix, and thus
 REM Affect many application, but hopefully in a good way :)
 
 set DJANGO_SETTINGS_MODULE=%VIP_DJANGO_SETTINGS_MODULE%
+set CELERY_CONFIG_MODULE=%VIP_CELERY_CONFIG_MODULE%
 
 REM I don't know if this is actually used, but it is mentioned in the Geodjango tutorial
 set PROJ_LIB=%VIP_DJANGO_PROJ_LIB%
@@ -154,3 +161,4 @@ set GDAL_DATA=%VIP_DJANGO_GDAL_DATA%
 set POSTGIS_ENABLE_OUTDB_RASTERS=1
 set POSTGIS_GDAL_ENABLED_DRIVERS=ENABLE_ALL
 set POSTGIS_GDAL_ENABLED_DRIVERS=GTiff PNG JPEG GIF XYZ
+
