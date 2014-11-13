@@ -4,8 +4,6 @@
 {% block title %}Voxel Globe - Main {% endblock %}
 
 {% block includes %}
-
-</style>
 {% endblock %}
 
 {%block globalfunctions %}
@@ -20,7 +18,7 @@
 
 {% block content %}
 
-<div class="main-content" style="margin: 20px;">
+<div class="main-content">
     <ul>
         <li><a href="{% url 'ingest:ingest' %}">Image Ingest</a></li>
         <li><a href="{% url 'order_visualsfm:make_order' %}">Order SFM Processing</a></li>
