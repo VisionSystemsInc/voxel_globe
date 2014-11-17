@@ -31,7 +31,7 @@ class ModelLinkWidget(django.forms.Select):
 admin.site.register(voxel_globe.meta.models.WorkflowInstance)
 
 def fk_link(self, obj):
-  return '<a href="/admin/%s/%s/%d/">Link</a>' % (obj._meta.app_label, obj._meta.model_name, obj.pk)
+  return '<a href="/admin/%s/%s/%s/">Link</a>' % (obj._meta.app_label, obj._meta.model_name, obj.pk)
 fk_link.allow_tags = True
 fk_link.short_description = "Link to object"
 
@@ -92,7 +92,7 @@ for m in inspect.getmembers(voxel_globe.meta.models):
   ''' Add inlines for ALL VIP memebers '''
   try:
     if issubclass(m[1], voxel_globe.meta.models.VipObjectModel):
-      if not admin.site._registry.has_key(voxel_globe.meta.models.Image):
+      if not admin.site._registry.has_key(m[1]) and m[1] is not voxel_globe.meta.models.VipObjectModel:
         admin.site.register(m[1], VipAdmin);
   except (TypeError, admin.sites.AlreadyRegistered):
     pass 
