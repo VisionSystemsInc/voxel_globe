@@ -89,13 +89,22 @@ for %%t in (%TASKS%) do (
   schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
   
   if /i "%%t"=="postgresql" (
-    :waitforpostgresqlstart
-    pg_isready %VIP_POSTGRESQL_CREDENTIALS% > nul
-    if "!errorlevel!" NEQ "0" (
-      echo Waiting for database to come up...
-      timeout /T 1 /NOBREAK > nul
-      goto waitforpostgresqlstart
+    for /l %%q in (1,1,10) do (
+      if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
+        pg_isready %VIP_POSTGRESQL_CREDENTIALS% > nul
+        if "!errorlevel!" NEQ "0" (
+          echo Waiting for database to come up... %%q
+          timeout /T 1 /NOBREAK > nul
+        ) else (
+          set VIP_POSTGRESQL_TEMP_STARTED=1
+        )
+      )
     )
+    if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
+      echo Postgresql has failed to start. If you are continuing to see
+      echo this, please contact an administrator.
+    )
+    set VIP_POSTGRESQL_TEMP_STARTED=
   )
 
   if /i "%%t"=="httpd" (
@@ -143,7 +152,21 @@ for %%t in (%TASKS%) do (
     )
     set VIP_HTTPD_TEMP_STOPPED=
   )
-  
+
+  if /i "%%t"=="notebook" (
+    for /l %%q in (1, 1, 5) do (
+      if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
+        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_NOTEBOOK_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
+        if "!errorlevel!" NEQ "0" set VIP_NOTEBOOK_TEMP_STOPPED=1
+        echo Waiting for notebook server to go down... %%q
+        timeout /T 1 /NOBREAK > nul
+      )
+    )
+    if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
+      echo I give up
+    )
+    set VIP_NOTEBOOK_TEMP_STOPPED=
+  )
 )
 if "%VIP_RESTART%" == "1" (
   set VIP_RESTART=
