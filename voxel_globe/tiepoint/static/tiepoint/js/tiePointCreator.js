@@ -142,7 +142,7 @@ TiePointMain.prototype.chooseVideoToDisplay = function(videoNdx) {
 					var img = {
 						id : data[i].pk,
 						name : data[i].fields.name,
-						url : data[i].fields.imageURL,
+						url : data[i].fields.imageUrl,
 						width : data[i].fields.imageWidth,
 						height : data[i].fields.imageHeight
 					};
@@ -241,7 +241,7 @@ TiePointMain.prototype.pullDataAndUpdate = function() {
 		data : {},
 		success : function(data) {
 			// alert("received json data...http://" + window.location.host +
-			// data[0].fields.imageURL);
+			// data[0].fields.imageUrl);
 			for (var i = 0; i < data.length; i++) {
 				var geoPt = {
 					id : data[i].pk,

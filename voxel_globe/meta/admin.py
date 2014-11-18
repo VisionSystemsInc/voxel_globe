@@ -57,8 +57,17 @@ def VipInlineFactory(model):
   return type(model._meta.model_name+'Inline', (VipInline,), {'model':model})
 
 class ServiceInstanceAdmin(admin.ModelAdmin):
-  list_display = ('__unicode__', 'entryTime', 'finishTime', 'inputs', 'outputs');
+  list_display = ('__unicode__', 'entryTime', 'finishTime', 'inputs', 'formattedOutput');
   inlines = [];
+  def formattedOutput(self, obj):
+    s = str(obj.outputs)
+    if s.startswith('"Traceback'):
+      return s.replace('\\n', '<P>')
+    else:
+      return s.replace('\\n', '<BR>')
+  formattedOutput.allow_tags = True
+  formattedOutput.short_description = "Outputs"
+    
 
 ''' Custom VipObjectModels ''' 
 class VipAdmin(admin.ModelAdmin):

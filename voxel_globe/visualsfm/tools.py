@@ -184,7 +184,7 @@ def writeGcpFileEcef(inputs, outputGps):
                 (' %0.12g'*3) % ecef_xyz +'\n');
 
 def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
-  ''' Same as writeGpsFile, except ecef
+  ''' Same as writeGpsFile, except enu
       inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename 
       lat_origin, lon_origin, h_origin 

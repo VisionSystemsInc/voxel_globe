@@ -32,6 +32,9 @@ set VIP_LOCK_DIR=%VIP_LOCALSTATEDIR%/lock/subsys
 REM Currently only Linux even uses the lock dir
 set VIP_DATABASE_DIR=%VIP_PROJECT_ROOT%/data
 set VIP_EXTERNAL_DATA_DIR=%VIP_PROJECT_ROOT%/external/data
+set VIP_TEMP_DIR=%VIP_PROJECT_ROOT%/tmp
+set VIP_CONSTANT_TEMP_DIR=0
+REM Very useful for debugging. Everything dumped into VIP_TEMP_DIR directly, instead of a random dir inside 
 
 REM ### Vxl Settings ###
 set VIP_VXL_DIR=%VIP_PROJECT_ROOT%/vxl
@@ -100,7 +103,7 @@ set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%
 REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
-set VIP_CELERY_TASK_LOG_DIR=%VIP_LOG_DIR%/tasks
+set VIP_CELERY_TASK_LOG_DIR=%VIP_CELERY_LOG_DIR%
 set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
 set VIP_CELERY_APP=voxel_globe.tasks
 set VIP_CELERY_CONFIG_MODULE=voxel_globe.celeryconfig

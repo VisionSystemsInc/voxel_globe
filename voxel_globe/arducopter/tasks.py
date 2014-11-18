@@ -24,7 +24,8 @@ def add_arducopter_images(self, *args, **kwargs):
       raise Exception('Already exists');
     img = voxel_globe.meta.models.Image.create(name="Arducopter Mission 2 Frame:%s" % frameNum, imageWidth=4096, imageHeight=2160, 
                              numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                             imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             imageUrl='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             originalImageUrl='http://%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
     img.save();
      

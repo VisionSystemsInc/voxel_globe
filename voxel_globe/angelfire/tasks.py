@@ -22,9 +22,13 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     other = image[-16:-11]
     frameNum = image[-11:-8]
     image = os.path.basename(os.path.dirname(image));
+    if voxel_globe.meta.models.Image.objects.filter(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum)):
+      raise Exception('Already exists');
+
     img = voxel_globe.meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
                              numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
-                             imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             imageUrl='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             originalImageUrl='http://%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
                              service_id = self.request.id);
     img.save();
     
@@ -131,7 +135,7 @@ def add_sample_cameras(self, filename, srid=4326):
         
       #No longer necessary with the Django inspired "Leave the FK alone" technique
 
-      images = voxel_globe.meta.models.Image.objects.filter(imageURL__contains=base_filename);
+      images = voxel_globe.meta.models.Image.objects.filter(imageUrl__contains=base_filename);
 
       for img in images:
         #img.service_id = self.request.id;

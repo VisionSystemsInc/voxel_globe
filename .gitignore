@@ -10,3 +10,4 @@ vip.bsh
 .ipynb_checkpoints
 *.zip
 local_np2r.*
+tmp

@@ -11,3 +11,6 @@ CELERY_RESULT_SERIALIZER='json';
 CELERY_SEND_EVENTS=True;
 
 CELERY_DISABLE_RATE_LIMITS = True
+
+CELERY_TRACK_STARTED = True
+#This APPEARS to be on already (but shouldn't be)? But I want it anyways

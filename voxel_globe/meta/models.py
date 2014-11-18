@@ -394,9 +394,10 @@ class Image(VipObjectModel):
   imageWidth = models.PositiveIntegerField('Image Width (pixels)');
   imageHeight = models.PositiveIntegerField('Image Height (pixels)');
   numberColorBands = models.PositiveIntegerField('Number of Color Bands');
-  #imageURL = models.TextField(unique=True);
+  #imageUrl = models.TextField(unique=True);
   #I can't use unique with the current precedence implementation
-  imageURL = models.TextField();
+  imageUrl = models.TextField(); #The url for Open Layers
+  originalImageUrl = models.TextField(); #The url to access original image, untouched. 
   camera = models.ForeignKey('Camera', null=True, blank=True);
   #coordinateSystem = models.ForeignKey('CoordinateSystem', null=True, blank=True);
   #Question for Joe: Point at the camera, or point at the oppisite end of the
