@@ -13,9 +13,10 @@ def runVisualSfm(self, imageCollectionId):
   from os.path import join as path_join
   import os
   
-  from .tools import writeNvm, writeGcpFileEnu, generateMatchPoints, runSparse
+  from .tools import writeNvm, writeGcpFileEnu, generateMatchPoints, runSparse, readNvm
   
   from voxel_globe.tools.wget import download as wget
+  from ..meta.tools import getKTO
   
   self.update_state(state='INITIALIZE', meta={'stage':0})
 
@@ -65,9 +66,18 @@ def runVisualSfm(self, imageCollectionId):
   logger.info('The image list is %s' % filenames)
 
   self.update_state(state='PROCESSING', meta={'stage':'generate match points'})
-  generateMatchPoints(localImageList, path_join(processingDir, 'match.nvm'))
+  generateMatchPoints(localImageList, path_join(processingDir, 'match.nvm'), logger=logger)
   
-  #self.update_state(state='PROCESSING', meta={'stage':'writing gcp points'})
+  self.update_state(state='PROCESSING', meta={'stage':'writing gcp points'})
+  cameras = [];
+  for image in imageList:
+    if 1:
+    #try:
+      [K, T, llh] = getKTO(image);
+      cameras.append({'image':image.id, 'K':K, 'tranformation':T, 'origin':llh})
+    #except:
+      pass
+
   #Make this a separate injest process, making CAMERAS linked to the images
   #data = arducopter.loadAdjTaggedMetadata(r'd:\visualsfm\arducopter\2014-03-20 13-22-44_adj_tagged_images.txt');
   #Make this read the cameras from the DB instead
@@ -75,12 +85,12 @@ def runVisualSfm(self, imageCollectionId):
 
   #runSparse(r'd:\visualsfm\arducopter\match.nvm', r'd:\visualsfm\arducopter\sparse.nvm', gcp=True, shared=True)
   self.update_state(state='PROCESSING', meta={'stage':'sparse'})
-  runSparse(path_join(processingDir, 'match.nvm'), path_join(processingDir, 'sparse.nvm'), gcp=False, shared=True)
+  runSparse(path_join(processingDir, 'match.nvm'), path_join(processingDir, 'sparse.nvm'), gcp=False, shared=True, logger=logger)
 
   self.update_state(state='FINALIZE', meta={'stage':'loading resulting cameras'})
   
   
-  cams = path_join(processingDir, 'sparse.nvm')
+  cams = readNvm(path_join(processingDir, 'sparse.nvm'))
   cams.sort(key=lambda x:x.name)
   
   logger.info(str(cams[0]))

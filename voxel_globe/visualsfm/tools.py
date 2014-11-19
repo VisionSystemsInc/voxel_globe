@@ -1,5 +1,6 @@
 import subprocess
-from subprocess import Popen
+#from subprocess import Popen
+from ..tools.celery import Popen
 
 import numpy as np;
 from osgeo.gdal import GCP
@@ -203,11 +204,17 @@ def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
       fid.write(input.filename + 
                 (' %0.12g'*3) % enu_xyz +'\n');
 
-def runVisualSfm(sfmArg='sfm', args=[]):
-  pid = Popen([program, sfmArg] + args)
-  (stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+def runVisualSfm(sfmArg='sfm', args=[], logger=None):
+  return Popen([program, sfmArg] + args, logger=logger, shell=True)
+  #shell=True is IMPORTANT, or else visual sfm crashes becuase of the stdout/stderr redirect
+  #WHY?! I'm pretty sure he's trying to be clever about something, does something non-standard
+  #AND CRASHES!
 
-def generateMatchPoints(inputs, outputNvm, matchArg=None):
+#  import subprocess
+#  return subprocess.Popen([program, sfmArg] + args)
+  #(stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+
+def generateMatchPoints(inputs, outputNvm, matchArg=None, logger=None):
   ''' Generate match 
       inputs - list of files names
       outputNvm - name of output NVM file '''
@@ -226,9 +233,9 @@ def generateMatchPoints(inputs, outputNvm, matchArg=None):
     args += [matchArg];
   sfmArg+='+skipsfm'
   
-  runVisualSfm(sfmArg, args);
+  runVisualSfm(sfmArg, args, logger).wait();
 
-def runSparse(inputNvm, outputNvm, shared=True, gcp=False):
+def runSparse(inputNvm, outputNvm, shared=True, gcp=False, logger=None):
   sfmArg = 'sfm';
   if shared:
     sfmArg+='+shared'
@@ -236,7 +243,7 @@ def runSparse(inputNvm, outputNvm, shared=True, gcp=False):
     sfmArg+='+gcp'
     #optionally verify inputNvm.gcp exists here
   
-  runVisualSfm(sfmArg, [inputNvm, outputNvm]);
+  runVisualSfm(sfmArg, [inputNvm, outputNvm], logger).wait();
 
 # def runDesnse(inputNvm, outputNvm, shared=True, skipPmvs=False):
 #   sfmArg = 'sfm';
