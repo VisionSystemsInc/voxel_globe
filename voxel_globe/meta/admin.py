@@ -35,6 +35,22 @@ def fk_link(self, obj):
 fk_link.allow_tags = True
 fk_link.short_description = "Link to object"
 
+def list_subclass(self, obj):
+  subclasses = obj.get_subclasses()
+  if subclasses:
+    tags = []
+    for subclass in subclasses:
+      tags.append('<a href="/admin/%s/%s/%s/">%s[%d]</a>' % (subclass._meta.app_label, 
+                                                             subclass._meta.model_name, 
+                                                             subclass.pk,
+                                                             subclass._meta.object_name,
+                                                             subclass.pk))
+    return '<BR>'.join(tags)
+  else:
+    return 'None'
+list_subclass.allow_tags = True
+list_subclass.short_description = "Object Subclasses"
+
 def history_link(self, obj):
   histories = obj._meta.model.objects.filter(objectId=obj.objectId)
   history_ids =  map(lambda x:x['id'], histories.values('id'))
@@ -77,10 +93,10 @@ class VipAdmin(admin.ModelAdmin):
       #This MAY explode, if EVERY instance is kept in memory, it's for dev only, so I'm ok with this
     return super(VipAdmin, self).formfield_for_dbfield(db_field, **kwargs);
   history_link = history_link;
-
+  list_subclass = list_subclass;
   search_fields = ('name','objectId')
 
-  readonly_fields=('history_link', 'service')
+  readonly_fields=('history_link', 'service', 'list_subclass')
 #  formfield_overrides = {django.contrib.gis.db.models.ForeignKey: {'widget':  ModelLinkWidget}};
   
 class TiePointAdmin(VipAdmin):
@@ -95,6 +111,32 @@ admin.site.register(voxel_globe.meta.models.CartesianTransform, CartesianTransfo
 class ControlPointAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.contrib.gis.forms.widgets.OSMWidget }};
 admin.site.register(voxel_globe.meta.models.ControlPoint, ControlPointAdmin)
+
+ct1 = type('CTFromInline', (VipInline,), 
+           {'model':voxel_globe.meta.models.CoordinateTransform,
+            'extra':0,
+            'fk_name':'coordinateSystem_from'})
+ct2 = type('CTFromInline', (VipInline,), 
+           {'model':voxel_globe.meta.models.CoordinateTransform,
+            'extra':0,
+            'fk_name':'coordinateSystem_to'})
+
+class CoordinateSystemsAdmin(VipAdmin):
+###  def test1(self, obj):
+###  pass
+  #inlines=['coordinatetransform_from_set', 'coordinatetransform_to_set'];
+  inlines=[type('CTFromInline', (VipInline,), 
+                {'model':voxel_globe.meta.models.CoordinateTransform,
+                 'extra':0,
+                 'fk_name':'coordinateSystem_from'}),
+           type('CTFromInline', (VipInline,), 
+                {'model':voxel_globe.meta.models.CoordinateTransform,
+                 'extra':0,
+                 'fk_name':'coordinateSystem_to'})
+]
+###  readonly_fields=['get_subclasses', 'test1']
+admin.site.register(voxel_globe.meta.models.CoordinateSystem, CoordinateSystemsAdmin)
+
 
 ''' Register EVERYTHING else '''
 for m in inspect.getmembers(voxel_globe.meta.models):
