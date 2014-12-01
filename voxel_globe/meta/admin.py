@@ -112,15 +112,6 @@ class ControlPointAdmin(VipAdmin):
   formfield_overrides = {django.contrib.gis.db.models.PointField: {'widget': django.contrib.gis.forms.widgets.OSMWidget }};
 admin.site.register(voxel_globe.meta.models.ControlPoint, ControlPointAdmin)
 
-ct1 = type('CTFromInline', (VipInline,), 
-           {'model':voxel_globe.meta.models.CoordinateTransform,
-            'extra':0,
-            'fk_name':'coordinateSystem_from'})
-ct2 = type('CTFromInline', (VipInline,), 
-           {'model':voxel_globe.meta.models.CoordinateTransform,
-            'extra':0,
-            'fk_name':'coordinateSystem_to'})
-
 class CoordinateSystemsAdmin(VipAdmin):
 ###  def test1(self, obj):
 ###  pass
@@ -128,11 +119,15 @@ class CoordinateSystemsAdmin(VipAdmin):
   inlines=[type('CTFromInline', (VipInline,), 
                 {'model':voxel_globe.meta.models.CoordinateTransform,
                  'extra':0,
-                 'fk_name':'coordinateSystem_from'}),
+                 'fk_name':'coordinateSystem_from',
+                 'verbose_name':'From Coordinate transform',
+                 'verbose_name_plural':'From Coordinate transforms'}),
            type('CTFromInline', (VipInline,), 
                 {'model':voxel_globe.meta.models.CoordinateTransform,
                  'extra':0,
-                 'fk_name':'coordinateSystem_to'})
+                 'fk_name':'coordinateSystem_to',
+                 'verbose_name':'To Coordinate transform',
+                 'verbose_name_plural':'To Coordinate transforms'}),
 ]
 ###  readonly_fields=['get_subclasses', 'test1']
 admin.site.register(voxel_globe.meta.models.CoordinateSystem, CoordinateSystemsAdmin)
