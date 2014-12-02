@@ -43,13 +43,14 @@ def add_sample_images(self, imageDir, *args, **kwargs):
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'purdue_cameras_3.txt')) #history = 3
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'purdue_cameras_4.txt')) #history = 4
 
+#This BELONGS in a tools.py file, but I decided I don't care about this code
 def add_sample_cameras(self, filename, srid=4326):
   with open(filename, 'r') as fid:
     history = dict();
     #create a history object for the entire file for the demo
     for line in fid:
       l = eval(line);
-    
+
       pos_filename = l[0];
       base_filename = os.path.splitext(os.path.split(pos_filename)[-1])[0]
       
