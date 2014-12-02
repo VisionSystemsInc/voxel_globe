@@ -160,21 +160,19 @@ def readNvm(inputNvm):
       
   return cameras;
 
-def writeGpsFile(inputs, outputGps):
-  ''' inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+def writeGcpFile(inputs, outputGps):
+  ''' inputs - List of objcets, with .filename and .xyz fields, in degree/meters
       outputGps - output gps filename '''
   with open(outputGps, 'w') as fid:
     for input in inputs:
-      fid.write(input.filename + 
-                (' %0.12g'*3) % (input.llh_xyz[1], 
-                                 input.llh_xyz[0], 
-                                 input.llh_xyz[2]) +'\n');
+      fid.write(input['filename'] + 
+                (' %0.12g'*3) % (input['xyz'][0], input['xyz'][1], input['xyz'][2]) +'\n');
 
 def writeGcpFileEcef(inputs, outputGps):
   ''' Same as writeGpsFile, except ecef
-      inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+      inputs - List of objcets, with .filename and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename '''
-  import voxel_globe.tools.enu
+  import voxel_globe.tools.enu as enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:
@@ -186,12 +184,12 @@ def writeGcpFileEcef(inputs, outputGps):
 
 def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
   ''' Same as writeGpsFile, except enu
-      inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+      inputs - List of objcets, with .filename and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename 
       lat_origin, lon_origin, h_origin 
         - origin of enu cooridinate system, in degrees/meters'''
 
-  import voxel_globe.tools.enu
+  import voxel_globe.tools.enu as enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:
