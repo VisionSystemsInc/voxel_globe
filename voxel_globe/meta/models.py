@@ -25,6 +25,7 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
 
 use_geography_points = False
 
+#Temporary code crutch
 class History(models.Model):
   name = models.TextField();
   history = models.TextField(); #json field
@@ -125,7 +126,7 @@ class VipObjectModel(VipCommonModel):
   service = models.ForeignKey('ServiceInstance');
   name = models.TextField();
   objectId = models.CharField('Object ID', max_length=36);
-  newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='history_set');
+  newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='olderVersion');
   deleted = models.BooleanField('Object deleted', default=False);
 
   class Meta:
@@ -182,7 +183,7 @@ class VipObjectModel(VipCommonModel):
       obj.service_id = self.request.id;
       obj.save();
       return obj.id;
-    return _taskAdd.apply_async(*args, **kwargs)
+    return __taskAdd.apply_async(*args, **kwargs)
 
   ''' I never finished this. Finish when above is fixed ''' 
   # @classmethod
@@ -385,8 +386,13 @@ class CartesianTransform(CoordinateTransform):
 
 ''' The rest '''
 
+class VipManyToManyField(models.ManyToManyField):
+  def history(self, history=None):
+    pass
+    #return querySet with the history version?
+
 class ImageCollection(VipObjectModel):
-  images = models.ManyToManyField('Image');
+  images = VipManyToManyField('Image');
 
 class Image(VipObjectModel):
   fileFormat = models.CharField(max_length=4);

@@ -34,6 +34,10 @@ def add_arducopter_images(self, *args, **kwargs):
   ic = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Mission 2", service_id = self.request.id);
   ic.save();
   ic.images.add(*imageCollection);
+
+  ic = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Mission 2 short", service_id = self.request.id);
+  ic.save();
+  ic.images.add(*imageCollection[101:151]);
    
   with open(path_join(env['VIP_PROJECT_ROOT'], 'images', 'Contractor_Survey_NorthA_List.csv'), 'r') as fid:
     lines = fid.readlines();
@@ -59,5 +63,4 @@ def add_arducopter_images(self, *args, **kwargs):
     tp.service_id = self.request.id;
     tp.save();
   print '********** Populating arducopter cameras **********'     
-  add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'cannon_cameras_1.txt')) #history = 1
-  add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'cannon_cameras_2.txt'), srid=7428) #history = 1
+  add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'cannon_cameras_gps.txt'), srid=7428)

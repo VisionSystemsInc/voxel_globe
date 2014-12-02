@@ -1,8 +1,49 @@
 import numpy
+import voxel_globe.meta.models
+import inspect
+
+def _getHistory(histories):
+  ''' Returns dictionary for specific service ids. This has no real use.
+      You should probably be using getHistory that uses this function '''
+  
+  matches = []
+  for model in inspect.getmembers(voxel_globe.meta.models, inspect.isclass):
+    if issubclass(model[1], voxel_globe.meta.models.VipObjectModel) and model[1] is not voxel_globe.meta.models.VipObjectModel:
+      matches.extend(model[1].objects.filter(service_id__in=histories).values_list('id', 'objectId', 'service_id')) 
+  
+  d = {}
+  for history in histories:
+    tmp = filter(lambda x:x[2]==history, matches)
+    try:
+      id, objectId, tmp = zip(*tmp)
+      d.update(dict(zip(objectId, id)))
+    except ValueError:
+      pass;
+  
+  return d
+
+def getHistory(history=None, include=True):
+  ''' Helper function to create a snapshot in history either just before or
+      after a specific service. Can be specifies by DMO object or id
+      include=True - Include this service ID's history (after)
+      include=False - Do not include this service ID's history (before)
+      
+      Note: This will probably get expensive as the database grows''' 
+  
+  if history is None:
+    return {};
+  
+  if not isinstance(history, voxel_globe.meta.models.ServiceInstance):
+    history = voxel_globe.meta.models.ServiceInstance.objects.get(id=history)
+
+  histories = list(voxel_globe.meta.models.ServiceInstance.objects.filter(finishTime__lt=history.finishTime).order_by('finishTime').values_list('id', flat=True))
+  if include:
+    histories.append(history.id);
+
+  return _getHistory(histories)
 
 def getKTO(image, history=None):
   ''' returns K, T, llh_origin (lon, lat, h)'''
-  import voxel_globe.meta.models
   debug= 0;
   
   camera = image.camera.history(history);
@@ -23,6 +64,7 @@ def getKTO(image, history=None):
     print repr(coordinate_systems)  
   coordinate_transforms = [];
   while len(coordinate_systems[0].coordinatetransform_to_set.all()):
+    #While the first coordinate system has a transform, pre-pend it to the list
     ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].history(history);
     if debug:
       print "CT"
@@ -55,6 +97,50 @@ def getKTO(image, history=None):
     print T_camera_0
     
   return (K_i, T_camera_0, llh);
+
+
+def getKRT(image, origin=None, history=None, eps=1e-9):
+  ''' returns K, T, llh_origin (lon, lat, h)'''
+  camera = image.camera.history(history);
+  K_i = numpy.eye(3);
+  K_i[0,2] = camera.principalPointU;
+  K_i[1,2] = camera.principalPointV;
+  K_i[0,0] = camera.focalLengthU;
+  K_i[1,1] = camera.focalLengthV;
+  
+  llh = [None];
+  
+  coordinate_systems = [camera.coordinateSystem.history(history)]
+  coordinate_transforms = [];
+  while len(coordinate_systems[0].coordinatetransform_to_set.all()):
+    #While the first coordinate system has a transform, pre-pend it to the list
+    ct = coordinate_systems[0].coordinatetransform_to_set.all()[0].history(history);
+
+    #cs = ct.coordinateSystem_from.get_subclasses()[0];
+    cs = ct.coordinateSystem_from.history(history);
+    coordinate_transforms = [ct]+coordinate_transforms;
+    coordinate_systems = [cs] + coordinate_systems;
+  
+  if isinstance(coordinate_systems[0], voxel_globe.meta.models.GeoreferenceCoordinateSystem):
+    llh = list(coordinate_systems[0].history(history).location);
+  
+  T_camera_0 = numpy.eye(4);
+  for ct in coordinate_transforms:
+    T = numpy.eye(4);
+    T[0,0:3] = ct.rodriguezX;
+    T[1,0:3] = ct.rodriguezY;
+    T[2,0:3] = ct.rodriguezZ;
+    T[0:3, 3] = ct.translation;
+    T_camera_0 = T.dot(T_camera_0);
+    
+    R = T_camera_0[0:3, 0:3];
+    t = T_camera_0[0:3, 3:4];
+    
+  if origin:
+    if numpy.abs(numpy.array(llh)-origin).max() > eps:
+      pass#Convert to different origin. WARNING, less stable
+  return (K_i, R, t, llh);
+
 
 def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   ''' Project a set of points xs, ys (Nx1 numpy array each) through the K (3x3) T (4x4) 
