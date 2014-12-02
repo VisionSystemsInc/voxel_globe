@@ -11,3 +11,4 @@ vip.bsh
 *.zip
 local_np2r.*
 tmp
+notebooks/profile
