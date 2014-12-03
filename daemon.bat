@@ -47,7 +47,7 @@ goto usage
 
 :valid_service_name
 set NEXT=usage
-for %%i in (start stop restart status) do (
+for %%i in (start stop restart status killall) do (
   if /i "%%i"=="%2" set NEXT=%2
 )
 
@@ -122,6 +122,36 @@ for %%t in (%TASKS%) do (
       echo this, please contact an administrator.
     )
     set VIP_HTTPD_TEMP_STARTED=
+  )
+)
+goto done
+
+:killall
+for %%t in (%TASKS%) do (
+  schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
+  if /i "%%t"=="rabbitmq" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process erl.exe rabbitmq') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+    taskkill /im %VIP_RABBITMQ_DAEMON% /f
+  )
+  if /i "%%t"=="postgresql" (
+    taskkill /im postgres.exe /f
+  )
+  if /i "%%t"=="celeryd" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe celery') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+  )
+  if /i "%%t"=="flower" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe flower') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+  )
+  if /i "%%t"=="notebook" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe notebook') do (
+      taskkill /fi "PID eq %%i" /f
+    )
   )
 )
 goto done
