@@ -4,7 +4,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 @app.task(base=VipTask, bind=True)
-def runVisualSfm(self, imageCollectionId, history=None):
+def runVisualSfm(self, imageCollectionId, sceneId, history=None):
   from voxel_globe.meta import models
   from ..order.visualsfm.models import Order
   from tempfile import mkdtemp;
@@ -46,7 +46,6 @@ def runVisualSfm(self, imageCollectionId, history=None):
   
 
   localImageList = [];
-  origin = [];
   for x in range(len(imageList)):
     #Download the image locally
     self.update_state(state='INITIALIZE', meta={'stage':'image fetch', 'i':x, 'total':len(imageList)})
@@ -73,7 +72,6 @@ def runVisualSfm(self, imageCollectionId, history=None):
       imageInfo['K_intrinsics'] = K;
       imageInfo['transformation'] = T;
       imageInfo['enu_origin'] = llh;
-      origin.append(llh);
     except:
       pass
 
@@ -96,8 +94,9 @@ def runVisualSfm(self, imageCollectionId, history=None):
 #     #except:
 #       pass  
 
-  origin = numpy.median(origin, axis=0)
-  origin = [-92.215197, 37.648858, 268.599]
+#  origin = numpy.median(origin, axis=0)
+#  origin = [-92.215197, 37.648858, 268.599]
+  origin = list(models.Scene.objects.get(id=sceneId).origin) 
   #find the middle origin, and make it THE origin
   data = []#.name .llh_xyz
   for imageInfo in localImageList:

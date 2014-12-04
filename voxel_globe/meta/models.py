@@ -4,6 +4,8 @@ from django.db.transaction import atomic;
 from django.db.models.fields.related import OneToOneField
 import json;
 
+from . import history_manager
+
 from uuid import uuid4;
 
 # Create your models here.
@@ -24,6 +26,8 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
               ('c', 'Cylinder'), ('pc', 'Point Cloud'))
 
 use_geography_points = False
+
+historyManager = history_manager.Histories();
 
 #Temporary code crutch
 class History(models.Model):
@@ -440,3 +444,8 @@ class ControlPoint(VipObjectModel):
   #apparentLongitude = models.FloatField()
   #apparentAltitude = models.FloatField()
 
+class Scene(VipObjectModel):
+  origin = models.PointField(dim=3, null=False, blank=False)
+  
+  def __unicode__(self):
+    return '%s [%s]' % (self.name, self.origin)

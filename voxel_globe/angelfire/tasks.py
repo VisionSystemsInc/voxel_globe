@@ -27,8 +27,16 @@ def add_sample_images(self, imageDir, *args, **kwargs):
 
     img = voxel_globe.meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
                              numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
-                             imageUrl='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
-                             originalImageUrl='http://%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                             env['VIP_IMAGE_SERVER_HOST'], 
+                                                             env['VIP_IMAGE_SERVER_PORT'], 
+                                                             env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                             image),
+                             originalImageUrl='%s://%s:%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                                        env['VIP_IMAGE_SERVER_HOST'], 
+                                                                        env['VIP_IMAGE_SERVER_PORT'], 
+                                                                        env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                                        image),
                              service_id = self.request.id);
     img.save();
     

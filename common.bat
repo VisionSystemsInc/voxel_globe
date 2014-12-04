@@ -109,6 +109,9 @@ set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
 set VIP_CELERY_APP=voxel_globe.tasks
 set VIP_CELERY_CONFIG_MODULE=voxel_globe.celeryconfig
 
+set VIP_FLOWER_HOST=localhost
+set VIP_FLOWER_PORT=5555
+
 set VIP_NOTEBOOK_RUN_DIR=%VIP_CELERY_PROCESSORS%
 
 REM ##### RABITMQ Settings ##### 
@@ -121,14 +124,13 @@ set VIP_RABBITMQ_USER=npr_rabbitmq
 set VIP_RABBITMQ_MNESIA_BASE=%VIP_DATABASE_DIR%
 
 REM ##### Image Server Settings #####
+set VIP_IMAGE_SERVER_PROTOCOL=http
 set VIP_IMAGE_SERVER_HOST=localhost
 set VIP_IMAGE_SERVER_PORT=80
 set VIP_IMAGE_SERVER_URL_PATH=images
   REM Where are the images served from
 set VIP_IMAGE_SERVER_ROOT=%VIP_PROJECT_ROOT%/images
   REM Where are the images physically/virtually?
-
-set VIP_IMAGE_SERVER_AUTHORITY=%VIP_IMAGE_SERVER_HOST%:%VIP_IMAGE_SERVER_PORT%
 
 REM ##### Apache HTTPD Settings ##### 
 set VIP_HTTPD_CONF=%VIP_CONF_DIR%/httpd.conf

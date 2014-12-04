@@ -38,7 +38,7 @@ if "%1"=="start_httpd" (
 ) else if "%1"=="start_postgresql" (
   postgres -D %VIP_POSTGRESQL_DATABASE% %VIP_POSTGRESQL_SERVER_CREDENTIALS% > %VIP_LOG_DIR%/postgresql_out.log 2> %VIP_LOG_DIR%/postgresql_err.log
 ) else if "%1"=="start_flower" (
-  flower > %VIP_LOG_DIR%/flower_out.log 2> %VIP_LOG_DIR%/flower_err.log
+  flower --address=0.0.0.0 --port=%VIP_FLOWER_PORT%  > %VIP_LOG_DIR%/flower_out.log 2> %VIP_LOG_DIR%/flower_err.log
 ) else if "%1"=="start_notebook" (
   ipython notebook --notebook-dir=%VIP_NOTEBOOK_RUN_DIR% --no-browser --port=%VIP_NOTEBOOK_PORT% --ip=%VIP_NOTEBOOK_IP% --profile-dir=%VIP_NOTEBOOK_PROFILE_DIR% > %VIP_LOG_DIR%/notebook_out.log 2> %VIP_LOG_DIR%/notebook_err.log
 ) else (

@@ -24,8 +24,16 @@ def add_arducopter_images(self, *args, **kwargs):
       raise Exception('Already exists');
     img = voxel_globe.meta.models.Image.create(name="Arducopter Mission 2 Frame:%s" % frameNum, imageWidth=4096, imageHeight=2160, 
                              numberColorBands=3, pixelFormat='b', fileFormat='zoom', 
-                             imageUrl='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
-                             originalImageUrl='http://%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                             env['VIP_IMAGE_SERVER_HOST'], 
+                                                             env['VIP_IMAGE_SERVER_PORT'], 
+                                                             env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                             image),
+                             originalImageUrl='%s://%s:%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                                        env['VIP_IMAGE_SERVER_HOST'], 
+                                                                        env['VIP_IMAGE_SERVER_PORT'], 
+                                                                        env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                                        image),
                              service_id = self.request.id);
     img.save();
      
@@ -62,5 +70,9 @@ def add_arducopter_images(self, *args, **kwargs):
                                          apparentPoint=point)
     tp.service_id = self.request.id;
     tp.save();
+
   print '********** Populating arducopter cameras **********'     
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'cannon_cameras_gps.txt'), srid=7428)
+  
+  voxel_globe.meta.models.Scene.create(name="Arducopter Mission 2 origin", service_id = self.request.id,
+                                       origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % (7428, -92.215197, 37.648858, 300)).save()

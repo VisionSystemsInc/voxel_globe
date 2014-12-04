@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>Choose Scene for processing</title>
+</head>
+<body>
+{% if scene_list %}
+    <ul>
+    {% for scene in scene_list %}
+        <li><a href="{% url 'order_visualsfm:make_order_3' image_collection_id scene.id %}">{{ scene.name }} - [{{ scene.id }}] @ {{ scene.origin }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No image collections are available.</p>
+{% endif %}
+</body>
+</html>
