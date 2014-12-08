@@ -8,5 +8,6 @@ urlpatterns = patterns('',
     url(r'^search$', views.search, name='search'),
     url(r'^(?P<lat>-?\d+.?\d*)/result2/$', views.result2, name='result2'),
     url(r'^result/$', views.result, name='result'),
+    url(r'^area$', views.area, name='area'),
 )
 

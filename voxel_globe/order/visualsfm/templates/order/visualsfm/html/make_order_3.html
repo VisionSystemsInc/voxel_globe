@@ -1,12 +1,12 @@
 <html>
 <head>
-<title>blah</title>
+<title>Ordered</title>
 </head>
 <body>
 {% if image_list %}
-    I will process:
+    Task {{ task_id }} (<a href="{% url 'order_visualsfm:order_status' task_id %}">get task status</a>) started using origin {{ origin }} to process:
     <ul>
-    {% for image in image_list %}
+    {% for image in image_list.all %}
         <li>{{ image.name }} - [{{ image.id }}]</li>
     {% endfor %}
     </ul>

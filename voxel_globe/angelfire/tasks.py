@@ -22,9 +22,21 @@ def add_sample_images(self, imageDir, *args, **kwargs):
     other = image[-16:-11]
     frameNum = image[-11:-8]
     image = os.path.basename(os.path.dirname(image));
+    if voxel_globe.meta.models.Image.objects.filter(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum)):
+      raise Exception('Already exists');
+
     img = voxel_globe.meta.models.Image.create(name="Purdue Data Date:%s Sequence:%s Camera:%d Frame:%s" % (date, other, cam, frameNum), imageWidth=3248, imageHeight=4872, 
                              numberColorBands=1, pixelFormat='b', fileFormat='zoom', 
-                             imageURL='http://%s/%s/%s/' % (env['VIP_IMAGE_SERVER_AUTHORITY'], env['VIP_IMAGE_SERVER_URL_PATH'], image),
+                             imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                             env['VIP_IMAGE_SERVER_HOST'], 
+                                                             env['VIP_IMAGE_SERVER_PORT'], 
+                                                             env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                             image),
+                             originalImageUrl='%s://%s:%s/%s/%s.jpg' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
+                                                                        env['VIP_IMAGE_SERVER_HOST'], 
+                                                                        env['VIP_IMAGE_SERVER_PORT'], 
+                                                                        env['VIP_IMAGE_SERVER_URL_PATH'], 
+                                                                        image),
                              service_id = self.request.id);
     img.save();
     
@@ -39,13 +51,14 @@ def add_sample_images(self, imageDir, *args, **kwargs):
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'purdue_cameras_3.txt')) #history = 3
   add_sample_cameras(self, path_join(env['VIP_PROJECT_ROOT'], 'images', 'purdue_cameras_4.txt')) #history = 4
 
+#This BELONGS in a tools.py file, but I decided I don't care about this code
 def add_sample_cameras(self, filename, srid=4326):
   with open(filename, 'r') as fid:
     history = dict();
     #create a history object for the entire file for the demo
     for line in fid:
       l = eval(line);
-    
+
       pos_filename = l[0];
       base_filename = os.path.splitext(os.path.split(pos_filename)[-1])[0]
       
@@ -131,7 +144,7 @@ def add_sample_cameras(self, filename, srid=4326):
         
       #No longer necessary with the Django inspired "Leave the FK alone" technique
 
-      images = voxel_globe.meta.models.Image.objects.filter(imageURL__contains=base_filename);
+      images = voxel_globe.meta.models.Image.objects.filter(imageUrl__contains=base_filename);
 
       for img in images:
         #img.service_id = self.request.id;

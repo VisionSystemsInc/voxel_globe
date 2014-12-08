@@ -142,7 +142,7 @@ TiePointMain.prototype.chooseVideoToDisplay = function(videoNdx) {
 					var img = {
 						id : data[i].pk,
 						name : data[i].fields.name,
-						url : data[i].fields.imageURL,
+						url : data[i].fields.imageUrl,
 						width : data[i].fields.imageWidth,
 						height : data[i].fields.imageHeight
 					};
@@ -241,7 +241,7 @@ TiePointMain.prototype.pullDataAndUpdate = function() {
 		data : {},
 		success : function(data) {
 			// alert("received json data...http://" + window.location.host +
-			// data[0].fields.imageURL);
+			// data[0].fields.imageUrl);
 			for (var i = 0; i < data.length; i++) {
 				var geoPt = {
 					id : data[i].pk,
@@ -362,9 +362,9 @@ TiePointMain.prototype.initializeDataAndEvents = function() {
 		that.displayImage(that.displayingImage);
 	});
 
-	$('#historySelection').change(function(e) {
-		that.displayImage(that.displayingImage);
-	});
+//	$('#historySelection').change(function(e) {
+//		that.displayImage(that.displayingImage);
+//	});
 
 	$('#frustumSize').change(function(e) {
 		that.displayImage(that.displayingImage);
@@ -389,21 +389,21 @@ TiePointMain.prototype.initializeDataAndEvents = function() {
 		$('#showAdvancedOptions').toggle(true);
 	});
 
-	$('#estimateCameraLocs').click(function (e) {
-		var items = document.getElementById('historySelection');
-		var selectedHistory = parseInt(items.options[items.selectedIndex].value);
-		console.log("Pressing the magic button, moving through history..." + selectedHistory);		
-		$('#historySelection option[value="' + selectedHistory + '"]').prop("selected", "false");
-		if (selectedHistory == 4) {
-			selectedHistory = 1;
-		} else {
-			selectedHistory += 1;
-		}
-		$('#historySelection').val(selectedHistory);
-		console.log("Pressing the magic button, moving through history..." + selectedHistory);
-		
-		that.displayImage(that.displayingImage);
-	})
+//	$('#estimateCameraLocs').click(function (e) {
+//		var items = document.getElementById('historySelection');
+//		var selectedHistory = parseInt(items.options[items.selectedIndex].value);
+//		console.log("Pressing the magic button, moving through history..." + selectedHistory);		
+//		$('#historySelection option[value="' + selectedHistory + '"]').prop("selected", "false");
+//		if (selectedHistory == 4) {
+//			selectedHistory = 1;
+//		} else {
+//			selectedHistory += 1;
+//		}
+//		$('#historySelection').val(selectedHistory);
+//		console.log("Pressing the magic button, moving through history..." + selectedHistory);
+//		
+//		that.displayImage(that.displayingImage);
+//	})
 
 	$('#clearSelectedControlPoints').click(function (e) {
 		for (var id in that.controlPoints) {

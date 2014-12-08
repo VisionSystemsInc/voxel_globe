@@ -4,6 +4,8 @@ from django.db.transaction import atomic;
 from django.db.models.fields.related import OneToOneField
 import json;
 
+from . import history_manager
+
 from uuid import uuid4;
 
 # Create your models here.
@@ -25,6 +27,9 @@ MODEL_TYPE = (('vol', 'Volumentric'), ('ph', 'Polyhedral'), ('pl', 'Plane'),
 
 use_geography_points = False
 
+historyManager = history_manager.Histories();
+
+#Temporary code crutch
 class History(models.Model):
   name = models.TextField();
   history = models.TextField(); #json field
@@ -125,7 +130,7 @@ class VipObjectModel(VipCommonModel):
   service = models.ForeignKey('ServiceInstance');
   name = models.TextField();
   objectId = models.CharField('Object ID', max_length=36);
-  newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='history_set');
+  newerVersion = models.ForeignKey('self', null=True, blank=True, related_name='olderVersion');
   deleted = models.BooleanField('Object deleted', default=False);
 
   class Meta:
@@ -182,7 +187,7 @@ class VipObjectModel(VipCommonModel):
       obj.service_id = self.request.id;
       obj.save();
       return obj.id;
-    return _taskAdd.apply_async(*args, **kwargs)
+    return __taskAdd.apply_async(*args, **kwargs)
 
   ''' I never finished this. Finish when above is fixed ''' 
   # @classmethod
@@ -385,8 +390,13 @@ class CartesianTransform(CoordinateTransform):
 
 ''' The rest '''
 
+class VipManyToManyField(models.ManyToManyField):
+  def history(self, history=None):
+    pass
+    #return querySet with the history version?
+
 class ImageCollection(VipObjectModel):
-  images = models.ManyToManyField('Image');
+  images = VipManyToManyField('Image');
 
 class Image(VipObjectModel):
   fileFormat = models.CharField(max_length=4);
@@ -394,9 +404,10 @@ class Image(VipObjectModel):
   imageWidth = models.PositiveIntegerField('Image Width (pixels)');
   imageHeight = models.PositiveIntegerField('Image Height (pixels)');
   numberColorBands = models.PositiveIntegerField('Number of Color Bands');
-  #imageURL = models.TextField(unique=True);
+  #imageUrl = models.TextField(unique=True);
   #I can't use unique with the current precedence implementation
-  imageURL = models.TextField();
+  imageUrl = models.TextField(); #The url for Open Layers
+  originalImageUrl = models.TextField(); #The url to access original image, untouched. 
   camera = models.ForeignKey('Camera', null=True, blank=True);
   #coordinateSystem = models.ForeignKey('CoordinateSystem', null=True, blank=True);
   #Question for Joe: Point at the camera, or point at the oppisite end of the
@@ -433,3 +444,8 @@ class ControlPoint(VipObjectModel):
   #apparentLongitude = models.FloatField()
   #apparentAltitude = models.FloatField()
 
+class Scene(VipObjectModel):
+  origin = models.PointField(dim=3, null=False, blank=False)
+  
+  def __unicode__(self):
+    return '%s [%s]' % (self.name, self.origin)

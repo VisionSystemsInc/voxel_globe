@@ -244,10 +244,25 @@ if __name__=='__main__':
                               'AUTHORITY["EPSG","5773"]]]]')
 
 
+  print '********** Purging previous migrations in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
+  for rootDir, dirs, files in os.walk(env['VIP_DJANGO_PROJECT']):
+    if rootDir.endswith('migrations'):
+      for filename in files:
+        if filename.endswith('.pyc'):
+          os.remove(path_join(rootDir, filename))
+        if filename.endswith('.py') and filename[4] == '_':
+          try:
+            int(filename[0:4])
+            os.remove(path_join(rootDir, filename))
+          except:
+            pass;
+
+  print '********** Making new migrations for %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
+  management.call_command('makemigrations', interactive=False, stdout=logStdOut)
   print '********** Creating django tables in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
   management.call_command('migrate', interactive=False, stdout=logStdOut)
   #syncdb will become migrate in django 1.7
-  
+
   print '********** Creating Djanjo Superuser %s **********' % env['VIP_DJANGO_USER']
   from django.contrib.auth.models import User as DjangoUser; 
   #Chicken egg again

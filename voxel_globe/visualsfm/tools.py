@@ -1,5 +1,6 @@
 import subprocess
-from subprocess import Popen
+#from subprocess import Popen
+from ..tools.celery import Popen
 
 import numpy as np;
 from osgeo.gdal import GCP
@@ -159,21 +160,19 @@ def readNvm(inputNvm):
       
   return cameras;
 
-def writeGpsFile(inputs, outputGps):
-  ''' inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+def writeGcpFile(inputs, outputGps):
+  ''' inputs - List of objcets, with .filename and .xyz fields, in degree/meters
       outputGps - output gps filename '''
   with open(outputGps, 'w') as fid:
     for input in inputs:
-      fid.write(input.filename + 
-                (' %0.12g'*3) % (input.llh_xyz[1], 
-                                 input.llh_xyz[0], 
-                                 input.llh_xyz[2]) +'\n');
+      fid.write(input['filename'] + 
+                (' %0.12g'*3) % (input['xyz'][0], input['xyz'][1], input['xyz'][2]) +'\n');
 
 def writeGcpFileEcef(inputs, outputGps):
   ''' Same as writeGpsFile, except ecef
-      inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+      inputs - List of objcets, with .filename and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename '''
-  import voxel_globe.tools.enu
+  import voxel_globe.tools.enu as enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:
@@ -184,13 +183,13 @@ def writeGcpFileEcef(inputs, outputGps):
                 (' %0.12g'*3) % ecef_xyz +'\n');
 
 def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
-  ''' Same as writeGpsFile, except ecef
-      inputs - List of objcets, with .name and .llh_xyz fields, in degree/meters
+  ''' Same as writeGpsFile, except enu
+      inputs - List of objcets, with .filename and .llh_xyz fields, in degree/meters
       outputGps - output gcp filename 
       lat_origin, lon_origin, h_origin 
         - origin of enu cooridinate system, in degrees/meters'''
 
-  import voxel_globe.tools.enu
+  import voxel_globe.tools.enu as enu
 
   with open(outputGps, 'w') as fid:
     for input in inputs:
@@ -203,11 +202,17 @@ def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
       fid.write(input.filename + 
                 (' %0.12g'*3) % enu_xyz +'\n');
 
-def runVisualSfm(sfmArg='sfm', args=[]):
-  pid = Popen([program, sfmArg] + args)
-  (stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+def runVisualSfm(sfmArg='sfm', args=[], logger=None):
+  return Popen([program, sfmArg] + args, logger=logger, shell=True)
+  #shell=True is IMPORTANT, or else visual sfm crashes becuase of the stdout/stderr redirect
+  #WHY?! I'm pretty sure he's trying to be clever about something, does something non-standard
+  #AND CRASHES!
 
-def generateMatchPoints(inputs, outputNvm, matchArg=None):
+#  import subprocess
+#  return subprocess.Popen([program, sfmArg] + args)
+  #(stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+
+def generateMatchPoints(inputs, outputNvm, matchArg=None, logger=None):
   ''' Generate match 
       inputs - list of files names
       outputNvm - name of output NVM file '''
@@ -226,9 +231,9 @@ def generateMatchPoints(inputs, outputNvm, matchArg=None):
     args += [matchArg];
   sfmArg+='+skipsfm'
   
-  runVisualSfm(sfmArg, args);
+  runVisualSfm(sfmArg, args, logger).wait();
 
-def runSparse(inputNvm, outputNvm, shared=True, gcp=False):
+def runSparse(inputNvm, outputNvm, shared=True, gcp=False, logger=None):
   sfmArg = 'sfm';
   if shared:
     sfmArg+='+shared'
@@ -236,7 +241,7 @@ def runSparse(inputNvm, outputNvm, shared=True, gcp=False):
     sfmArg+='+gcp'
     #optionally verify inputNvm.gcp exists here
   
-  runVisualSfm(sfmArg, [inputNvm, outputNvm]);
+  runVisualSfm(sfmArg, [inputNvm, outputNvm], logger).wait();
 
 # def runDesnse(inputNvm, outputNvm, shared=True, skipPmvs=False):
 #   sfmArg = 'sfm';

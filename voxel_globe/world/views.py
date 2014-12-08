@@ -85,3 +85,13 @@ def result2(request, lat, lon='33.00'):
   s += '\n'.join(map(lambda x:x.name, countriesNearUS))'''
 
 #  return HttpResponse(s)
+
+def area(request, id=1):
+  if request.REQUEST.has_key('id'):
+    id=int(request.REQUEST['id'])
+  t = tasks.getAreaLong.delay(id);
+  t.wait(); 
+  area2 = t.result;
+  return HttpResponse('%d is %d (whatever units)' % (id, area2))
+
+

@@ -1,12 +1,12 @@
 <html>
 <head>
-<title>blah</title>
+<title>Choose Image Collection</title>
 </head>
 <body>
 {% if image_collection_list %}
     <ul>
     {% for image_collection in image_collection_list %}
-        <li><a href="{% url 'order_visualsfm:order' image_collection.id %}">{{ image_collection.name }} - [{{ image_collection.id }}]</a></li>
+        <li><a href="{% url 'order_visualsfm:make_order_2' image_collection.id %}">{{ image_collection.name }} - [{{ image_collection.id }}]</a></li>
     {% endfor %}
     </ul>
 {% else %}
