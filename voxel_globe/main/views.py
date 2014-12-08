@@ -1,10 +1,14 @@
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-
 # Create your views here. Mostly placeholders
+from django.contrib.auth.models import User
 
 def index(request):
-    return render(request, 'main/html/index.html')
+    try:
+      user = User.objects.get(username=request.META['REMOTE_USER'], is_active=True)
+    except:
+      user= None
+    return render(request, 'main/html/index.html',
+                  {'user':user})
 
 def voxelCreator(request):
     return render(request, 'main/html/voxelCreator.html')

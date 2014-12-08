@@ -53,7 +53,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 ) #Staticfiles MUST come last, or else it might skip some files
   #at collectstatic deploy time!!!! This is one of the rare times
-  #it matters
+  #order matters
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -63,7 +63,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'voxel_globe.nga.middleware.RequireLoginMiddleware',
+#    'voxel_globe.nga.middleware.RequireLoginMiddleware',
+#I'm disabling this now in favor for Basic Apache authorization
+#But this only works as long as the images server is the same
+#when the image server separates, I will probably need something
+#like oauth2
 )
 
 ROOT_URLCONF = 'voxel_globe.nga.urls'

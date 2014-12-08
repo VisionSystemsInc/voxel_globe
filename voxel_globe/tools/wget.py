@@ -3,8 +3,14 @@ import urllib2
 from StringIO import StringIO
 import zlib
 
-def download(url, filename, chunkSize=2**20):
+def download(url, filename, chunkSize=2**20, user=None, password=None, realm=None, uri=None):
   #start simple, add feautres as time evolves
+  if user and password and realm and uri:
+    auth_handler = urllib2.HTTPBasicAuthHandler()
+    auth_handler.add_password(realm=realm, uri=uri, user=user, passwd=password)
+    opener = urllib2.build_opener(auth_handler)
+    urllib2.install_opener(opener)
+  
   request = urllib2.Request(url);
   request.add_header('Accept-encoding', 'gzip');
   response = urllib2.urlopen(request);

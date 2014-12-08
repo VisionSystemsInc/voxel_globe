@@ -52,7 +52,10 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
     imageName = imageList[x].originalImageUrl;
     extension = os.path.splitext(imageName)[1]
     localName = path_join(processingDir, 'frame_%05d%s' % (x+1, extension)); 
-    wget(imageName, localName)
+    wget(imageName, localName, realm='Voxel Globe', 
+         uri='%s://%s' % (env['VIP_IMAGE_SERVER_PROTOCOL'],
+                          env['VIP_IMAGE_SERVER_HOST']),
+         user='npr', password='vsi')
 
     #Convert the image if necessary    
     if extension not in ['.jpg', '.pgm', '.ppm']:
