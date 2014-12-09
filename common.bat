@@ -151,6 +151,7 @@ REM APACHE is started in my environment, so I'm sure this is why everything is w
 set VIP_WSGI_PYTHON_PATH=%VIP_DJANGO_PROJECT%;%VIP_CELERY_PROCESSORS%
 REM For the initial wsgi.py file and all Celery processors
 set VIP_WSGI_SCRIPT_ALIAS=%VIP_DJANGO_SITE%/wsgi.py
+set VIP_WSGI_ACCESS_SCRIPT=%VIP_DJANGO_SITE%/auth.py
 
 set VIP_UTIL_DIR=%VIP_INSTALL_DIR%/utils
 
