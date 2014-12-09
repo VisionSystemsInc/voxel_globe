@@ -63,11 +63,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'voxel_globe.nga.middleware.RequireLoginMiddleware',
-#I'm disabling this now in favor for Basic Apache authorization
-#But this only works as long as the images server is the same
-#when the image server separates, I will probably need something
-#like oauth2
+    'voxel_globe.nga.middleware.RequireLoginMiddleware',
 )
 
 ROOT_URLCONF = 'voxel_globe.nga.urls'
