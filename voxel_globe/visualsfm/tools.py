@@ -4,8 +4,7 @@ from ..tools.celery import Popen
 
 import numpy as np;
 from osgeo.gdal import GCP
-
-program = r'd:\visualsfm\VisualSFM_windows_cuda_64bit\visualsfm.exe';
+import os
 
 class Image(object):
   def __init__(self, line=None, name=None, focalLength=None, 
@@ -203,7 +202,7 @@ def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
                 (' %0.12g'*3) % enu_xyz +'\n');
 
 def runVisualSfm(sfmArg='sfm', args=[], logger=None):
-  return Popen([program, sfmArg] + args, logger=logger, shell=True)
+  return Popen([runVisualSfm.program, sfmArg] + args, logger=logger, shell=True)
   #shell=True is IMPORTANT, or else visual sfm crashes becuase of the stdout/stderr redirect
   #WHY?! I'm pretty sure he's trying to be clever about something, does something non-standard
   #AND CRASHES!
@@ -211,6 +210,7 @@ def runVisualSfm(sfmArg='sfm', args=[], logger=None):
 #  import subprocess
 #  return subprocess.Popen([program, sfmArg] + args)
   #(stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+runVisualSfm.program = os.environ['VIP_VISUALSFM_EXE'] 
 
 def generateMatchPoints(inputs, outputNvm, matchArg=None, logger=None):
   ''' Generate match 

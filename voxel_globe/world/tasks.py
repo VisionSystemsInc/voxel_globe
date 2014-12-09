@@ -1,6 +1,14 @@
 from ..common_tasks import app
 import voxel_globe.world.models
 
+@app.task(bind=True)
+def sleeper(self, seconds):
+  import time
+  for s in xrange(seconds):
+    self.update_state(state='SLEEPING', meta={'t':s, 'total':seconds})
+    time.sleep(1);
+  return s;
+
 @app.task
 def getArea(id):
   from celery.utils.log import get_task_logger
