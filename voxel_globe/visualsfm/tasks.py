@@ -4,7 +4,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 @app.task(base=VipTask, bind=True)
-def runVisualSfm(self, imageCollectionId, sceneId, history=None):
+def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   from voxel_globe.meta import models
   from ..order.visualsfm.models import Order
   from tempfile import mkdtemp;
@@ -21,6 +21,8 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
   import numpy
   
   from django.contrib.gis.geos import Point
+  
+  from distutils.dir_util import remove_tree
 
   self.update_state(state='INITIALIZE', meta={'stage':0})
 
@@ -52,10 +54,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
     imageName = imageList[x].originalImageUrl;
     extension = os.path.splitext(imageName)[1]
     localName = path_join(processingDir, 'frame_%05d%s' % (x+1, extension)); 
-    wget(imageName, localName, realm='Voxel Globe', 
-         uri='%s://%s' % (env['VIP_IMAGE_SERVER_PROTOCOL'],
-                          env['VIP_IMAGE_SERVER_HOST']),
-         user='npr', password='vsi')
+    wget(imageName, localName, secret=True)
 
     #Convert the image if necessary    
     if extension not in ['.jpg', '.pgm', '.ppm']:
@@ -83,7 +82,9 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
 #  filenames = list(imageList.values_list('imageUrl'))
 #  logger.info('The image list 0is %s' % filenames)
 
-  self.update_state(state='PROCESSING', meta={'stage':'generate match points'})
+  self.update_state(state='PROCESSING', meta={'stage':'generate match points', 
+                                              'processingDir':processingDir,
+                                              'total':len(imageList)})
   generateMatchPoints(map(lambda x:x['localName'], localImageList),
                       matchFilename, logger=logger)
   
@@ -140,7 +141,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
   writeGcpFile(data, gcpFilename)
 
   #runSparse(r'd:\visualsfm\arducopter\match.nvm', r'd:\visualsfm\arducopter\sparse.nvm', gcp=True, shared=True)
-  self.update_state(state='PROCESSING', meta={'stage':'sparse'})
+  self.update_state(state='PROCESSING', meta={'stage':'sparse SFM'})
   runSparse(matchFilename, sparceFilename, gcp=True, shared=True, logger=logger)
 
   self.update_state(state='FINALIZE', meta={'stage':'loading resulting cameras'})
@@ -205,7 +206,11 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
                     coordinateSystem=cs);
       camera.save();
       image.update(camera = camera);
-  
+
   logger.info(str(cams[0]))
+
+  if cleanup:
+    logger.info('Removing proccessing dir')
+    remove_tree(processingDir);
 
   return oid.id;

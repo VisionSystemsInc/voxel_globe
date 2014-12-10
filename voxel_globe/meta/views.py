@@ -25,7 +25,6 @@ class AutoViewSet(rest_framework.mixins.CreateModelMixin,
                   rest_framework.mixins.ListModelMixin,
                   rest_framework.viewsets.GenericViewSet):
   filter_backends = (rest_framework.filters.DjangoFilterBackend,);
-  filter_fields = map(lambda x: x[0].name, voxel_globe.meta.models.TiePoint._meta.get_fields_with_model());
   
   def destroy(self, request, pk=None, *args, **kwargs):
     ''' Destroy that sets delete to true, but does not actually delete to support history'''
@@ -70,7 +69,11 @@ class AutoViewSet(rest_framework.mixins.CreateModelMixin,
 
 
 def ViewSetFactory(model, serilizer):
-  return type('AutoViewSet_%s' % model._meta.model_name, (AutoViewSet,), {'queryset':model.objects.all(), 'serializer_class':serilizer})
+  return type('AutoViewSet_%s' % model._meta.model_name, 
+              (AutoViewSet,), 
+              {'queryset':model.objects.all(), 
+               'serializer_class':serilizer,
+               'filter_fields': map(lambda x: x[0].name, model._meta.get_fields_with_model())})
   
 
 #Define custom view sets here

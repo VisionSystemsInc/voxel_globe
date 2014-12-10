@@ -43,12 +43,12 @@
 
 <body>    
 	<div id="pageTitle" class="banner">
-	    <div style="display:inline-block;padding: 0px 10px;vertical-align:top;"><img height="40px" src="{% static 'world/images/VSI_Logo.png' %}"/></div>
-        <div style="display:inline-block;vertical-align:top;">{% block pageTitle %}{% endblock %}</div>        
+	    <div style="display:inline-block;padding: 0px 10px;vertical-align:top;"><a href="{% url 'main:index' %}"><img height="40px" src="{% static 'world/images/VSI_Logo.png' %}"/></a></div>
+        <div style="display:inline-block;vertical-align:top;"><h2>{% block pageTitle %}{% endblock %}</h2></div>        
         <div id="debugOptions" style="display:inline-block; position:absolute; top: 10px; right:200px;vertical-align:top;">
             {% block debugOptions %}{% endblock %}
         </div>      
-		{% if user.is_active and user.is_staff %}
+		{% if user.is_active %}
 		<div id="user-tools">
             {% block welcome-msg %}
                 'Welcome'
@@ -60,9 +60,9 @@
                     <a href="{{ docsroot }}">Documentation</a> /
                 {% endif %}
                 {% if user.has_usable_password %}
-                <a href="{% url 'admin:password_change' %}">Change password</a> /
+                <a href="{% url 'main:password_change' %}">Change password</a> /
                 {% endif %}
-                <a href="{% url 'admin:logout' %}">Log out</a>
+                <a href="{% url 'main:logout' %}">Log out</a>
             {% endblock %}
         </div>
 		{% endif %}

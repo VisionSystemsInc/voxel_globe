@@ -7,7 +7,15 @@ class VipModelSerializer(serializers_gis.GeoModelSerializer):
     kwargs.pop('force_update', None);
     #This is something rest_framework adds for the update, but
     #Given the nature of how I update, this is not needed.
-    obj.update(**kwargs)
+    kwargs.pop('force_insert', None);
+    #This too is for advanced use, so I will ignore it for now
+
+    if obj.pk is None: #if this is None
+      #This is creating a new object
+      obj.save(**kwargs)
+    else:
+      #else this is an update
+      obj.update(**kwargs)
 
 def serializerFactory(model):
   return type('AutoSerializer_%s' % model._meta.model_name, (VipModelSerializer,), 

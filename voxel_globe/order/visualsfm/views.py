@@ -46,7 +46,7 @@ def make_order_3(request, image_collection_id, scene_id):
 
   history = getHistory(request.REQUEST.get('history', None))
 
-  t = tasks.runVisualSfm.apply_async(args=(image_collection_id, scene_id, history))
+  t = tasks.runVisualSfm.apply_async(args=(image_collection_id, scene_id, True, history))
 
   #Crap ui filler   
   image_collection = models.ImageCollection.objects.get(id=image_collection_id);
@@ -64,15 +64,25 @@ def make_order_3(request, image_collection_id, scene_id):
   
 def order_status(request, task_id):
   import urllib2, json, os
+  from celery.result import AsyncResult
   
-  u = urllib2.urlopen('http://%s:%s/api/task/info/%s' % (os.environ['VIP_FLOWER_HOST'], 
-                                                         os.environ['VIP_FLOWER_PORT'], 
-                                                         task_id))
+  task = AsyncResult(task_id);
   
-  status = json.loads(u.read());
-  status['task_id'] = status['task-id']
-  #jinja2 limitation 
-
+  #u = urllib2.urlopen('http://%s:%s/api/task/info/%s' % (os.environ['VIP_FLOWER_HOST'], 
+  #                                                       os.environ['VIP_FLOWER_PORT'], 
+  #                                                       task_id))
+  
+  #status = json.loads(u.read());
+  #status['task_id'] = status['task-id']
+  #jinja2 limitation
+  
+  status = {'task': task};
+  
+  if task.state == 'PROCESSING' and task.result['stage'] == 'generate match points':
+    from glob import glob
+    status['mat'] = len(glob(os.path.join(task.result['processingDir'], '*.mat')))
+    status['sift'] = len(glob(os.path.join(task.result['processingDir'], '*.sift')))
+  
   return render(request, 'order/visualsfm/html/order_status.html',
                 status)
   #return HttpResponse('Task %s\n%s' % (task_id, status))

@@ -14,6 +14,7 @@ from django.contrib.gis.utils import LayerMapping
 from django.contrib.gis.gdal import DataSource
 from django.core import management
 import django
+import pickle
 
 logStdOut = None;
 logStdErr = None;
@@ -263,19 +264,23 @@ if __name__=='__main__':
   management.call_command('migrate', interactive=False, stdout=logStdOut)
   #syncdb will become migrate in django 1.7
 
-  print '********** Creating Djanjo Superuser %s **********' % env['VIP_DJANGO_USER']
+  print '********** Creating Djanjo Users %s **********'
   from django.contrib.auth.models import User as DjangoUser; 
   #Chicken egg again
   with open(env['VIP_DJANGO_PASSWD'], 'rb') as fid:
-    pw = fid.readline().strip()
-    fid.close();
-  try:
-    user = DjangoUser.objects.create_superuser(env['VIP_DJANGO_USER'], env['VIP_EMAIL'], 'changeme');
-  except:
-    user = DjangoUser.objects.get(username=env['VIP_DJANGO_USER'])
+    shadow = pickle.load(fid) 
+    #pw = fid.readline().strip()
+    #fid.close();
+  for s in shadow:
+    if s[2]:
+      print 'Creating superuser: %s' % s[0]
+      user = DjangoUser.objects.create_superuser(s[0], env['VIP_EMAIL'], 'changeme');
+    else:
+      print 'Creating user: %s' % s[0]
+      user = DjangoUser.objects.create_user(s[0], env['VIP_EMAIL']);
 
-  user.password = pw;
-  user.save();
+    user.password = s[1];
+    user.save();
 
   print '********** Populating database WorldBorder **********'
   load_world_data();
