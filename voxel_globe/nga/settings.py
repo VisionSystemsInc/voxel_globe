@@ -124,8 +124,8 @@ LOGIN_REQUIRED_URLS = (r'/(.*)$',)
 LOGIN_REQUIRED_URLS_EXCEPTIONS = (
   r'/login.html(.*)$',
   r'/admin(.*)$', #Admin already does its own thing, leave it alone, even though I don't have to
-  r'/rest/login(.*)$',
-  r'/rest/logout(.*)$',
+  r'/login(.*)$',
+  r'/logout(.*)$',
 )
 
-LOGIN_URL = '/rest/login'
+LOGIN_URL = '/login'

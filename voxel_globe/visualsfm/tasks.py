@@ -206,9 +206,9 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
                     coordinateSystem=cs);
       camera.save();
       image.update(camera = camera);
-  
+
   logger.info(str(cams[0]))
-  
+
   if cleanup:
     logger.info('Removing proccessing dir')
     remove_tree(processingDir);

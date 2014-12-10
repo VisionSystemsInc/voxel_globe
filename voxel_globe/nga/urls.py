@@ -15,7 +15,8 @@ urlpatterns = patterns('',
     
     # pages
     #Main home page    
-    url(r'^$', voxel_globe.main.views.index, name='index'),
+    url(r'', include('voxel_globe.main.urls', namespace='main')),
+    
     #Placeholders
 #    url(r'^apps/imageIngest/$', voxel_globe.main.views.imageIngest, name='imageIngest'),
     url(r'^apps/voxelCreator/$', voxel_globe.main.views.voxelCreator, name='voxelCreator'),
