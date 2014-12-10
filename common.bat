@@ -70,7 +70,7 @@ REM os.environ["DJANGO_SETTINGS_MODULE"] = "mysite.settings" in your wsgi.py.
 
 set VIP_DJANGO_REGRESSION_APP=world
 set VIP_DJANGO_REGRESSION_SHAPEFILE=%VIP_DATABASE_DIR%/world_borders/TM_WORLD_BORDERS-0.3.shp
-set VIP_DJANGO_USER=npr
+set VIP_DJANGO_ADMIN_USER=npr
 set VIP_DJANGO_PASSWD=%VIP_PROJECT_ROOT%/shadow/django
 set VIP_DJANGO_ALLOWED_HOSTS=['*']
 
