@@ -14,7 +14,7 @@ set VIP_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
 
 REM Debug flags
-set VIP_DEBUG=1
+set VIP_DEBUG=0
 REM This flags should ONLY be used in the following lines. Please create a new
 REM Debug flag everytime you need it. VIP_DEBUG is just an easy way to disable
 REM or enable them all at once.
@@ -72,6 +72,7 @@ set VIP_DJANGO_REGRESSION_APP=world
 set VIP_DJANGO_REGRESSION_SHAPEFILE=%VIP_DATABASE_DIR%/world_borders/TM_WORLD_BORDERS-0.3.shp
 set VIP_DJANGO_USER=npr
 set VIP_DJANGO_PASSWD=%VIP_PROJECT_ROOT%/shadow/django
+set VIP_DJANGO_ALLOWED_HOSTS=['*']
 
 REM ### POSTGRESQL Settings ###
 REM For connecting

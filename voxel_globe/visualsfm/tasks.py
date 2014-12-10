@@ -4,7 +4,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 @app.task(base=VipTask, bind=True)
-def runVisualSfm(self, imageCollectionId, sceneId, history=None):
+def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   from voxel_globe.meta import models
   from ..order.visualsfm.models import Order
   from tempfile import mkdtemp;
@@ -21,6 +21,8 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
   import numpy
   
   from django.contrib.gis.geos import Point
+  
+  from distutils.dir_util import remove_tree
 
   self.update_state(state='INITIALIZE', meta={'stage':0})
 
@@ -206,5 +208,9 @@ def runVisualSfm(self, imageCollectionId, sceneId, history=None):
       image.update(camera = camera);
   
   logger.info(str(cams[0]))
+  
+  if cleanup:
+    logger.info('Removing proccessing dir')
+    remove_tree(processingDir);
 
   return oid.id;

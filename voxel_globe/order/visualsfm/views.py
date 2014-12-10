@@ -46,7 +46,7 @@ def make_order_3(request, image_collection_id, scene_id):
 
   history = getHistory(request.REQUEST.get('history', None))
 
-  t = tasks.runVisualSfm.apply_async(args=(image_collection_id, scene_id, history))
+  t = tasks.runVisualSfm.apply_async(args=(image_collection_id, scene_id, True, history))
 
   #Crap ui filler   
   image_collection = models.ImageCollection.objects.get(id=image_collection_id);

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from os import path, environ as env
+
 BASE_DIR = path.dirname(path.dirname(__file__))
 
 #if 'LIBDIR' in os.environ:
@@ -28,11 +29,11 @@ BASE_DIR = path.dirname(path.dirname(__file__))
 SECRET_KEY = '20hiyp8-=0+oan+sa(r$xz#j83jr5*13*(j_(a)9q234cynf+&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env['VIP_DJANGO_DEBUG']
+DEBUG = env['VIP_DJANGO_DEBUG']=='1'
 
-TEMPLATE_DEBUG = env['VIP_DJANGO_TEMPLATE_DEBUG']
+TEMPLATE_DEBUG = env['VIP_DJANGO_TEMPLATE_DEBUG']=='1'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = env['VIP_DJANGO_ALLOWED_HOSTS'];
 
 # Application definition
 
