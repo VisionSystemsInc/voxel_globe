@@ -31,20 +31,45 @@ router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models
 router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.UploadSessionSerializer));
 router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.UploadSessionSerializer)));
 
-
 def ingest(request):
   return render(request, 'ingest/html/ingest.html')
 
 def blah(request):
+  uploadSession = models.UploadSession(name='Blah', owner=request.user);
+  uploadSession.save();
+  directory = models.Directory(name='Blahdir', session=uploadSession, owner=request.user);
+  directory.save();
+  testFile = models.File(name='Blahfile', directory=directory, owner=request.user);
+  testFile.save();
+  
   if request.method=='POST':
     form = UploadFileForm(request.POST, request.FILES);
     if form.is_valid():
       return HttpResponse('form valid');
   else:
     form = UploadFileForm();
-  
+
   #return render(request, 'ingest/html/upload.html', {'form':form})
-  return render_to_response('ingest/html/upload.html', {'form':form}, context_instance=RequestContext(request))
+  return render_to_response('ingest/html/upload.html', 
+                            {'form':form,
+                             'uploadSession':uploadSession,
+                             'directory':directory,
+                             'testFile':testFile}, 
+                            context_instance=RequestContext(request))
   
 def upload(request):
-  return HttpResponse('ok' + str(request.FILES));
+  uploadSession_id = request.POST['uploadSession']
+  directory_id = request.POST['directory']
+  testFile_id = request.POST['testFile']
+  
+  s = 'ok<br>'
+  import os
+  os.mkdir(r'd:\vip\tmp\%s' % uploadSession_id)
+  os.mkdir(r'd:\vip\tmp\%s\%s' % (uploadSession_id, directory_id))
+  for f in request.FILES:
+    s += request.FILES[f].name
+    with open(r'd:\vip\tmp\%s\%s\%s' % (uploadSession_id, directory_id, request.FILES[f].name), 'wb') as fid:
+      for c in request.FILES[f].chunks():
+        fid.write(c)
+  
+  return HttpResponse(s);
