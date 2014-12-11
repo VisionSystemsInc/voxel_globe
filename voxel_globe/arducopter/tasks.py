@@ -13,6 +13,14 @@ from voxel_globe.angelfire.tasks import add_sample_cameras, add_sample_tie_point
 import json;
 
 @app.task(base=VipTask, bind=True)
+def ingest_data(self, uploadSession_id):
+  ''' task for the ingest route, to ingest the data an upload sessions points to '''
+  import voxel_globe.ingest.models as IngestModels
+  uploadSession = IngestModels.UploadSession.objects.get(id=uploadSession_id);
+  directories = uploadSession.directory.all();
+  
+
+@app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):
   images = glob(path_join(env['VIP_PROJECT_ROOT'], 'images', '1fps*', ''));
   images.sort();
