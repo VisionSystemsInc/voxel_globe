@@ -14,7 +14,7 @@ set VIP_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
 
 REM Debug flags
-set VIP_DEBUG=1
+set VIP_DEBUG=0
 REM This flags should ONLY be used in the following lines. Please create a new
 REM Debug flag everytime you need it. VIP_DEBUG is just an easy way to disable
 REM or enable them all at once.
@@ -31,6 +31,10 @@ set VIP_LOG_DIR=%VIP_PROJECT_ROOT%/logs
 set VIP_LOCK_DIR=%VIP_LOCALSTATEDIR%/lock/subsys
 REM Currently only Linux even uses the lock dir
 set VIP_DATABASE_DIR=%VIP_PROJECT_ROOT%/data
+set VIP_EXTERNAL_DATA_DIR=%VIP_PROJECT_ROOT%/external/data
+set VIP_TEMP_DIR=%VIP_PROJECT_ROOT%/tmp
+set VIP_CONSTANT_TEMP_DIR=0
+REM Very useful for debugging. Everything dumped into VIP_TEMP_DIR directly, instead of a random dir inside 
 
 REM ### Vxl Settings ###
 set VIP_VXL_DIR=%VIP_PROJECT_ROOT%/vxl
@@ -55,13 +59,16 @@ set VIP_NOTEBOOK_USER=%USERNAME%
 set VIP_NOTEBOOK_LOG_DIR=%VIP_LOG_DIR%/notebook
 set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
+set VIP_NOTEBOOK_PROFILE_DIR=%VIP_PROJECT_ROOT%/notebooks/profile
 
 REM ### Django settings
-set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/web
+set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe
+REM I am adding the namespace voxel_globe to ALL web content, so this and celery_processors will eventual be merged into JUST VIP_PROJECT_ROOT, and that will be the only thing added to pythonpath in env.bat
 set VIP_DJANGO_SITE=%VIP_DJANGO_PROJECT%/nga
-set VIP_DJANGO_STATIC_ROOT=%VIP_DJANGO_PROJECT%/static_deploy
-set VIP_DJANGO_SETTINGS_MODULE=nga.settings
+set VIP_DJANGO_STATIC_ROOT=%VIP_PROJECT_ROOT%/static_deploy
+set VIP_DJANGO_SETTINGS_MODULE=voxel_globe.nga.settings
 set VIP_DJANGO_STATIC_URL_PATH=static
+set VIP_DJANGO_STATIC_COMMON=%VIP_DJANGO_PROJECT%/static_common
 set VIP_DJANGO_MEDIA_ROOT=%VIP_DJANGO_PROJECT%/media_root
 REM Note: Since environment variables are process-wide, this doesn’t work when you
 REM run multiple Django sites in the same process. This happens with mod_wsgi.
@@ -71,8 +78,9 @@ REM os.environ["DJANGO_SETTINGS_MODULE"] = "mysite.settings" in your wsgi.py.
 
 set VIP_DJANGO_REGRESSION_APP=world
 set VIP_DJANGO_REGRESSION_SHAPEFILE=%VIP_DATABASE_DIR%/world_borders/TM_WORLD_BORDERS-0.3.shp
-set VIP_DJANGO_USER=npr
+set VIP_DJANGO_ADMIN_USER=npr
 set VIP_DJANGO_PASSWD=%VIP_PROJECT_ROOT%/shadow/django
+set VIP_DJANGO_ALLOWED_HOSTS=['*']
 
 REM ### POSTGRESQL Settings ###
 REM For connecting
@@ -101,10 +109,17 @@ REM db-namespace is needed, in which case we will switch over to ssl connections
 REM ### Celery Settings ###
 set VIP_CELERY_DEFAULT_NODES=npr
 set VIP_CELERY_DAEMON_USER=npr_celery
-set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%/processors
+set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%
+REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
+set VIP_CELERY_TASK_LOG_DIR=%VIP_CELERY_LOG_DIR%
 set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
+set VIP_CELERY_APP=voxel_globe.tasks
+set VIP_CELERY_CONFIG_MODULE=voxel_globe.celeryconfig
+
+set VIP_FLOWER_HOST=localhost
+set VIP_FLOWER_PORT=5555
 
 set VIP_NOTEBOOK_RUN_DIR=%VIP_CELERY_PROCESSORS%
 
@@ -118,14 +133,13 @@ set VIP_RABBITMQ_USER=npr_rabbitmq
 set VIP_RABBITMQ_MNESIA_BASE=%VIP_DATABASE_DIR%
 
 REM ##### Image Server Settings #####
+set VIP_IMAGE_SERVER_PROTOCOL=http
 set VIP_IMAGE_SERVER_HOST=localhost
 set VIP_IMAGE_SERVER_PORT=80
 set VIP_IMAGE_SERVER_URL_PATH=images
   REM Where are the images served from
 set VIP_IMAGE_SERVER_ROOT=%VIP_PROJECT_ROOT%/images
   REM Where are the images physically/virtually?
-
-set VIP_IMAGE_SERVER_AUTHORITY=%VIP_IMAGE_SERVER_HOST%:%VIP_IMAGE_SERVER_PORT%
 
 REM ##### Apache HTTPD Settings ##### 
 set VIP_HTTPD_CONF=%VIP_CONF_DIR%/httpd.conf
@@ -138,6 +152,7 @@ set VIP_HTTPD_LOG_DIR=%VIP_LOG_DIR%/httpd
 set VIP_HTTPD_LOCK_DIR=%VIP_LOCK_DIR%/httpd
 set VIP_HTTPD_LOG_LEVEL=info
 set VIP_HTTPD_DEPLOY_ON_START=1
+set VIP_HTTPD_SERVER_NAME=www.vsi-ri.com
 
 set VIP_WSGI_PYTHON_DIR=%VIP_PYTHON_DIR%
 REM THIS was annoying, WSGI auto adds bin in linux, SO my roam isn't used, however
@@ -145,6 +160,7 @@ REM APACHE is started in my environment, so I'm sure this is why everything is w
 set VIP_WSGI_PYTHON_PATH=%VIP_DJANGO_PROJECT%;%VIP_CELERY_PROCESSORS%
 REM For the initial wsgi.py file and all Celery processors
 set VIP_WSGI_SCRIPT_ALIAS=%VIP_DJANGO_SITE%/wsgi.py
+set VIP_WSGI_ACCESS_SCRIPT=%VIP_DJANGO_SITE%/auth.py
 
 set VIP_UTIL_DIR=%VIP_INSTALL_DIR%/utils
 
@@ -153,6 +169,7 @@ REM These parameters are not protected by the VIP Prefix, and thus
 REM Affect many application, but hopefully in a good way :)
 
 set DJANGO_SETTINGS_MODULE=%VIP_DJANGO_SETTINGS_MODULE%
+set CELERY_CONFIG_MODULE=%VIP_CELERY_CONFIG_MODULE%
 
 REM I don't know if this is actually used, but it is mentioned in the Geodjango tutorial
 set PROJ_LIB=%VIP_DJANGO_PROJ_LIB%
@@ -160,3 +177,4 @@ set GDAL_DATA=%VIP_DJANGO_GDAL_DATA%
 set POSTGIS_ENABLE_OUTDB_RASTERS=1
 set POSTGIS_GDAL_ENABLED_DRIVERS=ENABLE_ALL
 set POSTGIS_GDAL_ENABLED_DRIVERS=GTiff PNG JPEG GIF XYZ
+

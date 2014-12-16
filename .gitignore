@@ -11,3 +11,6 @@ vip.bsh
 *.zip
 local_np2r.*
 vxl
+tmp
+notebooks/profile
+0001_initial.py

@@ -4,7 +4,10 @@ if [ "$#" == "0" ]; then ADDED_ARGS='-print'; fi
 
 cd $(dirname ${BASH_SOURCE[0]})
 
-#-o -name 'static*' -prune \ 
+#Don't forget, if you want to limit the search (-name blah)
+#And still get an accurate print out, add the -print yourself
+#(so it gets IN the () below, and works right)
+
 find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -prune \
 -o \( -not -path '*/SOURCES/common.inc' -a -path '*/SOURCES/*' \) \
 -o -path '*/rpmbuild/BUILD*' -prune \
@@ -13,14 +16,22 @@ find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -pru
 -o -path '*/rpmbuild/db' -prune \
 -o -path '*/bin' -prune -o -path '*/share' -prune \
 -o -name 'static_deploy' -prune \
--o -name cesium -prune -o -name jquery-ui -prune -o -name 'OpenLayers*' -prune \
+-o -name 'static_common' -prune \
 -o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune \
 -o -path './data/*/*' -prune -o -path '*/.git' -prune \
+-o -path './external/bin_Windows_NT_AMD64/postgresql/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/Apache24/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/erlang/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/python/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/rabbitmq_server/*' -prune \
+-o -path './external/bin_Windows_NT_AMD64/vips/*' -prune \
+-o -path './tmp' -prune \
+-o -path './notebooks/profile' -prune \
 -o \( -not -path '*/roam/roam' -a -path '*/roam/*' \) \
 -o -type f -not -name \*.exe -not -name \*.msi -not -name \*.gz \
 -not -name \*.tgz -not -name \*.zip -not -name \*.bz2 -not -name \*.rpm \
 -not -name \*.xz -not -name \*.dll -not -name \*.py\? -not -name \*.pdf \
--not -name \*.png \
+-not -name \*.png -not -name \*.jpg\
 -a \( ${ADDED_ARGS} "${@}" \)
 
 #

@@ -14,7 +14,9 @@ if not "%VIP_NARG%"=="2" (
 
 ::Special case all
 if /i "%1" == "all" (
-  if /i "%2" == "stop" (
+  if /i "%2" == "stop" set VIP_RESERVE_ORDER=1
+  if /i "%2" == "restart" set VIP_RESERVE_ORDER=1
+  if "!VIP_RESERVE_ORDER!" == "1" (
   REM Stop in reverse order, and NO, GOOGLE DID NOT HELP HERE! This is ALL AEN!
 	set TEMPTASKS=%VIP_SERVICES%
 
@@ -28,6 +30,7 @@ if /i "%1" == "all" (
 	    if "!COUNTT!"=="%%x" set TASKS=!TASKS! %%y
       )
     )
+    set VIP_RESERVE_ORDER=
   ) else (
     set TASKS=%VIP_SERVICES%
   )
@@ -44,7 +47,7 @@ goto usage
 
 :valid_service_name
 set NEXT=usage
-for %%i in (start stop restart status) do (
+for %%i in (start stop restart status killall) do (
   if /i "%%i"=="%2" set NEXT=%2
 )
 
@@ -82,7 +85,75 @@ goto usage
 ::Just in case something went REALLY wrong?!
 
 :start
-for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+for %%t in (%TASKS%) do (
+  schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+  
+  if /i "%%t"=="postgresql" (
+    for /l %%q in (1,1,10) do (
+      if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
+        pg_isready %VIP_POSTGRESQL_CREDENTIALS% > nul
+        if "!errorlevel!" NEQ "0" (
+          echo Waiting for database to come up... %%q
+          timeout /T 1 /NOBREAK > nul
+        ) else (
+          set VIP_POSTGRESQL_TEMP_STARTED=1
+        )
+      )
+    )
+    if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
+      echo Postgresql has failed to start. If you are continuing to see
+      echo this, please contact an administrator.
+    )
+    set VIP_POSTGRESQL_TEMP_STARTED=
+  )
+
+  if /i "%%t"=="httpd" (
+    for /l %%q in (1, 1, 5) do (
+      if !VIP_HTTPD_TEMP_STARTED! NEQ 1 (
+        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
+        if "!errorlevel!"=="0" set VIP_HTTPD_TEMP_STARTED=1
+        echo Waiting for httpd server to come up... %%q
+        timeout /T 1 /NOBREAK > nul
+      )
+    )
+    if !VIP_HTTPD_TEMP_STARTED! NEQ 1 (
+      echo Either httpd has failed to start, or it is doing its initial deploy that may
+      echo take a long time. This should only happen once. If you are continuing to see
+      echo this, please contact an administrator.
+    )
+    set VIP_HTTPD_TEMP_STARTED=
+  )
+)
+goto done
+
+:killall
+for %%t in (%TASKS%) do (
+  schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
+  if /i "%%t"=="rabbitmq" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process erl.exe rabbitmq') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+    taskkill /im %VIP_RABBITMQ_DAEMON% /f
+  )
+  if /i "%%t"=="postgresql" (
+    taskkill /im postgres.exe /f
+  )
+  if /i "%%t"=="celeryd" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe celery') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+  )
+  if /i "%%t"=="flower" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe flower') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+  )
+  if /i "%%t"=="notebook" (
+    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe notebook') do (
+      taskkill /fi "PID eq %%i" /f
+    )
+  )
+)
 goto done
 
 :stop
@@ -97,12 +168,49 @@ for %%t in (%TASKS%) do (
       if errorlevel 1 taskkill /im postgres.exe /f
     )
   )
+  if /i "%%t"=="httpd" (
+    for /l %%q in (1, 1, 5) do (
+      if !VIP_HTTPD_TEMP_STOPPED! NEQ 1 (
+        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
+        if "!errorlevel!" NEQ "0" set VIP_HTTPD_TEMP_STOPPED=1
+        echo Waiting for httpd server to go down... %%q
+        timeout /T 1 /NOBREAK > nul
+      )
+    )
+    if !VIP_HTTPD_TEMP_STOPPED! NEQ 1 (
+      echo I give up
+    )
+    set VIP_HTTPD_TEMP_STOPPED=
+  )
+
+  if /i "%%t"=="notebook" (
+    for /l %%q in (1, 1, 5) do (
+      if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
+        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_NOTEBOOK_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
+        if "!errorlevel!" NEQ "0" set VIP_NOTEBOOK_TEMP_STOPPED=1
+        echo Waiting for notebook server to go down... %%q
+        timeout /T 1 /NOBREAK > nul
+      )
+    )
+    if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
+      echo I give up
+    )
+    set VIP_NOTEBOOK_TEMP_STOPPED=
+  )
+)
+if "%VIP_RESTART%" == "1" (
+  set VIP_RESTART=
+  daemon.bat %1 start
 )
 goto done
 
 :restart
-for %%t in (%TASKS%) do schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
-for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+set VIP_RESTART=1
+goto stop
+REM for %%t in (%TASKS%) do schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
+REM for %%t in (%TASKS%) do schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+REM call daemon.bat %1 stop
+REM call daemon.bat %1 start
 goto done
 
 :status

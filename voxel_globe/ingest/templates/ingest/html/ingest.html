@@ -1,0 +1,35 @@
+{% extends "main/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Voxel Globe - Image Ingest{% endblock %}
+
+{% block includes %}
+
+<!-- Include the client side javascript code -->
+
+<style>
+</style>
+
+{% endblock %}
+
+{%block globalfunctions %}
+// Global functions defined outside of the jquery document ready function can be put here.
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}
+
+{% block pageTitle %}<h2>Voxel Globe - Image Ingest</h2> {% endblock %}
+
+{% block content %}
+<div id="mainContainer" class="main-content">
+
+<h1>Under Construction</h1>
+
+This page will support uploading of images into the image database.
+<a href="{% url "ingest:blah_del_me" %}">blah</a>
+<div id="debugInfo">
+</div>
+</div>
+{% endblock %}

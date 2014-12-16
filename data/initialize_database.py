@@ -5,13 +5,16 @@ from os.path import join as path_join
 import os
 import tempfile
 from subprocess import Popen
-import time;
+import time
+import psycopg2
 
 from pprint import pprint
 from django.contrib.gis.utils.ogrinspect import mapping
 from django.contrib.gis.utils import LayerMapping
 from django.contrib.gis.gdal import DataSource
 from django.core import management
+import django
+import pickle
 
 logStdOut = None;
 logStdErr = None;
@@ -78,7 +81,7 @@ def psql(databaseName, sqlCmd):
   return runCommand(cmd, haltOnFail=False);
 
 def load_world_data():
-  from world import models
+  from voxel_globe.world import models
   #Chicken egg problem. You can't import until after postgres has started
   
   world_shp = env['VIP_DJANGO_REGRESSION_SHAPEFILE']
@@ -104,7 +107,56 @@ def load_world_data():
     lm.save(strict=True, verbose=True, stream=logStdOut);
   except:
     print 'Failed to load mapping data. It probably already exists!'
-  
+
+from django.contrib.gis.gdal import SpatialReference
+from django.db import connections, DEFAULT_DB_ALIAS
+
+
+def add_srid_entry(srid, proj4text, srtext=None, ref_sys_name=None,
+                   auth_name='EPSG', auth_srid=None, database=None):
+  from django.contrib.gis.gdal import SpatialReference
+  from django.db import connections, DEFAULT_DB_ALIAS
+
+  if not database:
+    database = DEFAULT_DB_ALIAS
+  connection = connections[database]
+
+  if not hasattr(connection.ops, 'spatial_version'):
+    raise Exception('The `add_srs_entry` utility only works '
+                    'with spatial backends.')
+  if connection.ops.oracle or connection.ops.mysql:
+    raise Exception('This utility does not support the '
+                    'Oracle or MySQL spatial backends.')
+
+  SpatialRefSys = connection.ops.spatial_ref_sys()
+  #Model access TO spatial_ref_Sys
+  #Why not just do django.contrib.gis.models.SpatialRefSys? I don't know?
+
+
+  # Initializing the keyword arguments dictionary for both PostGIS
+  # and SpatiaLite.
+  kwargs = {'srid': srid,
+            'auth_name': auth_name,
+            'auth_srid': auth_srid or srid,
+            'proj4text': proj4text,
+            }
+
+  # Backend-specific fields for the SpatialRefSys model.
+  srs_field_names = SpatialRefSys._meta.get_all_field_names()
+  if 'srtext' in srs_field_names:
+    kwargs['srtext'] = srtext
+  if 'ref_sys_name' in srs_field_names:
+    # Spatialite specific
+    kwargs['ref_sys_name'] = ref_sys_name
+
+  # Creating the spatial_ref_sys model.
+  try:
+    # Try getting via SRID only, because using all kwargs may
+    # differ from exact wkt/proj in database.
+    SpatialRefSys.objects.using(database).get(srid=kwargs['srid'])
+  except SpatialRefSys.DoesNotExist:
+    SpatialRefSys.objects.using(database).create(**kwargs)
+
 if __name__=='__main__':
   logStdOut = open(path_join(env['VIP_LOG_DIR'], 'db_setup_out.log'), 'w');
   logStdErr = open(path_join(env['VIP_LOG_DIR'], 'db_setup_err.log'), 'w');
@@ -166,73 +218,72 @@ if __name__=='__main__':
   print '********** Creating database %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
   pg_createdb(env['VIP_POSTGRESQL_DATABASE_NAME'], otherArgs=['-T', 'template_postgis'])
 
-  print '********** Creating django tables in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
-  management.call_command('syncdb', interactive=False, stdout=logStdOut)
-  #syncdb will become migrate in django 1.7
+  django.setup(); #New in 1.7, need to load app registry yourself.
   
-  print '********** Creating Djanjo Superuser %s **********' % env['VIP_DJANGO_USER']
+  print '********** Adding SRIDs **********'
+
+  #egm96 = SpatialReference('+proj=latlong +ellps=WGS84 +geoidgrids=@egm96_15.gtx,null +no_defs')
+  add_srid_entry(srid=7428, auth_name='VSI/spatialreference.org', ref_sys_name='EGM96',
+                 proj4text='+proj=latlong +ellps=WGS84 +geoidgrids=@egm96_15.gtx,null +no_defs',
+                 srtext='COMPD_CS["WGS84 + EGM96",'
+                          'GEOGCS["WGS 84 (3D EGM geoid height)",'
+                            'DATUM["WGS_84",'
+                              'SPHEROID["WGS 84",6378137,298.257223563,'
+                                'AUTHORITY["EPSG","7030"]],'
+                              'AUTHORITY["EPSG","6326"]],'
+                            'PRIMEM["Greenwich",0,'
+                              'AUTHORITY["EPSG","8901"]],'
+                            'UNIT["degree",0.0174532925199433,'
+                              'AUTHORITY["EPSG","9122"]],'
+                            'AXIS["Geodetic latitude",NORTH],'
+                            'AXIS["Geodetic longitude",EAST],'
+                            'AUTHORITY["EPSG","4329"]],'
+                          'VERT_CS["EGM96",'
+                            'VERT_DATUM["EGM96",2005,'
+                              'EXTENSION["PROJ4_GRIDS","@egm95_15.gtx,null"]],'
+                            'AXIS["Gravity-related height",UP,'
+                              'AUTHORITY["EPSG","5773"]]]]')
+
+
+  print '********** Purging previous migrations in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
+  for rootDir, dirs, files in os.walk(env['VIP_DJANGO_PROJECT']):
+    if rootDir.endswith('migrations'):
+      for filename in files:
+        if filename.endswith('.pyc'):
+          os.remove(path_join(rootDir, filename))
+        if filename.endswith('.py') and filename[4] == '_':
+          try:
+            int(filename[0:4])
+            os.remove(path_join(rootDir, filename))
+          except:
+            pass;
+
+  print '********** Making new migrations for %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
+  management.call_command('makemigrations', interactive=False, stdout=logStdOut)
+  print '********** Creating django tables in %s **********' % env['VIP_POSTGRESQL_DATABASE_NAME']
+  management.call_command('migrate', interactive=False, stdout=logStdOut)
+  #syncdb will become migrate in django 1.7
+
+  print '********** Creating Djanjo Users **********'
   from django.contrib.auth.models import User as DjangoUser; 
   #Chicken egg again
   with open(env['VIP_DJANGO_PASSWD'], 'rb') as fid:
-    pw = fid.readline().strip()
-    fid.close();
-  try:
-    user = DjangoUser.objects.create_superuser(env['VIP_DJANGO_USER'], env['VIP_EMAIL'], 'changeme');
-  except:
-    user = DjangoUser.objects.get(username=env['VIP_DJANGO_USER'])
+    shadow = pickle.load(fid) 
+    #pw = fid.readline().strip()
+    #fid.close();
+  for s in shadow:
+    if s[2]:
+      print 'Creating superuser: %s' % s[0]
+      user = DjangoUser.objects.create_superuser(s[0], env['VIP_EMAIL'], 'changeme');
+    else:
+      print 'Creating user: %s' % s[0]
+      user = DjangoUser.objects.create_user(s[0], env['VIP_EMAIL']);
 
-  user.password = pw;
-  user.save();
+    user.password = s[1];
+    user.save();
 
   print '********** Populating database WorldBorder **********'
   load_world_data();
-
-  print '********** Checking for sample meta data **********'
-  if not os.path.exists(path_join(env['VIP_PROJECT_ROOT'], 'images', '20100427161943-04003009-05-VIS')):
-    import Tkinter
-    import tkMessageBox
-    top = Tkinter.Tk();
-    top.withdraw();
-    tkMessageBox.showinfo("Download needed", "Images missing. Please download:\n"+
-                          "/pgm/finderdata2/projects/nga_p2/purdue_sample.zip\n"+
-                          "And extract into %s" % env['VIP_PROJECT_ROOT'])
-    exit(1);
-
-  if False and not os.path.exists(path_join(env['VIP_DATABASE_DIR'], 'meta', '20100427161943-04003009-05-VIS')):
-    '''Use this for when you have camera models in the database dir to add'''
-    import Tkinter
-    import tkMessageBox
-    top = Tkinter.Tk();
-    top.withdraw();
-    tkMessageBox.showinfo("Download needed", "Images missing. Please download:\n"+
-                          "/pgm/finderdata2/projects/nga_p2/purdue_sample.zip\n"+
-                          "And extract into %s" % env['VIP_PROJECT_ROOT'])
-    exit(1);
-
-  print '********** Populating sample meta databases **********'
-  
-  import tasks;
-  t = tasks.add_control_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'NGASBIR.txt'),));
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-  t = tasks.add_sample_images.apply((os.path.join(env['VIP_PROJECT_ROOT'], 'images'),))
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-
-  
-  t = tasks.add_sample_tie_point.apply(args=(os.path.join(env['VIP_DATABASE_DIR'], 'Purdue_Sample9_all_meta.xml'),
-                                             os.path.join(env['VIP_DATABASE_DIR'], 'survey_pts_in_lvcs_selected.txt'),
-                                             0,
-                                             range(10)));
-  if t.failed():
-    print t.traceback;
-    raise t.result;
-  t = tasks.update_sample_tie_point.apply(args=(path_join(env['VIP_DATABASE_DIR'], 'latest_tiepoints.txt'),));
-  if t.failed():
-    print t.traceback;
-    raise t.result;
  
   print '********** Stopping database **********'
   pg_stopdb();
