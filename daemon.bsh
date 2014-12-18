@@ -45,7 +45,12 @@ do
     if [ "$?" == "0" ]
     then
       echo Stray postgresql detected, cleaning up
-      pg_ctl stop -D ${VIP_POSTGRESQL_DATABASE} -m fast 2>&1 >> ${VIP_POSTGRESQL_LOG_DIR}/postgresql_stop_stray.log
+      if [ `whoami` == "${VIP_POSTGRESQL_USER}" ]; then
+        pg_ctl stop -D ${VIP_POSTGRESQL_DATABASE} -m fast 2>&1 >> ${VIP_POSTGRESQL_LOG_DIR}/postgresql_stop_stray.log
+      else
+        echo "Running cleanup as postgresql"
+        sudo -u ${VIP_POSTGRESQL_USER} ${BASH_SOURCE[0]} postgresql stop
+      fi
     fi
   fi
   echo

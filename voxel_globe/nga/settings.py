@@ -14,13 +14,9 @@ from os import path, environ as env
 
 BASE_DIR = path.dirname(path.dirname(__file__))
 
-#if 'LIBDIR' in os.environ:
-#  GEOS_LIBRARY_PATH=os.path.join(os.environ['LIBDIR'],'libgeos_c.so')
-#Really only needed for Linux, I think
-#GDAL_LIBRARY_PATH='/opt/users/andy/projects/ngap2/code/external/bin_Linux_x86_64/lib/libgdal.so'
-
-###GEOS_LIBRARY_PATH=env['VIP_DJANGO_GEOS_LIBRARY_PATH'];
-###GDAL_LIBRARY_PATH=env['VIP_DJANGO_GDAL_LIBRARY_PATH'];
+GEOS_LIBRARY_PATH=env['VIP_DJANGO_GEOS_LIBRARY_PATH'];
+GDAL_LIBRARY_PATH=env['VIP_DJANGO_GDAL_LIBRARY_PATH'];
+#This shoudl work in windows too?
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/

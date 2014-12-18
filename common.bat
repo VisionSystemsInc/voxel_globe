@@ -5,8 +5,8 @@ REM 3) No " quotes, windows doesn't need them
 REM 4) Used ; only when separating paths, because in linux it'll become :
 
 REM ### Basic Settings ###
-set VIP_PROJECT_NAME=npr
-set VIP_DAEMON_GROUP=npr
+set VIP_PROJECT_NAME=voxel_globe
+set VIP_DAEMON_GROUP=voxel_globe
 set VIP_BUILD=%VIP_OS%_%VIP_ARCH%
 set VIP_EMAIL=andrew.neff@vsi-ri.com
 set VIP_AUTOSTART=0
@@ -55,7 +55,6 @@ REM ### Python settings ###
 set PYTHONSTARTUP=%VIP_CONF_DIR%/pythonrc.py
 set VIP_NOTEBOOK_PORT=8888
 set VIP_NOTEBOOK_IP=0.0.0.0
-set VIP_NOTEBOOK_USER=%USERNAME%
 set VIP_NOTEBOOK_LOG_DIR=%VIP_LOG_DIR%/notebook
 set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
