@@ -124,6 +124,6 @@ def ingestFolder(request):
   distutils.dir_util.remove_tree(sessionDir)
   
   from ..arducopter.tasks import ingest_data;
-  ingest_data.delay(uploadSession_id);
+  ingest_data.delay(uploadSession_id, imageDir);
 
   return HttpResponse('Ingest started');
