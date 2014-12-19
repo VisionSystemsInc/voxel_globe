@@ -12,13 +12,20 @@ from voxel_globe.angelfire.tasks import add_sample_cameras, add_sample_tie_point
 
 import json;
 
+from celery.utils.log import get_task_logger
+logger = get_task_logger(__name__);
+
 @app.task(base=VipTask, bind=True)
 def ingest_data(self, uploadSession_id):
   ''' task for the ingest route, to ingest the data an upload sessions points to '''
   import voxel_globe.ingest.models as IngestModels
   uploadSession = IngestModels.UploadSession.objects.get(id=uploadSession_id);
   directories = uploadSession.directory.all();
+  #imageDirectory = directories.filter(name='image')
+  #metaDirectory = directories.filter(name='meta')
   
+  logger.info(uploadSession)
+  logger.info(directories)
 
 @app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):
