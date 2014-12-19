@@ -55,16 +55,21 @@ $('#fakeUpload').click(function (e) {
 })
 
 $('#doIngest').click(function (e) {
-	for (var i = 0; i < pendingUpload.length; i++) {
-		console.log("Uploading file " + i);
-		pendingUpload[i].submit();
-		pendingUpload[i].node.append("...DONE");
-	}
+  for (var i = 0; i < pendingUpload.length; i++) {
+    console.log("Uploading file " + i);
+    pendingUpload[i].submit();
+    pendingUpload[i].node.append("...STARTED");
+  }
 });
 
 $('#clearButton').click(function (e) {
 	pendingUpload = [];
 	$('#selectedImages').html("");
+});
+
+$('#processButton').click(function (e) {
+  document.forms['ingestfolder'].submit()
+  //AEN: Yeah, I don't know your jquery magic
 });
 
 {% endblock %}
@@ -89,7 +94,15 @@ $('#clearButton').click(function (e) {
                     <p>
                     <form action="{% url "ingest:uploadEndpoint" %}" name="filedropform" method="post" enctype="multipart/form-data">
                       {% csrf_token %}
+                        <input type="hidden" name="uploadSession" value="{{ uploadSession.id }}" />
+                        <input type="hidden" name="directory" value="{{ directory.id }}" />
+                        <input type="hidden" name="testFile" value="{{ testFile.id }}" />
                         <input id="fileupload" type="file" name="filedrop" style="display:none" multiple>
+                    </form>
+                    
+                    <form action="{% url "ingest:ingestFolder" %}" name="ingestfolder" method="post">
+                      {% csrf_token %}
+                      <input type="hidden" name="uploadSession" value="{{ uploadSession.id }}" />
                     </form>
                    
                     <button id="fakeUpload" style="z-index: 10;">
@@ -104,6 +117,11 @@ $('#clearButton').click(function (e) {
                      <button id="clearButton"
                   		  style="overflow: auto; z-index: 10;"
                    		  title="Clear files">Clear Selected Files
+                    </button>
+
+                    <button id="processButton"
+                        style="overflow: auto; z-index: 10;"
+                        title="Process File">Process Uploaded Files
                     </button>
                     
                     <p>

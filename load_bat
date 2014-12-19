@@ -6,5 +6,5 @@ while read line
 do
   eval $line
   #eval echo $line
-done < <(\grep '^[ ]*set' $1 | sed 's|;|:|g' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \sed -r 's:[ ]*set (.+?)=(.*):export \1=\\\"\2\\\":' -)
+done < <(\grep '^[ ]*set' $1 | sed 's|;|:|g' - | \perl -pe 's:%(.*?)%:\\\${\1}:g' - | \perl -pe 's:[ ]*set (.+?)=(.*):export \1=\\\"\2\\\":' -)
 

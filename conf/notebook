@@ -1,5 +1,5 @@
 
-NOTEBOOK_OPTIONS="notebook --pylab=inline --no-browser --port=${VIP_NOTEBOOK_PORT} --ip=${VIP_NOTEBOOK_IP}"
+NOTEBOOK_OPTIONS="notebook --pylab=inline --no-browser --port=${VIP_NOTEBOOK_PORT} --ip=${VIP_NOTEBOOK_IP} --profile-dir=${VIP_NOTEBOOK_PROFILE_DIR}"
 NOTEBOOK_BIN=${VIP_ROAM_DIR}/ipython
 
 NOTEBOOK_USER=${VIP_NOTEBOOK_DAEMON_USER}

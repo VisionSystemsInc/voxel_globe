@@ -264,7 +264,7 @@ if __name__=='__main__':
   management.call_command('migrate', interactive=False, stdout=logStdOut)
   #syncdb will become migrate in django 1.7
 
-  print '********** Creating Djanjo Users %s **********'
+  print '********** Creating Djanjo Users **********'
   from django.contrib.auth.models import User as DjangoUser; 
   #Chicken egg again
   with open(env['VIP_DJANGO_PASSWD'], 'rb') as fid:
