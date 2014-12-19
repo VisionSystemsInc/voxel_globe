@@ -5,9 +5,22 @@
 
 {% block includes %}
 
+<link rel="stylesheet" href="{% static 'OpenLayers-3.0.0/css/ol.css' %}" type="text/css">
+
+<link rel="stylesheet" href="{% static 'fileUpload/css/style.css' %}">
+<link rel="stylesheet" href="{% static 'fileUpload/css/jquery.fileupload.css' %}">
+<link rel="stylesheet" href="{% static 'fileUpload/css/jquery.fileupload-ui.css' %}">
+
+<script src="{% static 'fileUpload/js/jquery.fileupload.js' %}"></script>
+<script src="{% static 'fileUpload/js/jquery.fileupload-process.js' %}"></script>
+
 <!-- Include the client side javascript code -->
+<!-- <script src="{% static 'tiepoint/js/controlPointOptions.js' %}"></script> -->
 
 <style>
+    @import url({% static 'cesium/Build/Cesium/Widgets/shared.css' %});
+    @import url({% static 'cesium/Build/Cesium/Widgets/widgets.css' %});
+
 </style>
 
 {% endblock %}
@@ -18,6 +31,42 @@
 
 {% block javascript %}
 
+var pendingUpload = [];
+
+var url = '{% url "ingest:uploadEndpoint" %}'
+            
+$('#fileupload').fileupload({ 
+	url : url,
+	dataType : 'json', 
+	autoUpload: false });
+$('#fileupload').fileupload('enable').on('fileuploadadd', function (e, data) {
+    	console.log("Adding image for upload...");
+ 		pendingUpload.push(data);
+		data.context = $('<div/>').appendTo('#selectedImages');
+        $.each(data.files, function (index, file) {
+            var node = $('<li/>')
+                    .append($('<span/>').text(file.name));
+            node.appendTo(data.context);
+            data.node = node;
+        });
+    });
+$('#fakeUpload').click(function (e) {
+	$('#fileupload').click();	
+})
+
+$('#doIngest').click(function (e) {
+	for (var i = 0; i < pendingUpload.length; i++) {
+		console.log("Uploading file " + i);
+		pendingUpload[i].submit();
+		pendingUpload[i].node.append("...DONE");
+	}
+});
+
+$('#clearButton').click(function (e) {
+	pendingUpload = [];
+	$('#selectedImages').html("");
+});
+
 {% endblock %}
 
 {% block pageTitle %}<h2>Voxel Globe - Image Ingest</h2> {% endblock %}
@@ -25,11 +74,44 @@
 {% block content %}
 <div id="mainContainer" class="main-content">
 
-<h1>Under Construction</h1>
+<div><a href="{% url "ingest:blah_del_me" %}">Sample Upload</a></div>
 
-This page will support uploading of images into the image database.
-<a href="{% url "ingest:blah_del_me" %}">blah</a>
-<div id="debugInfo">
-</div>
+<h1>Ingest Images</h1>
+
+ <!--  <form id="fileupload" action="{% url "ingest:uploadEndpoint" %}" method="post" enctype="multipart/form-data">
+ -->
+   <div style="margin: 0px 20px; padding: 0px;  overflow:auto;">
+            <div style="display:block; min-width:800px; width:auto;">
+             <!-- <div style="width:auto; height: auto; overflow: hidden;" ondragover="allowDrop(event)" ondrop="drop(event)"> -->
+                    <div>
+						Drag and drop image files onto this page to upload the images and files to the server.
+                    </div>
+                    <p>
+                    <form action="{% url "ingest:uploadEndpoint" %}" name="filedropform" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                        <input id="fileupload" type="file" name="filedrop" style="display:none" multiple>
+                    </form>
+                   
+                    <button id="fakeUpload" style="z-index: 10;">
+                            Select files...
+                    </button>
+                    <div style="display:inline-block; width:50px;"> </div>
+                    <button id="doIngest"
+                  		  style="overflow: auto; z-index: 10;"
+                   		  title="Upload files">Upload Selected Files
+                    </button>
+                    
+                     <button id="clearButton"
+                  		  style="overflow: auto; z-index: 10;"
+                   		  title="Clear files">Clear Selected Files
+                    </button>
+                    
+                    <p>
+                    <h3>Files Selected for Ingest:</h3>
+                    <div id="selectedImages" style="position: relative; margin: 0px 40px;">
+                    </div>
+		</div>
+ </div>
+ <div id="debugInfo">
 </div>
 {% endblock %}
