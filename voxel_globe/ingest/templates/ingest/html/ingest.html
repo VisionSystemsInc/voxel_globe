@@ -58,7 +58,7 @@ $('#doIngest').click(function (e) {
   for (var i = 0; i < pendingUpload.length; i++) {
     console.log("Uploading file " + i);
     pendingUpload[i].submit();
-    pendingUpload[i].node.append("...DONE");
+    pendingUpload[i].node.append("...STARTED");
   }
 });
 

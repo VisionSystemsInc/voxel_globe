@@ -97,11 +97,9 @@ def upload(request):
   saveDir = os.path.join(os.environ['VIP_TEMP_DIR'], str(uploadSession_id), str(directory_id))
   distutils.dir_util.mkpath(saveDir)
   
-  print 'Saving to %s' % saveDir
   for f in request.FILES:
     s += request.FILES[f].name
     with open(os.path.join(saveDir, request.FILES[f].name), 'wb') as fid:
-      print 'Saving file %s' % request.FILES[f].name
       for c in request.FILES[f].chunks():
         fid.write(c)
   
