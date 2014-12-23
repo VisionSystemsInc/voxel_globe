@@ -29,6 +29,7 @@ urlpatterns = patterns('',
 
     #apps
     url(r'^meta/', include('voxel_globe.meta.urls', namespace='meta')),
+    url(r'^apps/task/', include('voxel_globe.task.urls', namespace='task')),
     url(r'^apps/tiepoint/', include('voxel_globe.tiepoint.urls', namespace='tiepoint')),
     url(r'^apps/ingest/', include('voxel_globe.ingest.urls', namespace='ingest')),
     url(r'^apps/order/sfm/', include('voxel_globe.order.visualsfm.urls', namespace='order_visualsfm')),

@@ -50,6 +50,33 @@ $('#fileupload').fileupload('enable').on('fileuploadadd', function (e, data) {
             data.node = node;
         });
     });
+
+$("#fileupload").ajaxComplete(function() {
+  console.log('WOOT!!!!'); 
+});
+
+
+//I couldn't get this to work ;(
+//$("#fileupload").bind('click:complete', function() {
+//  alert('done')
+//});
+
+//Too muych of a pain
+//$("#fileupload").submit(function(event) {
+//    event.preventDefault();
+//    var val = $(this).find('input[type="text"]').val();
+//
+//    // I like to use defers :)
+//    deferred = $.post("http://somewhere.com", { val: val });
+//
+//    deferred.success(function () {
+//        // Do your stuff.
+//    });
+//
+//    deferred.error(function () {
+//        // Handle any errors here.
+//    });
+//});
 $('#fakeUpload').click(function (e) {
 	$('#fileupload').click();	
 })
