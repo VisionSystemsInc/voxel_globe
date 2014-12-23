@@ -21,19 +21,38 @@ logger = get_task_logger(__name__);
 def ingest_data(self, uploadSession_id, imageDir):
   ''' task for the ingest route, to ingest the data an upload sessions points to '''
   import voxel_globe.ingest.models as IngestModels
+  from .tools import loadAdjTaggedMetadata
+  import numpy
+  from voxel_globe.tools.camera import saveKrt
+  from PIL import Image
+
   uploadSession = IngestModels.UploadSession.objects.get(id=uploadSession_id);
   directories = uploadSession.directory.all();
   #imageDirectory = directories.filter(name='image')
   #metaDirectory = directories.filter(name='meta')
-  
-  imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Upload %s" % uploadSession_id, service_id = self.request.id);
+
+  metadataFilename = glob(os.path.join(imageDir, '*', '*_adj_tagged_images.txt'));
+  if not len(metadataFilename) == 1:
+    logger.error('Only one metadatafile should have been found, found %d instead', len(metadataFilename));
+
+  try:
+    metadataFilename = metadataFilename[0]
+    (day, timeOfDay) = os.path.split(metadataFilename)[1].split(' ');
+    timeOfDay = timeOfDay.split('_', 1)[0];
+  except:
+    metadataFilename = os.devnull;
+    day = 'NYA'
+    timeOfDay = 'NYA'
+ 
+  imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Upload %s %s %s" % (uploadSession_id, day, timeOfDay), service_id = self.request.id);
   imageCollection.save();
-  
   
   for d in glob(os.path.join(imageDir, '*\\')):
     files = glob(os.path.join(d, '*.jpg'));
     files.sort()
     for f in files:
+      self.update_state(state='PROCESSING', 
+                        meta={'stage':'File %s of %d' % (f, len(files))})
       zoomifyName = f[:-4] + '_zoomify'
       pid = subprocess.Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
       pid.wait();
@@ -41,11 +60,22 @@ def ingest_data(self, uploadSession_id, imageDir):
       relFilePath = os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
       basename = os.path.split(f)[-1]
       relZoomPath = os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      
+      image = Image.open(f)
+      if image.bits == 8:
+        pixel_format = 'b';
+      if image.bits == 16:
+        pixel_format = 's';
+      if image.bits == 32:
+        if image.mode == "I":
+          pixel_format = 'i';
+        elif image.mode == "F":
+          pixel_format = 'f'
 
       img = voxel_globe.meta.models.Image.create(
                              name="Arducopter Upload %s Frame %s" % (uploadSession_id, basename), 
-                             imageWidth=4096, imageHeight=2160, 
-                             numberColorBands=3, pixelFormat='b', fileFormat='zoom',
+                             imageWidth=image.size[0], imageHeight=image.size[1], 
+                             numberColorBands=image.layers, pixelFormat=pixel_format, fileFormat='zoom', 
                              imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
                                                              env['VIP_IMAGE_SERVER_HOST'], 
                                                              env['VIP_IMAGE_SERVER_PORT'], 
@@ -60,6 +90,28 @@ def ingest_data(self, uploadSession_id, imageDir):
       img.save();
      
       imageCollection.images.add(img);
+
+  self.update_state(state='Processing', meta={'stage':'metadata'})      
+  metadata = loadAdjTaggedMetadata(metadataFilename);
+  for meta in metadata:
+    try:
+      img = imageCollection.images.get(name__endswith='Frame %s'%meta.filename)
+      k = numpy.eye(3);
+      k[0,2] = img.imageWidth/2;
+      k[1,2] = img.imageHeight/2;      
+      r = numpy.eye(3);
+      t = [0, 0, 0];
+      origin = meta.llh_xyz;
+      saveKrt(self.request.id, img, k, r, t, origin, srid=7428);
+    except:
+      logger.error('Could not match metadata entry for %s' % meta.filename)
+  
+  averageGps = numpy.mean(numpy.array(map(lambda x:x.llh_xyz, metadata)), 0);
+  
+  voxel_globe.meta.models.Scene.create(name="Arducopter origin %s" % uploadSession_id, 
+                                       service_id = self.request.id,
+                                       origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
+                                       (7428, averageGps[0], averageGps[1], averageGps[2])).save()    
 
 @app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):

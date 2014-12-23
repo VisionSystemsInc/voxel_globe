@@ -50,8 +50,9 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   localImageList = [];
   for x in range(len(imageList)):
     #Download the image locally
+    image = imageList[x].history(history);
     self.update_state(state='INITIALIZE', meta={'stage':'image fetch', 'i':x, 'total':len(imageList)})
-    imageName = imageList[x].originalImageUrl;
+    imageName = image.originalImageUrl;
     extension = os.path.splitext(imageName)[1]
     localName = path_join(processingDir, 'frame_%05d%s' % (x+1, extension)); 
     wget(imageName, localName, secret=True)
@@ -69,12 +70,13 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
       
     imageInfo = {'localName':localName, 'index':x}
 
-    try:
-      [K, T, llh] = getKTO(imageList[x], history=history);
+    if 1:
+###    try:
+      [K, T, llh] = getKTO(image, history=history);
       imageInfo['K_intrinsics'] = K;
       imageInfo['transformation'] = T;
       imageInfo['enu_origin'] = llh;
-    except:
+###    except:
       pass
 
     localImageList.append(imageInfo);
@@ -104,7 +106,8 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   #find the middle origin, and make it THE origin
   data = []#.name .llh_xyz
   for imageInfo in localImageList:
-    try:
+    if 1:
+###    try:
       r = imageInfo['transformation'][0:3, 0:3]
       t = imageInfo['transformation'][0:3, 3:]
       enu_point = -r.transpose().dot(t);
@@ -130,7 +133,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
       
       dataBit = {'filename':imageInfo['localName'], 'xyz':enu_point}
       data.append(dataBit);
-    except: #some images may have no camera 
+###    except: #some images may have no camera 
       pass
   oid.lvcsOrigin = str(origin)
   oid.save()
@@ -156,7 +159,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
     imageInfo = filter(lambda x: x['localName'].endswith(frameName), localImageList)[0]
     #I have to use endswith instead of == because visual sfm APPARENTLY 
     #decides to take some libery and make absolute paths relative
-    image = imageList[imageInfo['index']]
+    image = imageList[imageInfo['index']].history(history)
 
     (k,r,t) = cam.krt(width=image.imageWidth, height=image.imageHeight);
     logger.info('Origin is %s' % str(origin))

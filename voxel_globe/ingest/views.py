@@ -118,10 +118,21 @@ def ingestFolder(request):
     imageDir = tempfile.mkdtemp(dir=os.environ['VIP_IMAGE_SERVER_ROOT']);
   
   print sessionDir, imageDir
+  #TODO: The following should be a celery task too, and the two should be a 
+  #workflow, and this plust ingest_data should be a workflow
+
+  from glob import glob  
+  metadata = glob(sessionDir+'/*/*_adj_tagged_images.txt');
+  
   distutils.dir_util.copy_tree(sessionDir, imageDir)
   distutils.dir_util.remove_tree(sessionDir)
   
-  from ..arducopter.tasks import ingest_data;
-  ingest_data.delay(uploadSession_id, imageDir);
+  if len(metadata)>0:
+    import voxel_globe.arducopter.tasks;
+    task = voxel_globe.arducopter.tasks.ingest_data.delay(uploadSession_id, imageDir);
+  else:
+    import voxel_globe.jpg_exif.tasks;
+    task = voxel_globe.jpg_exif.tasks.ingest_data.delay(uploadSession_id, imageDir);
 
-  return HttpResponse('Ingest started');
+  return render(request, 'ingest/html/ingest_started.html', 
+                {'task_id':task.task_id})

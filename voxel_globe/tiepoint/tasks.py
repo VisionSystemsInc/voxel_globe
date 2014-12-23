@@ -27,7 +27,7 @@ def fetchCameraFrustum(**kwargs):
   from ..meta.tools import getKTO, projectPoint
   try:
     imageId = int(kwargs["imageId"])
-    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
+#    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
     size = int(kwargs.pop('size', 100)); #Size in meters
     historyId = kwargs.pop('history', None)
     output = kwargs.pop('output', 'json')
@@ -35,6 +35,9 @@ def fetchCameraFrustum(**kwargs):
     if historyId:
       historyId = int(historyId);
     history = voxel_globe.meta.models.History.to_dict(historyId)
+
+    image = voxel_globe.meta.models.Image.objects.get(id=imageId).history(history)
+
     if image.camera:
       w = image.imageWidth;
       h = image.imageHeight;
@@ -107,14 +110,16 @@ def fetchCameraRay(**kwargs):
   from ..meta.tools import getKTO, projectPoint
   try:
     imageId = int(kwargs["imageId"])
-    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
-    x = int(kwargs.pop('X', image.imageWidth/2))
-    y = int(kwargs.pop('Y', image.imageHeight/2))
+#    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
     height = int(kwargs.pop('height', 0))
     historyId = kwargs.pop('history', None)
     if historyId:
       historyId = int(historyId);
     history = voxel_globe.meta.models.History.to_dict(historyId)
+
+    image = voxel_globe.meta.models.Image.objects.get(id=imageId).history(history)
+    x = int(kwargs.pop('X', image.imageWidth/2))
+    y = int(kwargs.pop('Y', image.imageHeight/2))
   
     if image.camera:
       K, T, llh = getKTO(image, history);

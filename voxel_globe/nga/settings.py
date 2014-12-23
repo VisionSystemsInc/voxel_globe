@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'voxel_globe.main',
     'voxel_globe.tiepoint',
     'voxel_globe.ingest',
+    'voxel_globe.task',
     'voxel_globe.order.visualsfm',
     'django.contrib.staticfiles',
 ) #Staticfiles MUST come last, or else it might skip some files

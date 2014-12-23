@@ -108,7 +108,7 @@ for %%t in (%TASKS%) do (
   )
 
   if /i "%%t"=="httpd" (
-    for /l %%q in (1, 1, 5) do (
+    for /l %%q in (1, 1, 10) do (
       if !VIP_HTTPD_TEMP_STARTED! NEQ 1 (
         python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
         if "!errorlevel!"=="0" set VIP_HTTPD_TEMP_STARTED=1
