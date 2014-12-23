@@ -70,13 +70,12 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
       
     imageInfo = {'localName':localName, 'index':x}
 
-    if 1:
-###    try:
+    try:
       [K, T, llh] = getKTO(image, history=history);
       imageInfo['K_intrinsics'] = K;
       imageInfo['transformation'] = T;
       imageInfo['enu_origin'] = llh;
-###    except:
+    except:
       pass
 
     localImageList.append(imageInfo);
@@ -106,8 +105,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   #find the middle origin, and make it THE origin
   data = []#.name .llh_xyz
   for imageInfo in localImageList:
-    if 1:
-###    try:
+    try:
       r = imageInfo['transformation'][0:3, 0:3]
       t = imageInfo['transformation'][0:3, 3:]
       enu_point = -r.transpose().dot(t);
@@ -133,7 +131,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
       
       dataBit = {'filename':imageInfo['localName'], 'xyz':enu_point}
       data.append(dataBit);
-###    except: #some images may have no camera 
+    except: #some images may have no camera 
       pass
   oid.lvcsOrigin = str(origin)
   oid.save()
