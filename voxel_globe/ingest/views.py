@@ -34,6 +34,12 @@ router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models
 router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.UploadSessionSerializer));
 router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.UploadSessionSerializer)));
 
+def workflow(request):
+    # ANDY HELP!!!!  I want to pass in the folder information to use for the workflow or create a new one, then do ingest
+    return render_to_response('ingest/html/workflow.html', 
+                            { }, 
+                            context_instance=RequestContext(request))
+
 def ingest(request):
   uploadSession = models.UploadSession(name='Blah', owner=request.user);
   uploadSession.save();

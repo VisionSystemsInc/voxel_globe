@@ -5,24 +5,28 @@
 
 {% block includes %}
 
-<link rel="stylesheet" href="{% static 'OpenLayers-3.0.0/css/ol.css' %}" type="text/css">
-
 <link rel="stylesheet" href="{% static 'fileUpload/css/style.css' %}">
 <link rel="stylesheet" href="{% static 'fileUpload/css/jquery.fileupload.css' %}">
 <link rel="stylesheet" href="{% static 'fileUpload/css/jquery.fileupload-ui.css' %}">
 
 <script src="{% static 'fileUpload/js/jquery.fileupload.js' %}"></script>
 <script src="{% static 'fileUpload/js/jquery.fileupload-process.js' %}"></script>
-
-<!-- Include the client side javascript code -->
-<!-- <script src="{% static 'tiepoint/js/controlPointOptions.js' %}"></script> -->
-
 <style>
-    @import url({% static 'cesium/Build/Cesium/Widgets/shared.css' %});
-    @import url({% static 'cesium/Build/Cesium/Widgets/widgets.css' %});
 
-</style>
 
+img {
+    vertical-align: middle;
+}
+.uploadEntry {
+	display: block;
+  	vertical-align: top;
+}
+
+ .pendingUpload {
+   		list-style-image: url({% static 'ingest/icons/' %}upload_pending.png);
+ }
+    
+ </style>
 {% endblock %}
 
 {%block globalfunctions %}
@@ -32,51 +36,36 @@
 {% block javascript %}
 
 var pendingUpload = [];
-
+var pendingIcon = "{% static 'ingest/icons/' %}" + "upload_pending.png";
+var successIcon = "{% static 'ingest/icons/' %}" + "upload_success.png";
+var failIcon = "{% static 'ingest/icons/' %}" + "upload_fail.png";
 var url = '{% url "ingest:uploadEndpoint" %}'
             
 $('#fileupload').fileupload({ 
 	url : url,
-	dataType : 'json', 
+	dataType : 'html', 
 	autoUpload: false });
 $('#fileupload').fileupload('enable').on('fileuploadadd', function (e, data) {
     	console.log("Adding image for upload...");
+    	data.id = pendingUpload.length;
  		pendingUpload.push(data);
-		data.context = $('<div/>').appendTo('#selectedImages');
-        $.each(data.files, function (index, file) {
-            var node = $('<li/>')
-                    .append($('<span/>').text(file.name));
-            node.appendTo(data.context);
-            data.node = node;
-        });
-    });
-
-$("#fileupload").ajaxComplete(function() {
-  console.log('WOOT!!!!'); 
-});
-
-
-//I couldn't get this to work ;(
-//$("#fileupload").bind('click:complete', function() {
-//  alert('done')
-//});
-
-//Too muych of a pain
-//$("#fileupload").submit(function(event) {
-//    event.preventDefault();
-//    var val = $(this).find('input[type="text"]').val();
-//
-//    // I like to use defers :)
-//    deferred = $.post("http://somewhere.com", { val: val });
-//
-//    deferred.success(function () {
-//        // Do your stuff.
-//    });
-//
-//    deferred.error(function () {
-//        // Handle any errors here.
-//    });
-//});
+		data.context = $('<div class="uploadEntry"/>').appendTo('#selectedImages');
+        var img = $('<img id="icon' + data.id + '" src="' + pendingIcon + '"/>');
+        var node = $('<div/>')
+            		.append(img)
+                    .append($('<span/>').text(data.files[0].name));
+        node.appendTo(data.context);
+        data.node = node;
+    }).on('fileuploadsubmit', function(e, data) {
+    	console.log(data + " submitted...");
+	}).on('fileuploaddone', function(e, data) {
+    	console.log(data + " done...");
+    	$('#icon' + data.id).prop("src", successIcon);    
+	}).on('fileuploadfail', function(e, data) {
+    	console.log(data + " failed...");
+    	$('#icon' + data.id).prop("src", failIcon);    
+	});
+        
 $('#fakeUpload').click(function (e) {
 	$('#fileupload').click();	
 })
@@ -84,8 +73,7 @@ $('#fakeUpload').click(function (e) {
 $('#doIngest').click(function (e) {
   for (var i = 0; i < pendingUpload.length; i++) {
     console.log("Uploading file " + i);
-    pendingUpload[i].submit();
-    pendingUpload[i].node.append("...STARTED");
+	pendingUpload[i].submit();
   }
 });
 
@@ -106,13 +94,9 @@ $('#processButton').click(function (e) {
 {% block content %}
 <div id="mainContainer" class="main-content">
 
-<div><a href="{% url "ingest:blah_del_me" %}">Sample Upload</a></div>
-
 <h1>Ingest Images</h1>
 
- <!--  <form id="fileupload" action="{% url "ingest:uploadEndpoint" %}" method="post" enctype="multipart/form-data">
- -->
-   <div style="margin: 0px 20px; padding: 0px;  overflow:auto;">
+   <div id="page2" style="margin: 0px 20px; padding: 0px;  overflow:auto;">
             <div style="display:block; min-width:800px; width:auto;">
              <!-- <div style="width:auto; height: auto; overflow: hidden;" ondragover="allowDrop(event)" ondrop="drop(event)"> -->
                     <div>
@@ -146,14 +130,15 @@ $('#processButton').click(function (e) {
                    		  title="Clear files">Clear Selected Files
                     </button>
 
+                    <div style="display:inline-block; width:50px;"> </div>
                     <button id="processButton"
                         style="overflow: auto; z-index: 10;"
                         title="Process File">Process Uploaded Files
                     </button>
                     
                     <p>
-                    <h3>Files Selected for Ingest:</h3>
-                    <div id="selectedImages" style="position: relative; margin: 0px 40px;">
+                    <h3>Files Selected for Ingest</h3>
+                    <div id="selectedImages" style="margin: 0px 20px; padding: 0px;">
                     </div>
 		</div>
  </div>
