@@ -2,8 +2,8 @@ from django.conf.urls import patterns, url, include
 from voxel_globe.ingest import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.workflow, name='workflow'),
-    url(r'^addFiles$', views.ingest, name='ingest'),
+    url(r'^$', views.chooseSession, name='chooseSession'),
+    url(r'^addFiles$', views.addFiles, name='addFiles'),
     url(r'^upload$', views.upload, name="uploadEndpoint"),
     url(r'^ingestFolder$', views.ingestFolder, name="ingestFolder"),
 

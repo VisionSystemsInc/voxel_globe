@@ -6,7 +6,7 @@ class UploadSessionSerializer(serializers.ModelSerializer):
   #directory = serializers.RelatedField(many=True, read_only=True)
   class Meta(object):
     model = voxel_globe.ingest.models.UploadSession;
-    fields = ('id', 'name', 'directory')
+    fields = ('id', 'name', 'directory', 'sensorType')
     read_only_fields = ('directory',)
 
 class DirectorySerializer(serializers.ModelSerializer):

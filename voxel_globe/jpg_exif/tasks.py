@@ -33,6 +33,7 @@ def ingest_data(self, uploadSession_id, imageDir):
   t = [0, 0, 0];
   
   gpsList = []
+  gpsList2 = []
   
   for d in glob(os.path.join(imageDir, '*\\')):
     files = glob(os.path.join(d, '*.jpg'));
@@ -60,7 +61,7 @@ def ingest_data(self, uploadSession_id, imageDir):
           pixel_format = 'f'
 
       img = voxel_globe.meta.models.Image.create(
-                             name="Generic Upload %s Frame %s" % (uploadSession_id, basename), 
+                             name="Generic Upload %s Frame %s" % (uploadSession.name, basename), 
                              imageWidth=image.size[0], imageHeight=image.size[1], 
                              numberColorBands=image.layers, pixelFormat=pixel_format, fileFormat='zoom',
                              imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
@@ -124,15 +125,24 @@ def ingest_data(self, uploadSession_id, imageDir):
       logger.error('Origin is: %s' % origin)
       if not any(numpy.array(origin) == 0):
         gpsList.append(origin);
-
+      gpsList2.append(origin);
+      
       k = numpy.eye(3);
       k[0,2] = image.size[0]/2;
       k[1,2] = image.size[1]/2;      
       saveKrt(self.request.id, img, k, r, t, origin, srid=srid);
-      
-  averageGps = numpy.mean(numpy.array(gpsList), 0);
+
+  logger.error(gpsList)
   
-  voxel_globe.meta.models.Scene.create(name="Generic origin %s" % uploadSession_id, 
+  try:
+    averageGps = numpy.mean(numpy.array(gpsList), 0);
+    if len(averageGps) != 3:
+      raise ValueError
+  except:
+    averageGps = numpy.mean(numpy.array(gpsList2), 0);
+
+  voxel_globe.meta.models.Scene.create(name="Generic origin %s" % uploadSession.name, 
                                        service_id = self.request.id,
                                        origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
                                        (srid, averageGps[0], averageGps[1], averageGps[2])).save()
+  uploadSession.delete()

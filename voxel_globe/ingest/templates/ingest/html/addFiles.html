@@ -1,7 +1,7 @@
 {% extends "main/base.html" %}
 {% load staticfiles %}
 
-{% block title %}Voxel Globe - Image Ingest{% endblock %}
+{% block title %}Voxel Globe - Add files{% endblock %}
 
 {% block includes %}
 
@@ -89,12 +89,12 @@ $('#processButton').click(function (e) {
 
 {% endblock %}
 
-{% block pageTitle %}<h2>Voxel Globe - Image Ingest</h2> {% endblock %}
+{% block pageTitle %}<h2>Voxel Globe - Add Files</h2> {% endblock %}
 
 {% block content %}
 <div id="mainContainer" class="main-content">
 
-<h1>Ingest Images</h1>
+<h1>Add files for {{ uploadSession.name }}</h1>
 
    <div id="page2" style="margin: 0px 20px; padding: 0px;  overflow:auto;">
             <div style="display:block; min-width:800px; width:auto;">

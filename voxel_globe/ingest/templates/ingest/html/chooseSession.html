@@ -15,10 +15,10 @@
 
 var sessions;
 
-function loadWorkflow(sessionNdx) {
-	console.log("Loading existing workflow..." + sessions[sessionNdx].name);
-	// TODO: Figure out how to hook into the Django stuff to load an existing workflow
-	window.open("{% url "ingest:ingest" %}",'_top');
+function loadSession(sessionNdx) {
+	console.log("Loading existing session..." + sessions[sessionNdx].name);
+	// TODO: Figure out how to hook into the Django stuff to load an existing session
+	window.open("{% url "ingest:addFiles" %}?upload="+sessions[sessionNdx].id,'_top');
 }
 {% endblock %}
 
@@ -57,13 +57,14 @@ $.get("rest/uploadsession/", function (data) {
 	$("#availableSessions").html("");
 	sessions = data;
 	for (var i = 0; i < sessions.length; i++) {
-		$("#availableSessions").append('<button onclick="loadWorkflow(' + i + ')">Upload ' + sessions[i].name + '</button></br>');		
+		$("#availableSessions").append('<button onclick="loadSession(' + i + ')">Upload ' + sessions[i].name + '</button></br>');		
 	}
 	console.log(data.length + " sessions were loaded.");
 });
 
-function createWorkflow() {
-	var newName = $('#newWorkflowId').val();
+function createSession() {
+	var newName = $('#newSessionId').val();
+	var newSensorTypeName = $('#newSensorType').val();
 	// Check the name against the other sessions...
 	for (var i = 0; i < sessions.length; i++) {
 		if (sessions[i].name == newName) {
@@ -72,19 +73,20 @@ function createWorkflow() {
 		}
 	}
 	// Otherwise we are OK, go ahead and create the upload session
-	$.post("rest/uploadsession/", { name : newName },  function (data) {
-		console.log("Created workflow..." + newName);
+	console.log("Atempting to create " + newName + "," + newSensorTypeName);
+	$.post("rest/uploadsession/", { name : newName, sensorType : newSensorTypeName },  function (data) {
+		console.log("Created session..." + newName);
 		prompt.dialog( "close" );
-		window.open("{% url "ingest:ingest" %}",'_top');
+		window.open("{% url "ingest:addFiles" %}?upload="+data['id'],'_top');
 	}).fail( function(e) {
 		alert("Unable to create the new upload: " + e);
 		prompt.dialog( "close" );
 	});
 }
 
-var prompt = $('#newWorkflowDialog').dialog({autoOpen : false, modal : true, 
+var prompt = $('#newSessionDialog').dialog({autoOpen : false, modal : true, 
 	 buttons: {
-	"Create the Workflow": createWorkflow,
+	"Create the Session": createSession,
 	"Cancel": function() {
 				prompt.dialog( "close" );
 			}
@@ -92,7 +94,7 @@ var prompt = $('#newWorkflowDialog').dialog({autoOpen : false, modal : true,
 	}
 );
 
-$('#newWorkflow').click(function (e) {
+$('#newSession').click(function (e) {
 	prompt.dialog("open");	
 });
 
@@ -104,7 +106,7 @@ $('#newWorkflow').click(function (e) {
 <div id="mainContainer" class="main-content">
 
 <p>
- <button id="newWorkflow" style="">
+ <button id="newSession" style="">
 		Start New Upload
  </button>
 
@@ -116,8 +118,13 @@ $('#newWorkflow').click(function (e) {
  
  </div>
 
-<div id="newWorkflowDialog" title="New Workflow">
-Enter a name for the workflow: <input id="newWorkflowId" type="text" value='{{ uploadSession.id }}'></input>
+<div id="newSessionDialog" title="New Session">
+Enter a name for the session: <input id="newSessionId" type="text" value='{{ uploadSession.id }}'></input><BR>
+Sensor Type: <select id="newSensorType">
+{% for key,value in sensorTypes.items %}
+  <option value="{{ key }}">{{ value.0 }}</option>
+{% endfor %}
+</select>
 </div>
 
  <div id="debugInfo">

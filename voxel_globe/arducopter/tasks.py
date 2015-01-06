@@ -44,7 +44,7 @@ def ingest_data(self, uploadSession_id, imageDir):
     day = 'NYA'
     timeOfDay = 'NYA'
  
-  imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Upload %s %s %s" % (uploadSession_id, day, timeOfDay), service_id = self.request.id);
+  imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Upload %s %s %s" % (uploadSession.name, day, timeOfDay), service_id = self.request.id);
   imageCollection.save();
   
   for d in glob(os.path.join(imageDir, '*\\')):
@@ -73,7 +73,7 @@ def ingest_data(self, uploadSession_id, imageDir):
           pixel_format = 'f'
 
       img = voxel_globe.meta.models.Image.create(
-                             name="Arducopter Upload %s Frame %s" % (uploadSession_id, basename), 
+                             name="Arducopter Upload %s Frame %s" % (uploadSession.name, basename), 
                              imageWidth=image.size[0], imageHeight=image.size[1], 
                              numberColorBands=image.layers, pixelFormat=pixel_format, fileFormat='zoom', 
                              imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
@@ -108,10 +108,11 @@ def ingest_data(self, uploadSession_id, imageDir):
   
   averageGps = numpy.mean(numpy.array(map(lambda x:x.llh_xyz, metadata)), 0);
   
-  voxel_globe.meta.models.Scene.create(name="Arducopter origin %s" % uploadSession_id, 
+  voxel_globe.meta.models.Scene.create(name="Arducopter origin %s" % uploadSession.name, 
                                        service_id = self.request.id,
                                        origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
-                                       (7428, averageGps[0], averageGps[1], averageGps[2])).save()    
+                                       (7428, averageGps[0], averageGps[1], averageGps[2])).save()
+  uploadSession.delete()
 
 @app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):
