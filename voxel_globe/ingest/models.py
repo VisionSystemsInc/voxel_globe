@@ -2,6 +2,13 @@ from django.db import models
 
 # Create your models here.
 
+#key: [Friendly name, moduleName]
+#Module name should not includ tasks, but it is assume that tasks.ingest_data is used
+#I'm sure this will be updated at a later time to have api data in the module rather than here 
+SENSOR_TYPES = {'arducopter':['Arducopter', 'voxel_globe.arducopter'], 
+                'jpg_exif':['JPEG with EXIF tags', 'voxel_globe.jpg_exif']};
+#to be used in conjunction with importlib
+
 class IngestCommonModel(models.Model):
   class Meta:
     abstract = True

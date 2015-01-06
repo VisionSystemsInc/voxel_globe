@@ -34,23 +34,26 @@ router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models
 router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.UploadSessionSerializer));
 router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.UploadSessionSerializer)));
 
-def workflow(request):
-    # ANDY HELP!!!!  I want to pass in the folder information to use for the workflow or create a new one, then do ingest
-    return render_to_response('ingest/html/workflow.html', 
-                            { }, 
+def chooseSession(request):
+    return render_to_response('ingest/html/chooseSession.html', 
+                            {'sensorTypes': models.SENSOR_TYPES}, 
                             context_instance=RequestContext(request))
 
-def ingest(request):
-  uploadSession = models.UploadSession(name='Blah', owner=request.user);
-  uploadSession.save();
-  uploadSession.name = str(uploadSession.id); uploadSession.save();
-  directory = models.Directory(name='Blahdir', session=uploadSession, owner=request.user);
-  directory.save();
-  directory.name = str(directory.id); directory.save();
+def addFiles(request):
+  upload_session_id = int(request.GET['upload'])
+  uploadSession = models.UploadSession.objects.get(id=upload_session_id)
+  
+  #Temporary code only. This will get one directory successfully, or create a new one.
+  try:
+    directory = uploadSession.directory.get()
+  except:
+    directory = models.Directory(name='Blahdir', session=uploadSession, owner=request.user);
+    directory.save();
+    directory.name = str(directory.id); directory.save();
   testFile = models.File(name='Blahfile', directory=directory, owner=request.user);
   testFile.save();
 
-  return render_to_response('ingest/html/ingest.html',
+  return render_to_response('ingest/html/addFiles.html',
                            {'uploadSession':uploadSession,
                             'directory':directory,
                             'testFile':testFile}, 
@@ -117,15 +120,15 @@ def ingestFolder(request):
   #Code not quite done, using failsafe for now. 
   uploadSession = models.UploadSession.objects.get(id=uploadSession_id);
 
-  sessionDir = os.path.join(os.environ['VIP_TEMP_DIR'], uploadSession.name)
-  imageDir = os.path.join(os.environ['VIP_IMAGE_SERVER_ROOT'], uploadSession.name)
+  sessionDir = os.path.join(os.environ['VIP_TEMP_DIR'], str(uploadSession.id))
+  imageDir = os.path.join(os.environ['VIP_IMAGE_SERVER_ROOT'], str(uploadSession.id))
   if os.path.exists(imageDir):
     import tempfile
     imageDir = tempfile.mkdtemp(dir=os.environ['VIP_IMAGE_SERVER_ROOT']);
   
   print sessionDir, imageDir
   #TODO: The following should be a celery task too, and the two should be a 
-  #workflow, and this plust ingest_data should be a workflow
+  #workflow, and this plus ingest_data should be a workflow
 
   from glob import glob  
   metadata = glob(sessionDir+'/*/*_adj_tagged_images.txt');

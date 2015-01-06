@@ -61,7 +61,7 @@ def ingest_data(self, uploadSession_id, imageDir):
           pixel_format = 'f'
 
       img = voxel_globe.meta.models.Image.create(
-                             name="Generic Upload %s Frame %s" % (uploadSession_id, basename), 
+                             name="Generic Upload %s Frame %s" % (uploadSession.name, basename), 
                              imageWidth=image.size[0], imageHeight=image.size[1], 
                              numberColorBands=image.layers, pixelFormat=pixel_format, fileFormat='zoom',
                              imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
@@ -141,7 +141,8 @@ def ingest_data(self, uploadSession_id, imageDir):
   except:
     averageGps = numpy.mean(numpy.array(gpsList2), 0);
 
-  voxel_globe.meta.models.Scene.create(name="Generic origin %s" % uploadSession_id, 
+  voxel_globe.meta.models.Scene.create(name="Generic origin %s" % uploadSession.name, 
                                        service_id = self.request.id,
                                        origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
                                        (srid, averageGps[0], averageGps[1], averageGps[2])).save()
+  uploadSession.delete()
