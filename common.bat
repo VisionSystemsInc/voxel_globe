@@ -59,6 +59,7 @@ set VIP_NOTEBOOK_LOG_DIR=%VIP_LOG_DIR%/notebook
 set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 set VIP_NOTEBOOK_PROFILE_DIR=%VIP_PROJECT_ROOT%/notebooks/profile
+set VIP_PYTHONPATH=%VIP_VXL_DIR%/%VIP_VXL_BUILD_TYPE%/lib;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/bstm/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/boxm2/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/bvxm/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/boxm2_multi/pyscripts
 
 REM ### Django settings
 set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe
