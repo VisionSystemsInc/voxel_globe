@@ -25,8 +25,11 @@ if __name__=='__main__':
   cmake_options += ['-D', 'EXECUTABLE_OUTPUT_PATH='+
                  path_join(vxlDir, 'bin')];
 
-  cmake_options += ['-D', 'OPENCL_INCLUDE_PATH='+env['VIP_OPENCL_INCLUDE_PATH'],
-                    '-D', 'OPENCL_LIBRARY_PATH='+env['VIP_OPENCL_LIBRARY_PATH']];
+  cmake_options += ['-D', 'PYTHON_INCLUDE_DIR='+env['VIP_PYTHON_INCLUDE_DIR'],
+                    '-D', 'PYTHON_LIBRARY='+env['VIP_PYTHON_LIBRARY']];
+                    
+#  cmake_options += ['-D', 'OPENCL_INCLUDE_PATH='+env['VIP_OPENCL_INCLUDE_PATH'],
+#                    '-D', 'OPENCL_LIBRARY_PATH='+env['VIP_OPENCL_LIBRARY_PATH']];
 
 #  cmake_options += ['-D', 'OPENCL_LIBRARIES='+env['VIP_OPENCL_LIBRARY']]
 
@@ -53,5 +56,8 @@ if __name__=='__main__':
   pid = subprocess.Popen([env['VIP_CMAKE']] + cmake_options + [path_join(env['VIP_PROJECT_ROOT'], 'vxl_src')]);
   pid.wait();
 
-  pid = subprocess.Popen(['make', '-j', '8'], cwd=vxlDir);
+  if env['VIP_CMAKE_PLATFORM']=="Eclipse CDT4 - Unix Makefiles":
+    pid = subprocess.Popen(['make', '-j', '8'], cwd=vxlDir);
+  else:
+    pid = subprocess.Popen(['nmake', '-j', '8'], cwd=vxlDir);
   pid.wait();
