@@ -44,6 +44,7 @@ REM For example:
 REM set VIP_VXL_CMAKE_OPTIONS='"-D", "var:type=value"'
 set VIP_VXL_CMAKE_ENTRIES='BUILD_VGUI=ON'
 set VIP_VXL_BUILD_TYPE=Release
+set VIP_VXL_SRC=%VIP_PROJECT_ROOT%/vxl_src
 
 REM Must be set in local env for GDAL and vxl if not nvidia default
 REM set VIP_OPENCL_INCLUDE_PATH=/usr/local/cuda/include
@@ -59,7 +60,9 @@ set VIP_NOTEBOOK_LOG_DIR=%VIP_LOG_DIR%/notebook
 set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 set VIP_NOTEBOOK_PROFILE_DIR=%VIP_PROJECT_ROOT%/notebooks/profile
-set VIP_PYTHONPATH=%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/bstm/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/boxm2/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/bvxm/pyscripts;%VIP_PROJECT_ROOT%/vxl_src/contrib/brl/bseg/boxm2_multi/pyscripts
+set BOXM2_OPENCL_DIR=%VIP_VXL_SRC%/contrib/brl/bseg/boxm2/ocl/cl/
+set VOLM_DIR=%VIP_VXL_SRC%/contrib/brl/bbas/volm3
+set VIP_PYTHONPATH=%VIP_VXL_SRC%/contrib/brl/bseg/bstm/pyscripts;%VIP_VXL_SRC%/contrib/brl/bseg/boxm2/pyscripts;%VIP_VXL_SRC%/contrib/brl/bseg/bvxm/pyscripts;%VIP_VXL_SRC%/contrib/brl/bseg/boxm2_multi/pyscripts
 
 REM ### Django settings
 set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe

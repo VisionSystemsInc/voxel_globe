@@ -90,7 +90,7 @@ if __name__=='__main__':
       cmake_options += ['-D', entry];
 
 
-  pid = subprocess.Popen([env['VIP_CMAKE']] + cmake_options + [path_join(env['VIP_PROJECT_ROOT'], 'vxl_src')]);
+  pid = subprocess.Popen([env['VIP_CMAKE']] + cmake_options + [env['VIP_VXL_SRC']]);
   pid.wait();
 
   if os.name=='nt':
