@@ -7,6 +7,10 @@ import subprocess;
 from ast import literal_eval
 
 if __name__=='__main__':
+  vxlDir = path_join(env['VIP_VXL_DIR'], env['VIP_VXL_BUILD_TYPE'])
+  mkpath(vxlDir);
+  os.chdir(vxlDir);
+  
   if os.name == 'nt':
     if not os.path.exists(env['VIP_GLEW_INCLUDE_DIR']):
       print "You are missing Glew"
@@ -38,10 +42,6 @@ if __name__=='__main__':
   else:
     platform = env['VIP_CMAKE_PLATFORM']
 
-  vxlDir = path_join(env['VIP_VXL_DIR'], env['VIP_VXL_BUILD_TYPE'])
-  mkpath(vxlDir);
-  os.chdir(vxlDir);
-  
   cmake_options = [];
   
   cmake_options += ['-G', platform];
