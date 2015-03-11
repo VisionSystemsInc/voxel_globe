@@ -7,7 +7,7 @@ import subprocess;
 from ast import literal_eval
 
 if __name__=='__main__':
-  vxlDir = path_join(env['VIP_VXL_DIR'], env['VIP_VXL_BUILD_TYPE'])
+  vxlDir = path_join(env['VIP_VXL_BUILD_DIR'], env['VIP_VXL_BUILD_TYPE'])
   mkpath(vxlDir);
   os.chdir(vxlDir);
   
@@ -90,7 +90,7 @@ if __name__=='__main__':
       cmake_options += ['-D', entry];
 
 
-  pid = subprocess.Popen([env['VIP_CMAKE']] + cmake_options + [env['VIP_VXL_SRC']]);
+  pid = subprocess.Popen([env['VIP_CMAKE']] + cmake_options + [env['VIP_VXL_SRC_DIR']]);
   pid.wait();
 
   if os.name=='nt':

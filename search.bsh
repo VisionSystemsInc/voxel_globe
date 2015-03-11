@@ -8,7 +8,7 @@ cd $(dirname ${BASH_SOURCE[0]})
 #And still get an accurate print out, add the -print yourself
 #(so it gets IN the () below, and works right)
 
-find . -path './vxl_src' -prune -o -path './images' -prune -o -path '*/usr' -prune \
+find . -path './vxl*' -prune -o -path './images' -prune -o -path '*/usr' -prune \
 -o \( -not -path '*/SOURCES/common.inc' -a -path '*/SOURCES/*' \) \
 -o -path '*/rpmbuild/BUILD*' -prune \
 -o -path '*/rpmbuild/RPMS' -prune \
