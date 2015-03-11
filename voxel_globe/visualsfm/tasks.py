@@ -58,7 +58,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
     wget(imageName, localName, secret=True)
 
     #Convert the image if necessary    
-    if extension not in ['.jpg', '.pgm', '.ppm']:
+    if extension.lower() not in ['.jpg', '.jpeg', '.pgm', '.ppm']:
       self.update_state(state='INITIALIZE', meta={'stage':'image convert', 'i':x, 'total':len(imageList)})
       #Add code here to converty to jpg for visual sfm
       if extension=='not implemented':
