@@ -113,13 +113,20 @@ def ingest_data(self, uploadSession_id, imageDir):
         
       try:          
         altitude = float(gps[6][0])/gps[6][1]
-        if gps[5] == '\x00':
-          srid = 4326; #WGS84
-        else:
-          srid = 7428; #EGM 96
+        if gps[5] == '\x01':
+          altitude = -altitude;
       except:
         altitude = 0;
-        srid=4326;
+      srid=4326;
+      
+      #Untested code, because I images with this tag!
+      try:
+        if gps[16] == 'WGS-84': #http://www.cipa.jp/std/documents/e/DC-008-2010_E.pdf
+          srid = 4326;
+        elif gps[16] == 'EGM96': #I'm guessing here?
+          srid = 7428; #EGM 96
+      except:
+        pass
 
       origin = [longitude, latitude, altitude];
       logger.error('Origin is: %s' % origin)
