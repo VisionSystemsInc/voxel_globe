@@ -33,4 +33,5 @@ urlpatterns = patterns('',
     url(r'^apps/tiepoint/', include('voxel_globe.tiepoint.urls', namespace='tiepoint')),
     url(r'^apps/ingest/', include('voxel_globe.ingest.urls', namespace='ingest')),
     url(r'^apps/order/sfm/', include('voxel_globe.order.visualsfm.urls', namespace='order_visualsfm')),
+    url(r'^apps/order/voxel_world/', include('voxel_globe.order.build_voxel_world.urls', namespace='order_build_voxel_world')),
 )

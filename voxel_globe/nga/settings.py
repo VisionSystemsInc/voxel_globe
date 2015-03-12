@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'voxel_globe.ingest',
     'voxel_globe.task',
     'voxel_globe.order.visualsfm',
+    'voxel_globe.order.build_voxel_world',
     'django.contrib.staticfiles',
 ) #Staticfiles MUST come last, or else it might skip some files
   #at collectstatic deploy time!!!! This is one of the rare times

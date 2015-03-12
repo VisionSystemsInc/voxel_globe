@@ -32,7 +32,7 @@ if "%1"=="start_httpd" (
   if not exist %VIP_HTTPD_LOG_DIR:/=\% mkdir %VIP_HTTPD_LOG_DIR:/=\%
   httpd !HTTPD_OPTIONS! -f %VIP_HTTPD_CONF% > %VIP_HTTPD_LOG_DIR%/httpd_out.log 2> %VIP_HTTPD_LOG_DIR%/httpd_err.log
 ) else if "%1"=="start_celeryd" (
-  celery worker -A %VIP_CELERY_APP% --logfile=%VIP_LOG_DIR%/celery_log.log --loglevel=INFO > %VIP_LOG_DIR%/celery_out.log 2> %VIP_LOG_DIR%/celery_err.log
+  celery worker -A %VIP_CELERY_APP% --logfile=%VIP_LOG_DIR%/celery_log.log --loglevel=%VIP_CELERYD_LOG_LEVEL% > %VIP_LOG_DIR%/celery_out.log 2> %VIP_LOG_DIR%/celery_err.log
 ) else if "%1"=="start_rabbitmq" (
   rabbitmq-server > %VIP_RABBITMQ_LOG_DIR%/rabbitmq_out.log 2> %VIP_RABBITMQ_LOG_DIR%/rabbitmq_err.log
 ) else if "%1"=="start_postgresql" (

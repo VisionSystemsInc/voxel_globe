@@ -62,7 +62,8 @@ set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 set VIP_NOTEBOOK_PROFILE_DIR=%VIP_PROJECT_ROOT%/notebooks/profile
 set BOXM2_OPENCL_DIR=%VIP_VXL_SRC_DIR%/contrib/brl/bseg/boxm2/ocl/cl/
 set VOLM_DIR=%VIP_VXL_SRC_DIR%/contrib/brl/bbas/volm3
-REM set VIP_PYTHONPATH=%VIP_VXL_PYTHON_DIR%
+set VIP_PYTHONPATH=%VIP_PROJECT_ROOT%
+REM for voxel_globe package
 
 REM ### Django settings
 set VIP_DJANGO_PROJECT=%VIP_PROJECT_ROOT%/voxel_globe
@@ -116,6 +117,7 @@ set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%
 REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
+set VIP_CELERYD_LOG_LEVEL=INFO
 set VIP_CELERY_TASK_LOG_DIR=%VIP_CELERY_LOG_DIR%
 set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
 set VIP_CELERY_APP=voxel_globe.tasks
