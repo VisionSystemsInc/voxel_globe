@@ -1,27 +1,37 @@
 {% extends "main/base.html" %}
 {% load staticfiles %}
+
 {% block title %}Voxel Globe - Order Voxel World{% endblock %}
-{% block pageTitle %}<h2>Hello World title</h2>{% endblock %}
+{% block pageTitle %}<h2>SFM Ordered</h2>{% endblock %}
+
 {% block includes %}
+
+<!-- Include the client side javascript code -->
+
 <style>
 </style>
+
 {% endblock %}
+
 {%block globalfunctions %}
 // Global functions defined outside of the jquery document ready function can be put here.
 {% endblock %}
+
 {% block javascript %}
+
 {% endblock %}
+
 {% block content %}
 <div id="mainContainer" class="main-content">
-
-{% if image_collection_list %}
+{% if image_list %}
+    Task {{ task_id }} (<a href="{% url 'order_build_voxel_world:order_status' task_id %}">get task status</a>) started using origin {{ origin }} to process:
     <ul>
-    {% for image_collection in image_collection_list %}
-        <li><a href="{% url 'order_build_voxel_world:make_order_2' image_collection.id %}">{{ image_collection.name }} - [{{ image_collection.id }}]</a></li>
+    {% for image in image_list.all %}
+        <li>{{ image.name }} - [{{ image.id }}]</li>
     {% endfor %}
     </ul>
 {% else %}
-    <p>No image collections are available.</p>
+    <p>No images are available.</p>
 {% endif %}
 
 </div>

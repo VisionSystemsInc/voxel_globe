@@ -1,0 +1,38 @@
+{% extends "main/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Voxel Globe - Order Voxel World{% endblock %}
+{% block pageTitle %}<h2>Pick a scene size</h2>{% endblock %}
+
+{% block includes %}
+
+<!-- Include the client side javascript code -->
+
+<style>
+</style>
+
+{% endblock %}
+
+{%block globalfunctions %}
+// Global functions defined outside of the jquery document ready function can be put here.
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}
+
+{% block content %}
+<div id="mainContainer" class="main-content">
+  <form action="{% url 'order_build_voxel_world:make_order_4' image_collection_id scene_id %}" method="post">
+    {% csrf_token %}
+    Latitude1 (S is negative): <input type=text" name="lat1" value="37.647978"/><br/>
+    Longitude1 (E is negative): <input type=text" name="lon1" value="-92.215533"/><br/>
+    Altitude1 (WGS84): <input type=text" name="alt1" value="300"/><br/>
+    Latitude2 (S is negative): <input type=text" name="lat2" value="37.648663"/><br/>
+    Longitude2 (E is negative): <input type=text" name="lon2" value="-92.214523"/><br/>
+    Altitude2 (WGS84): <input type=text" name="alt2" value="400"/><br/>
+    Voxel Size(meters): <input type=text" name="vox" value="1"/><br/>
+    <input type="submit" value="Order"/>
+  </form>
+</div>
+{% endblock %}

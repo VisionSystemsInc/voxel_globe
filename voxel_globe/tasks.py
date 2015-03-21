@@ -14,5 +14,5 @@ import voxel_globe.tiepoint.tasks
 import voxel_globe.arducopter.tasks
 import voxel_globe.visualsfm.tasks
 import voxel_globe.jpg_exif.tasks
-import voxel_globe.order.build_voxel_world.tasks
+import voxel_globe.build_voxel_world.tasks
 #Replace this with a task registry eventually... controlled by the django settings file I guess? or here
