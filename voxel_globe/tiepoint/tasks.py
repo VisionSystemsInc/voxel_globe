@@ -24,7 +24,7 @@ def updateTiePoint(self, id, xc, y, *args, **kwargs):
 
 @app.task
 def fetchCameraFrustum(**kwargs):
-  from ..meta.tools import getKTO, projectPoint
+  from ..meta.tools import getKto, projectPoint
   try:
     imageId = int(kwargs["imageId"])
 #    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
@@ -41,7 +41,7 @@ def fetchCameraFrustum(**kwargs):
     if image.camera:
       w = image.imageWidth;
       h = image.imageHeight;
-      K, T, llh = getKTO(image, history);
+      K, T, llh = getKto(image, history);
       llh1 = projectPoint(K, T, llh, numpy.array([0]), numpy.array([0]), distances=0) 
       llh2 = projectPoint(K, T, llh, numpy.array([0,w,w,0]), numpy.array([0,0,h,h]), distances=size)
   
@@ -107,7 +107,7 @@ def fetchCameraFrustum(**kwargs):
   
 @app.task
 def fetchCameraRay(**kwargs):
-  from ..meta.tools import getKTO, projectPoint
+  from ..meta.tools import getKto, projectPoint
   try:
     imageId = int(kwargs["imageId"])
 #    image = voxel_globe.meta.models.Image.objects.get(id=imageId)
@@ -122,7 +122,7 @@ def fetchCameraRay(**kwargs):
     y = int(kwargs.pop('Y', image.imageHeight/2))
   
     if image.camera:
-      K, T, llh = getKTO(image, history);
+      K, T, llh = getKto(image, history);
       llh1 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), distances=0) 
       llh2 = projectPoint(K, T, llh, numpy.array([x]), numpy.array([y]), zs=numpy.array([height]))
 

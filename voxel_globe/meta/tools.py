@@ -42,7 +42,7 @@ def getHistory(history=None, include=True):
 
   return _getHistory(histories)
 
-def getKTO(image, history=None):
+def getKto(image, history=None):
   ''' returns K, T, llh_origin (lon, lat, h)'''
   debug= 0;
   
@@ -98,8 +98,7 @@ def getKTO(image, history=None):
     
   return (K_i, T_camera_0, llh);
 
-
-def getKRT(image, origin=None, history=None, eps=1e-9):
+def getKrt(image, origin=None, history=None, eps=1e-9):
   ''' returns K, T, llh_origin (lon, lat, h)'''
   camera = image.camera.history(history);
   K_i = numpy.eye(3);

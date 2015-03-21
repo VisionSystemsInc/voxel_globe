@@ -16,7 +16,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
   from .tools import writeNvm, writeGcpFile, generateMatchPoints, runSparse, readNvm
   
   from voxel_globe.tools.wget import download as wget
-  from ..meta.tools import getKTO
+  from ..meta.tools import getKto
   import voxel_globe.tools.enu as enu
   import numpy
   
@@ -71,7 +71,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
     imageInfo = {'localName':localName, 'index':x}
 
     try:
-      [K, T, llh] = getKTO(image, history=history);
+      [K, T, llh] = getKto(image, history=history);
       imageInfo['K_intrinsics'] = K;
       imageInfo['transformation'] = T;
       imageInfo['enu_origin'] = llh;
@@ -94,7 +94,7 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
 #   for image in imageList:
 #     if 1:
 #     #try:
-#       [K, T, llh] = getKTO(image);
+#       [K, T, llh] = getKto(image);
 #       cameras.append({'image':image.id, 'K':K, 'tranformation':T, 'origin':llh})
 #     #except:
 #       pass  
