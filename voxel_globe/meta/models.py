@@ -64,7 +64,6 @@ class VipCommonModel(models.Model):
     rels = [rel[0] for rel in rels
             if len(rel)]
     return rels
-    
 
   #Returns the string representation of the model. Documentation says I 
   #need to do this. __unicode__ on Python 2
@@ -159,7 +158,9 @@ class VipObjectModel(VipCommonModel):
     
   @classmethod
   def taskAddSync(cls, *args, **kwargs):
-    ''' This is DONE, however will NOT currently work. It has to do with some python
+    ''' I believe this function was suppose to ease creating objects (for development)
+        without having to use services all the time.
+        This is DONE, however will NOT currently work. It has to do with some python
         thing where a class can be loaded twice, and thus have a different ID, and
         super fails a basic "isinstance" test. I BELEIVE this will start working
         once I properly import celery into django, and load celery in a shared
@@ -168,26 +169,32 @@ class VipObjectModel(VipCommonModel):
         I will either 
         1) Have to give up on this neat trick
         2) Handle super myself?
-        3) Read more on http://thingspython.wordpress.com/2010/09/27/another-super-wrinkle-raising-typeerror/'''
-#    @tasks.app.task(base=tasks.VipTask, bind=True)
-#This too is broken until I do it right
+        3) Read more on http://thingspython.wordpress.com/2010/09/27/another-super-wrinkle-raising-typeerror/
+        
+        I think it works now...????'''
+    from voxel_globe import tasks
+
+    @tasks.app.task(base=tasks.VipTask, bind=True)
     def __taskAddSync(self, *args, **kwargs):
       obj = cls.create(*args, **kwargs);
       obj.service_id = self.request.id;
       obj.save();
       return obj.id;
-    return __taskAddSync.apply(*args, **kwargs)
+    return __taskAddSync.apply(args=args, kwargs=kwargs)
 
   @classmethod
   def taskAddAsync(cls, *args, **kwargs):
+    ''' I do not think this will work, because __taskAdd needs to be registered with
+        celery, and it can't be done when it's a inline function, Move to common_tasks, 
+        and register. But I won't do that now, until I use taskAddAsync more, and know
+        it is working now.'''
 #    @tasks.app.task(base=tasks.VipTask, bind=True)
-#This too is broken until I do it right
-    def __taskAdd(self, *args, **kwargs):
+    def __taskAddAsync(self, *args, **kwargs):
       obj = cls.create(*args, **kwargs);
       obj.service_id = self.request.id;
       obj.save();
       return obj.id;
-    return __taskAdd.apply_async(*args, **kwargs)
+    return __taskAddAsync.apply_async(args=args, kwargs=kwargs)
 
   ''' I never finished this. Finish when above is fixed ''' 
   # @classmethod
