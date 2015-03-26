@@ -65,7 +65,7 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, cleanup=True, his
     
   variance = 0.06
   
-  scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  "gpu1");
+  scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  "gpu");
 
   current_level = 0;
 

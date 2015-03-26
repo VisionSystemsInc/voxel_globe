@@ -47,33 +47,14 @@ goto usage
 
 :valid_service_name
 set NEXT=usage
-for %%i in (start stop restart status killall) do (
+for %%i in (start stop restart status test killall) do (
   if /i "%%i"=="%2" set NEXT=%2
 )
 
 if "%NEXT%"=="usage" goto usage
 ::Skip elevate because there is no reason
 
-:check_elevated
-net session >nul 2>&1
-if not %errorLevel% == 0 (
-  if "%attemptElevate%" NEQ "1" (
-    set attemptElevate=1
-    echo Elevated permissions...
-    ECHO Set UAC = CreateObject^("Shell.Application"^) > "%~dp0\OEgetPrivileges.vbs" 
-    ECHO UAC.ShellExecute "%~f0", "%*", "", "runas", 1 >> "%~dp0\OEgetPrivileges.vbs" 
-    "%~dp0\OEgetPrivileges.vbs" 
-    exit /B 1
-  ) else (
-    echo ERROR: Elevation of permissinos FAILED. I will attempt to run the command anyway ^
-but it will probably fail. Please make sure you are running from an user account ^
-that has the capability of elevate ^(UAC permissions^), not neccesarily an ^
-admin account.
-  )
-)
-del %~dp0\OEgetPrivileges.vbs > NUL 2>&1
-
-REM Create log directories incase they don't exist.
+REM Create log directories in case they don't exist.
 if not exist %VIP_POSTGRESQL_LOG_DIR:/=\% mkdir %VIP_POSTGRESQL_LOG_DIR:/=\%
 if not exist %VIP_RABBITMQ_LOG_DIR:/=\% mkdir %VIP_RABBITMQ_LOG_DIR:/=\%
 if not exist %VIP_CELERY_LOG_DIR:/=\% mkdir %VIP_CELERY_LOG_DIR:/=\%
@@ -86,49 +67,20 @@ goto usage
 
 :start
 for %%t in (%TASKS%) do (
-  schtasks /run /TN %%t_%VIP_DAEMON_POSTFIX%
+  schtasks /run /TN %%t_start_%VIP_DAEMON_POSTFIX%
   
-  if /i "%%t"=="postgresql" (
-    for /l %%q in (1,1,10) do (
-      if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
-        pg_isready %VIP_POSTGRESQL_CREDENTIALS% > nul
-        if "!errorlevel!" NEQ "0" (
-          echo Waiting for database to come up... %%q
-          timeout /T 1 /NOBREAK > nul
-        ) else (
-          set VIP_POSTGRESQL_TEMP_STARTED=1
-        )
-      )
-    )
-    if !VIP_POSTGRESQL_TEMP_STARTED! NEQ 1 (
-      echo Postgresql has failed to start. If you are continuing to see
-      echo this, please contact an administrator.
-    )
-    set VIP_POSTGRESQL_TEMP_STARTED=
-  )
-
-  if /i "%%t"=="httpd" (
-    for /l %%q in (1, 1, 10) do (
-      if !VIP_HTTPD_TEMP_STARTED! NEQ 1 (
-        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
-        if "!errorlevel!"=="0" set VIP_HTTPD_TEMP_STARTED=1
-        echo Waiting for httpd server to come up... %%q
-        timeout /T 1 /NOBREAK > nul
-      )
-    )
-    if !VIP_HTTPD_TEMP_STARTED! NEQ 1 (
-      echo Either httpd has failed to start, or it is doing its initial deploy that may
-      echo take a long time. This should only happen once. If you are continuing to see
-      echo this, please contact an administrator.
-    )
-    set VIP_HTTPD_TEMP_STARTED=
+  call %VIP_INIT_DIR%/%%t waitstart 20.0
+  if "!errorlevel!" NEQ "0" (
+    echo %%t did not start successfully
+  ) else (
+    echo %%t successfully start
   )
 )
 goto done
 
 :killall
 for %%t in (%TASKS%) do (
-  schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
+  schtasks /run /TN %%t_stop_%VIP_DAEMON_POSTFIX%
   if /i "%%t"=="rabbitmq" (
     for /F "" %%i in ('python -m voxel_globe.tools.find_process erl.exe rabbitmq') do (
       taskkill /fi "PID eq %%i" /f
@@ -158,49 +110,18 @@ goto done
 
 :stop
 for %%t in (%TASKS%) do (
-  schtasks /end /TN %%t_%VIP_DAEMON_POSTFIX%
-  if /i "%%t"=="rabbitmq" taskkill /im %VIP_RABBITMQ_DAEMON% /f
-  if /i "%%t"=="postgresql" (
-    pg_isready %VIP_POSTGRESQL_CREDENTIALS% > NUL
-    if not errorlevel 1 (
-      echo Stray postgresql detected, cleaning up
-      pg_ctl stop -D %VIP_POSTGRESQL_DATABASE% -m fast 2>&1 >> %VIP_POSTGRESQL_LOG_DIR%/postgresql_stop_stray.log
-      if errorlevel 1 taskkill /im postgres.exe /f
-    )
-  )
-  if /i "%%t"=="httpd" (
-    for /l %%q in (1, 1, 5) do (
-      if !VIP_HTTPD_TEMP_STOPPED! NEQ 1 (
-        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_HTTPD_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
-        if "!errorlevel!" NEQ "0" set VIP_HTTPD_TEMP_STOPPED=1
-        echo Waiting for httpd server to go down... %%q
-        timeout /T 1 /NOBREAK > nul
-      )
-    )
-    if !VIP_HTTPD_TEMP_STOPPED! NEQ 1 (
-      echo I give up
-    )
-    set VIP_HTTPD_TEMP_STOPPED=
-  )
-
-  if /i "%%t"=="notebook" (
-    for /l %%q in (1, 1, 5) do (
-      if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
-        python -c "import urllib2; exec('try:\n  urllib2.urlopen(\'http://localhost:%VIP_NOTEBOOK_PORT%/\', timeout=10)\nexcept urllib2.HTTPError:\n  exit(0)')" > NUL 2>&1
-        if "!errorlevel!" NEQ "0" set VIP_NOTEBOOK_TEMP_STOPPED=1
-        echo Waiting for notebook server to go down... %%q
-        timeout /T 1 /NOBREAK > nul
-      )
-    )
-    if !VIP_NOTEBOOK_TEMP_STOPPED! NEQ 1 (
-      echo I give up
-    )
-    set VIP_NOTEBOOK_TEMP_STOPPED=
+  schtasks /run /TN %%t_stop_%VIP_DAEMON_POSTFIX%
+  
+  call %VIP_INIT_DIR%/%%t waitstop 20.0
+  if "!errorlevel!" NEQ "0" (
+    echo %%t did not stop successfully
+  ) else (
+    echo %%t is stopped
   )
 )
 if "%VIP_RESTART%" == "1" (
   set VIP_RESTART=
-  daemon.bat %1 start
+  call daemon.bat %1 start
 )
 goto done
 
@@ -214,7 +135,17 @@ REM call daemon.bat %1 start
 goto done
 
 :status
-for %%t in (%TASKS%) do schtasks /query /TN %%t_%VIP_DAEMON_POSTFIX%
+REM for %%t in (%TASKS%) do schtasks /query /TN %%t_%VIP_DAEMON_POSTFIX%
+for %%t in (%TASKS%) do (
+  call %VIP_INIT_DIR%/%%t.bat status
+)
+goto done
+
+:test
+REM for %%t in (%TASKS%) do schtasks /query /TN %%t_%VIP_DAEMON_POSTFIX%
+for %%t in (%TASKS%) do (
+  call %VIP_INIT_DIR%/%%t.bat test
+)
 goto done
 
 :usage
