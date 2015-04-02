@@ -8,7 +8,7 @@ from os.path import join as path_join
 
 from django.contrib.gis import geos
 
-import subprocess;
+from voxel_globe.tools.subprocessbg import Popen
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__);
@@ -42,7 +42,7 @@ def ingest_data(self, uploadSession_id, imageDir):
       self.update_state(state='PROCESSING', 
                         meta={'stage':'File %s of %d' % (f, len(files))})
       zoomifyName = f[:-4] + '_zoomify'
-      pid = subprocess.Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
+      pid = Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
       pid.wait();
       
       relFilePath = os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');

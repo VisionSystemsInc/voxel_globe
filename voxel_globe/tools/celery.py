@@ -9,6 +9,9 @@ STDOUT_LEVEL=logging.DEBUG;
 STDERR_PREAMBLE='stderr:'
 STDOUT_PREAMBLE='stdout:'
 
+if os.name == 'nt' and os.environ['VIP_DAEMON_BACKGROUND'] == '1':
+    subprocess.STARTUPINFO.dwFlags = subprocess.STARTF_USESHOWWINDOW
+
 class StdLog:
   def __init__(self, logger, level, preamble):
     self.logger=logger;

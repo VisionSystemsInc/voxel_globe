@@ -1,7 +1,7 @@
 import subprocess
-
+from voxel_globe.tools.subprocessbg import Popen
 def findProcess(imageName, filterString):
-  pid = subprocess.Popen(['wmic', 'path', 'win32_process', 'where', "Name='%s'" % imageName, 'get', 'CommandLine,ProcessId', '/VALUE'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  pid = Popen(['wmic', 'path', 'win32_process', 'where', "Name='%s'" % imageName, 'get', 'CommandLine,ProcessId', '/VALUE'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out = pid.communicate()
   out=out[0].split('\r\r\n\r\r\n')
   out=filter(lambda x:'CommandLine' in x, out)
