@@ -21,6 +21,11 @@ REM or enable them all at once.
 set VIP_DJANGO_DEBUG=%VIP_DEBUG%
 set VIP_DJANGO_TEMPLATE_DEBUG=%VIP_DEBUG%
 set VIP_CELERY_AUTORELOAD=%VIP_DEBUG%
+set VIP_CELERY_DJANGO_DEBUG=0
+REM Special flag to attempt to disable django debug when loaded by celery.
+REM HOPEFULLY this allows the django server server by httpd to be in debug
+REM mode while the django loaded in celery is not. This should prevent the
+REM memory leak in celery while still making debugging bearable
 set VIP_HTTPD_DEBUG_INDEXES=%VIP_DEBUG%
 
 set VIP_INITIALIZE_DATABASE_CONFIRM=1
@@ -117,7 +122,7 @@ set VIP_CELERY_PROCESSORS=%VIP_PROJECT_ROOT%
 REM This is temporary, I will remove it once it has been merged with the voxel globe dir, and 
 set VIP_CELERY_PID_DIR=%VIP_PID_DIR%/celery
 set VIP_CELERY_LOG_DIR=%VIP_LOG_DIR%/celery
-set VIP_CELERYD_LOG_LEVEL=INFO
+set VIP_CELERY_LOG_LEVEL=INFO
 set VIP_CELERY_TASK_LOG_DIR=%VIP_CELERY_LOG_DIR%
 set VIP_CELERY_LOCK_DIR=%VIP_LOCK_DIR%/celery
 set VIP_CELERY_APP=voxel_globe.tasks
@@ -168,6 +173,8 @@ set VIP_WSGI_SCRIPT_ALIAS=%VIP_DJANGO_SITE%/wsgi.py
 set VIP_WSGI_ACCESS_SCRIPT=%VIP_DJANGO_SITE%/auth.py
 
 set VIP_UTIL_DIR=%VIP_INSTALL_DIR%/utils
+
+set VIP_VSI_DIR=%VIP_PROJECT_ROOT%/external/vsi
 
 REM *********** NON-VIP Section. There can affect ANYTHING ***********
 REM These parameters are not protected by the VIP Prefix, and thus
