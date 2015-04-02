@@ -1,37 +1,35 @@
 #!/usr/bin/env bash
 
-if [ "$#" == "0" ]; then ADDED_ARGS='-print'; fi
+ROOT_DIR=$(dirname ${BASH_SOURCE[0]})
 
-cd $(dirname ${BASH_SOURCE[0]})
+funs='function contain() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            echo "y"
+            return 0
+        fi
+    }
+    echo "n"
+    return 1
+}'
 
-#Don't forget, if you want to limit the search (-name blah)
-#And still get an accurate print out, add the -print yourself
-#(so it gets IN the () below, and works right)
+vars='EXCLUDE_SUBMOD=(external/data vxl_src)'
 
-find . -path './vxl*' -prune -o -path './images' -prune -o -path '*/usr' -prune \
--o \( -not -path '*/SOURCES/common.inc' -a -path '*/SOURCES/*' \) \
--o -path '*/rpmbuild/BUILD*' -prune \
--o -path '*/rpmbuild/RPMS' -prune \
--o -path '*/rpmbuild/SRPMS' -prune \
--o -path '*/rpmbuild/db' -prune \
--o -path '*/bin' -prune -o -path '*/share' -prune \
--o -name 'static_deploy' -prune \
--o -name 'static_common' -prune \
--o -path '*/lib' -prune -o -path '*/include' -prune -o -path '*/var' -prune \
--o -path './data/*/*' -prune -o -path '*/.git' -prune \
--o -path './external/bin_Windows_NT_AMD64/postgresql/*' -prune \
--o -path './external/bin_Windows_NT_AMD64/Apache24/*' -prune \
--o -path './external/bin_Windows_NT_AMD64/erlang/*' -prune \
--o -path './external/bin_Windows_NT_AMD64/python/*' -prune \
--o -path './external/bin_Windows_NT_AMD64/rabbitmq_server/*' -prune \
--o -path './external/bin_Windows_NT_AMD64/vips/*' -prune \
--o -path './tmp' -prune \
--o -path './notebooks/profile' -prune \
--o \( -not -path '*/roam/roam' -a -path '*/roam/*' \) \
--o -type f -not -name \*.exe -not -name \*.msi -not -name \*.gz \
--not -name \*.tgz -not -name \*.zip -not -name \*.bz2 -not -name \*.rpm \
--not -name \*.xz -not -name \*.dll -not -name \*.py\? -not -name \*.pdf \
--not -name \*.png -not -name \*.jpg\
--a \( ${ADDED_ARGS} "${@}" \)
+FILTER='\.exe$|\.zip$|\.dll$|\.msi$|\.gz$|\.zip$|\.bz2$|\.xz$|\.tgz$|.pdf$|\.png$'
+#IGNORE_SUBMODULES=$(git submodule --quiet foreach 'echo $name' | awk '{printf("^%s$|",$0)}')
+#This takes like a second :(
+IGNORE_SUBMODULES=$(grep path .gitmodules  | sed 's/.*= //' | awk '{printf("^%s$|",$0)}')
 
-#
+cd ${ROOT_DIR}
+git ls-files -oc --exclude-standard | \grep -vE "${IGNORE_SUBMODULES}"'voxel_globe/static_common/|data/world_borders|'"${FILTER}" | awk '{printf("./%s\n", $0)}'
+
+git submodule --quiet foreach "
+${funs}
+eval \"$vars\"
+"'
+if [ "$(contain "${EXCLUDE_SUBMOD[@]}" "$name")" == "y" ]; then
+return 0
+fi
+git ls-files -oc --exclude-standard | \grep -Ev '"'${FILTER}' | awk '{printf(\"./'\"\${name}\"'/%s\n\", \$0)}'"
