@@ -13,3 +13,6 @@
 [submodule "external/data"]
 	path = external/data
 	url = git@bitbucket.org:visionsystemsinc/vip_external_data.git
+[submodule "external/vsi"]
+	path = external/vsi
+	url = git@bitbucket.org:visionsystemsinc/vsi_common.git
