@@ -11,6 +11,7 @@ from voxel_globe.ingest import models
 import voxel_globe.ingest.serializers
 import rest_framework.routers
 import rest_framework.viewsets
+import rest_framework.filters
 router = rest_framework.routers.DefaultRouter()
 
 import distutils.dir_util
@@ -34,9 +35,31 @@ router.register(models.Directory._meta.model_name+'_nest', ViewSetFactory(models
 router.register(models.UploadSession._meta.model_name, ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.UploadSessionSerializer));
 router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(models.UploadSession, voxel_globe.ingest.serializers.NestFactory(voxel_globe.ingest.serializers.UploadSessionSerializer)));
 
+#key: [Friendly name, moduleName]
+#Module name should not includ tasks, but it is assume that tasks.ingest_data is used
+#I'm sure this will be updated at a later time to have api data in the module rather than here 
+#SENSOR_TYPES = {'arducopter':'Arducopter', 
+#                'jpg_exif':'JPEG with EXIF tags'};
+#to be used in conjunction with importlib
+
+def getSensorType():
+  ''' Helper function to get all registered ingest functions '''
+  class IngestClass(object):
+    def __init__(self, fun, description=''):
+      self.fun=fun
+      self.description=description
+  ingests = {}
+  from voxel_globe.tasks import ingest_tasks
+  for tasks in ingest_tasks:
+    task = tasks.ingest_data
+    ingests[task.name] = IngestClass(task, task.description)
+  return ingests
+
+SENSOR_TYPES = getSensorType()
+
 def chooseSession(request):
     return render_to_response('ingest/html/chooseSession.html', 
-                            {'sensorTypes': models.SENSOR_TYPES}, 
+                            {'sensorTypes': SENSOR_TYPES}, 
                             context_instance=RequestContext(request))
 
 def addFiles(request):
@@ -135,13 +158,10 @@ def ingestFolder(request):
   
   distutils.dir_util.copy_tree(sessionDir, imageDir)
   distutils.dir_util.remove_tree(sessionDir)
-  
-  if len(metadata)>0:
-    import voxel_globe.arducopter.tasks;
-    task = voxel_globe.arducopter.tasks.ingest_data.delay(uploadSession_id, imageDir);
-  else:
-    import voxel_globe.jpg_exif.tasks;
-    task = voxel_globe.jpg_exif.tasks.ingest_data.delay(uploadSession_id, imageDir);
+
+  ingest_data = __import__('voxel_globe.'+uploadSession.sensorType+'.tasks', fromlist=['ingest_data']).ingest_data
+
+  task = ingest_data.delay(uploadSession_id, imageDir);
 
   return render(request, 'ingest/html/ingest_started.html', 
                 {'task_id':task.task_id})

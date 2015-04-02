@@ -56,9 +56,10 @@ def make_order_4(request, image_collection_id, scene_id):
           'lon2': request.POST['lon2'], 
           'alt2': request.POST['alt2'],
           'vox': request.POST['vox']}
+  
+  skipFrames = int(request.POST['skip'])
 
-  #CALL TASK!!!!   t = tasks.runVisualSfm.apply_async(args=(image_collection_id, scene_id, True, history))
-  t = tasks.runBuildVoxelModel.apply_async(args=(image_collection_id, scene_id, bbox, True, history))
+  t = tasks.runBuildVoxelModel.apply_async(args=(image_collection_id, scene_id, bbox, skipFrames, True, history))
 
   #Crap ui filler   
   image_collection = models.ImageCollection.objects.get(id=image_collection_id);
@@ -71,7 +72,7 @@ def make_order_4(request, image_collection_id, scene_id):
                    {'origin':scene.origin,
                     'image_list':image_list,
                     'task_id': t.task_id})
-  response.delete_cookie('order_visualsfm')
+  response.delete_cookie('order_build_voxel_world_uuid')
 
   return response
 

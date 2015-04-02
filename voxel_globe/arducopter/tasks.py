@@ -114,6 +114,9 @@ def ingest_data(self, uploadSession_id, imageDir):
                                        (7428, averageGps[0], averageGps[1], averageGps[2])).save()
   uploadSession.delete()
 
+ingest_data.name="arducopter"
+ingest_data.description = "Arducopter data collect"
+
 @app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):
   images = glob(path_join(env['VIP_PROJECT_ROOT'], 'images', '1fps*', ''));

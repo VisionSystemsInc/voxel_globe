@@ -6,7 +6,7 @@ logger = get_task_logger(__name__)
 import os
 
 @app.task(base=VipTask, bind=True)
-def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, cleanup=True, history=None):
+def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, cleanup=True, history=None):
   from voxel_globe.meta import models
   from voxel_globe.meta.tools import getKrt
   import voxel_globe.tools
@@ -27,7 +27,8 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, cleanup=True, his
   app_model = "boxm2_mog3_grey"
   obs_model = "boxm2_num_obs"
   block_len_xy = 100
-  block_len_z = 60
+  block_len_z = 40
+  logger.warning(bbox)
   create_scene_and_blocks(processingDir, app_model, obs_model,
                           scene.origin[0], scene.origin[1], scene.origin[2],
                           float(bbox['lon1']), float(bbox['lat1']), float(bbox['alt1']),
@@ -65,33 +66,66 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, cleanup=True, his
     
   variance = 0.06
   
-  scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  "gpu");
+  scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  "gpu1");
 
   current_level = 0;
 
   loaded_imgs = [];
   loaded_cams = [];
 
-  for i in range(len(imageNames)):
-    #print "i: %d img name: %s cam name: %s" % (i, imgs[i], cams[i]);
+  for i in range(0, len(imageNames), skipFrames):
+    logger.debug("i: %d img name: %s cam name: %s", i, imageNames[i], cameraNames[i])
     self.update_state(state='PRELOADING', meta={'stage':'image load', 'i':i, 'total':len(imageNames)})
-    img, ni, nj = load_image(imageNames[i]);
-    loaded_imgs.append(img);
-    pcam = load_perspective_camera(cameraNames[i]);
-    loaded_cams.append(pcam);
+    img, ni, nj = load_image(imageNames[i])
+    loaded_imgs.append(img)
+    pcam = load_perspective_camera(cameraNames[i])
+    loaded_cams.append(pcam)
 
-  refine_cnt = 4;
+  refine_cnt = 5;
   for rfk in range(0, refine_cnt, 1):
-    frames = range(rfk,len(loaded_cams),5);
-
-    for idx, i in enumerate(frames):
-      print "refine_cnt: %d, idx: %d, i: %d" % (rfk, idx, i);
-      scene.update(loaded_cams[i],loaded_imgs[i],True,True,None,"gpu",variance); # update_alpha=True, update_app = True, mask=None
+    for idx, (img, cam) in enumerate(zip(loaded_imgs, loaded_cams)):
+      self.update_state(state='PROCESSING', meta={'stage':'update', 'i':rfk+1, 'total':refine_cnt, 'image':idx+1, 'images':len(loaded_imgs)})
+      logger.debug("refine_cnt: %d, idx: %d", rfk, idx)
+      scene.update(cam,img,True,True,None,"gpu",variance,tnear = 1000.0, tfar = 100000.0);
 
     scene.write_cache();
     
     if rfk < refine_cnt-1:
-      print "refining..";
-      scene.refine(0.3, "gpu1");
+      self.update_state(state='PROCESSING', meta={'stage':'refine', 'i':rfk, 'total':refine_cnt})
+      logger.debug("refining %d...", rfk)
+      scene.refine(0.3, "gpu");
       scene.write_cache();
+      
+  ''' The rest of this is crap preview code '''
+  
+  from distutils.dir_util import mkpath
+  expectedDir = os.path.join(processingDir, 'preview')
+  mkpath(expectedDir)
+  renderFlyThrough(scene, expectedDir, 768, 768)
+  
+
+def renderFlyThrough(scene, outDir, width, height):
+  from boxm2_adaptor import init_trajectory,trajectory_next
+  from boxm2_scene_adaptor import persp2gen, stretch_image, save_image
+  from boxm2_register import remove_data
+  startInc = 45.0                        #start incline angle off nadir
+  endInc = 45.0                          #end incline angle off nadir
+  radius   = -1.0                        #radius -1 defaults to half width of the volume
+
+  trajectory = init_trajectory(scene.scene, startInc, endInc, radius, width, height)
+  min_value = 0.0 
+  max_value = 1.0
+  
+  increments = 10
+  counter = 1
+  for x in range(0, 500, 1):
+    prcam = trajectory_next(trajectory)
+    if x % increments == 0:
+      expimg = scene.render(prcam, width, height)
+      expimg_s = stretch_image(expimg, min_value, max_value, 'byte')
+      save_image(expimg_s, os.path.join(outDir, 'expected_%05d.tif'%counter))
+      remove_data(expimg.id)
+      counter += 1
+    remove_data(prcam.id)
+
 

@@ -153,3 +153,5 @@ def ingest_data(self, uploadSession_id, imageDir):
                                        origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
                                        (srid, averageGps[0], averageGps[1], averageGps[2])).save()
   uploadSession.delete()
+ingest_data.name="jpg_exif"
+ingest_data.description = "JPEGs with EXIF GPS tags"

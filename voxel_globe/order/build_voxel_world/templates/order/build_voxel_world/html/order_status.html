@@ -16,8 +16,16 @@ Task ID: {{ task.task_id }}<BR>
   State: {{ task.state }}<BR>
   Reason: {{ task.result }}<BR>
 {% elif task.state == "INITIALIZE" %}
-{% elif task.result.stage %}
-  {% if task.result.stage == "generate match points" %}
+  State: {{ task.state }}<BR>
+  Stage: {{ task.result.stage }} {{ task.result.i }}/{{task.result.total }}<BR>
+{% elif task.state == "PRELOADING" %}
+  State: {{ task.state }}<BR>
+  Stage: {{ task.result.stage }} {{ task.result.i }}/{{task.result.total }}<BR>
+{% elif task.state == "PROCESSING" %}
+  State: {{ task.state }}<BR>
+  Stage: {{ task.result.stage }} {{ task.result.i }}/{{task.result.total }}<BR>
+  {% if task.result.stage == "update" %}
+  Image: {{ task.result.image }}/{{task.result.images }}
   {% endif %}
 {% else %}
   State: {{ task.state }}<BR>

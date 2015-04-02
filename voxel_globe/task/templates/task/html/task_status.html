@@ -20,6 +20,8 @@ Task ID: {{ task.task_id }}<BR>
 {% if task.state == "FAILURE" %}
   State: {{ task.state }}<BR>
   Reason: {{ task.result }}<BR>
+  Stack Trace: <br>
+  {{ task.traceback_html |safe }}
 {% else %}
   State: {{ task.state }}<BR>
   Result: {{ task.result }}<BR>

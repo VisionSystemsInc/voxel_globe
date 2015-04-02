@@ -76,9 +76,12 @@ class ServiceInstanceAdmin(admin.ModelAdmin):
   list_display = ('__unicode__', 'entryTime', 'finishTime', 'inputs', 'formattedOutput');
   inlines = [];
   def formattedOutput(self, obj):
+    from voxel_globe.task.views import tracebackToHtml
     s = str(obj.outputs)
     if s.startswith('"Traceback'):
-      return s.replace('\\n', '<P>')
+      s = str(s).decode('string_escape')[1:-1]
+      s = tracebackToHtml(s)
+      return s
     else:
       return s.replace('\\n', '<BR>')
   formattedOutput.allow_tags = True

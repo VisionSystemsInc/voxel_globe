@@ -122,7 +122,7 @@ $('#newSession').click(function (e) {
 Enter a name for the session: <input id="newSessionId" type="text" value='{{ uploadSession.id }}'></input><BR>
 Sensor Type: <select id="newSensorType">
 {% for key,value in sensorTypes.items %}
-  <option value="{{ key }}">{{ value.0 }}</option>
+  <option value="{{ key }}">{{ value.description }}</option>
 {% endfor %}
 </select>
 </div>
