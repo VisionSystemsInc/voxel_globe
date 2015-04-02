@@ -12,6 +12,12 @@ if not "%VIP_NARG%"=="2" (
   goto usage
 )
 
+REM killall needs admin rights
+if /i "killall"=="%2" (
+  call %VIP_INSTALL_DIR%/elevate.bat %~f0 %*
+  if "!errorlevel!" == "1" exit /b
+)
+
 ::Special case all
 if /i "%1" == "all" (
   if /i "%2" == "stop" set VIP_RESERVE_ORDER=1
@@ -115,6 +121,8 @@ for %%t in (%TASKS%) do (
   call %VIP_INIT_DIR%/%%t waitstop 20.0
   if "!errorlevel!" NEQ "0" (
     echo %%t did not stop successfully
+    call %VIP_INIT_DIR%/%%t stop /f
+    call %VIP_INIT_DIR%/%%t waitstop 2.0
   ) else (
     echo %%t is stopped
   )
