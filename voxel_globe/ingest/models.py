@@ -13,7 +13,7 @@ class IngestCommonModel(models.Model):
 
 class UploadSession(IngestCommonModel):
   sensorType = models.CharField(max_length=30)
-  pass;
+  pass
 
 class Directory(IngestCommonModel):
   session = models.ForeignKey('UploadSession', related_name='directory');

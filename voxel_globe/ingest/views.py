@@ -45,14 +45,14 @@ router.register(models.UploadSession._meta.model_name+'_nest', ViewSetFactory(mo
 def getSensorType():
   ''' Helper function to get all registered ingest functions '''
   class IngestClass(object):
-    def __init__(self, fun, description=''):
-      self.fun=fun
+    def __init__(self, ingest_data, description=''):
+      self.ingest_data=ingest_data
       self.description=description
   ingests = {}
   from voxel_globe.tasks import ingest_tasks
   for tasks in ingest_tasks:
     task = tasks.ingest_data
-    ingests[task.name] = IngestClass(task, task.description)
+    ingests[task.dbname] = IngestClass(task, task.description)
   return ingests
 
 SENSOR_TYPES = getSensorType()
@@ -159,9 +159,7 @@ def ingestFolder(request):
   distutils.dir_util.copy_tree(sessionDir, imageDir)
   distutils.dir_util.remove_tree(sessionDir)
 
-  ingest_data = __import__('voxel_globe.'+uploadSession.sensorType+'.tasks', fromlist=['ingest_data']).ingest_data
-
-  task = ingest_data.delay(uploadSession_id, imageDir);
+  task = SENSOR_TYPES[uploadSession.sensorType].ingest_data.delay(uploadSession_id, imageDir);
 
   return render(request, 'ingest/html/ingest_started.html', 
                 {'task_id':task.task_id})

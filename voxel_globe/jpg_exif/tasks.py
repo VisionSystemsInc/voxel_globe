@@ -1,6 +1,6 @@
 import os
 #import voxel_globe.tasks as tasks
-from ..common_tasks import app, VipTask
+from voxel_globe.common_tasks import app, VipTask
 from glob import glob
 import voxel_globe.meta.models
 from os import environ as env
@@ -61,7 +61,7 @@ def ingest_data(self, uploadSession_id, imageDir):
           pixel_format = 'f'
 
       img = voxel_globe.meta.models.Image.create(
-                             name="Generic Upload %s (%s) Frame %s" % (uploadSession.name, uploadSession_id, basename), 
+                             name="JPEG EXIF Upload %s (%s) Frame %s" % (uploadSession.name, uploadSession_id, basename), 
                              imageWidth=image.size[0], imageHeight=image.size[1], 
                              numberColorBands=image.layers, pixelFormat=pixel_format, fileFormat='zoom',
                              imageUrl='%s://%s:%s/%s/%s/' % (env['VIP_IMAGE_SERVER_PROTOCOL'], 
@@ -148,10 +148,10 @@ def ingest_data(self, uploadSession_id, imageDir):
   except:
     averageGps = numpy.mean(numpy.array(gpsList2), 0);
 
-  voxel_globe.meta.models.Scene.create(name="Generic origin %s (%s)" % (uploadSession.name, uploadSession_id), 
+  voxel_globe.meta.models.Scene.create(name="JPEG EXIF origin %s (%s)" % (uploadSession.name, uploadSession_id), 
                                        service_id = self.request.id,
                                        origin='SRID=%d;POINT(%0.12f %0.12f %0.12f)' % \
                                        (srid, averageGps[0], averageGps[1], averageGps[2])).save()
   uploadSession.delete()
-ingest_data.name="jpg_exif"
+ingest_data.dbname="jpg_exif"
 ingest_data.description = "JPEGs with EXIF GPS tags"

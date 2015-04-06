@@ -99,10 +99,20 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, clean
   ''' The rest of this is crap preview code '''
   
   from distutils.dir_util import mkpath
-  expectedDir = os.path.join(processingDir, 'preview')
+  import tempfile
+  ingestDir = tempfile.mkdtemp(dir=os.environ['VIP_IMAGE_SERVER_ROOT']);
+  expectedDir = os.path.join(ingestDir, 'preview')
   mkpath(expectedDir)
-  renderFlyThrough(scene, expectedDir, 768, 768)
+  renderFlyThrough(scene, expectedDir, 1024, 1024)
   
+  from voxel_globe.no_metadata.tasks import ingest_data
+  from voxel_globe.ingest.models import UploadSession
+  import django.contrib.auth.models
+  some_owner_id = django.contrib.auth.models.User.objects.all()[0].id 
+  uploadSession = UploadSession.objects.create(name='Voxel preview %s' %imageCollection.name, 
+                                               owner_id=some_owner_id) #sacrificial uploadSession
+  ingest_data.apply(args=(uploadSession.id, ingestDir))
+
 
 def renderFlyThrough(scene, outDir, width, height):
   from boxm2_adaptor import init_trajectory,trajectory_next

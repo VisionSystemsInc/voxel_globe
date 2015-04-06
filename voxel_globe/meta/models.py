@@ -8,11 +8,15 @@ from . import history_manager
 
 from uuid import uuid4;
 
+import numpy as np
+
 # Create your models here.
 
-PIXEL_FORMAT = (('f', 'Float'), ('d', 'Double'), ('q', 'Quadruple'), 
-                 ('b', 'Byte 8'), ('s', 'Short 16'), 
-                 ('i', 'Integer 32'), ('l', 'Long Integer 64'));
+PIXEL_FORMAT = map(np.dtype, sum(np.sctypes.values(), []))
+PIXEL_FORMAT = zip(map(lambda x: x.char, PIXEL_FORMAT), 
+                   map(lambda x: x.name, PIXEL_FORMAT))
+#Basically, V is the other (so Two Ration Ints is an other case), 
+#while O is a python object other, probably not of concern  
 
 LENGTH_UNIT = (('m', 'Meters'), ('f', 'Feet'))
 ANGLE_UNIT = (('r', 'Radians'), ('d', 'Degrees'))
@@ -408,6 +412,7 @@ class ImageCollection(VipObjectModel):
 class Image(VipObjectModel):
   fileFormat = models.CharField(max_length=4);
   pixelFormat = models.CharField(max_length=1, choices=PIXEL_FORMAT);
+
   imageWidth = models.PositiveIntegerField('Image Width (pixels)');
   imageHeight = models.PositiveIntegerField('Image Height (pixels)');
   numberColorBands = models.PositiveIntegerField('Number of Color Bands');

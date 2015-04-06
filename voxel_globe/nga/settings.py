@@ -129,7 +129,8 @@ LOGIN_REQUIRED_URLS_EXCEPTIONS = (
 LOGIN_URL = '/login'
 
 INGEST_TASKS = ['voxel_globe.arducopter.tasks',
-                'voxel_globe.jpg_exif.tasks']
+                'voxel_globe.jpg_exif.tasks',
+                'voxel_globe.no_metadata.tasks']
 
 CELERY_TASKS = ['voxel_globe.world.tasks',
                 'voxel_globe.tiepoint.tasks',

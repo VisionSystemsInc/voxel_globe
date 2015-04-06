@@ -1,6 +1,6 @@
 import os
 #import voxel_globe.tasks as tasks
-from ..common_tasks import app, VipTask
+from voxel_globe.common_tasks import app, VipTask
 from glob import glob
 import voxel_globe.meta.models
 from os import environ as env
@@ -114,7 +114,7 @@ def ingest_data(self, uploadSession_id, imageDir):
                                        (7428, averageGps[0], averageGps[1], averageGps[2])).save()
   uploadSession.delete()
 
-ingest_data.name="arducopter"
+ingest_data.dbname="arducopter"
 ingest_data.description = "Arducopter data collect"
 
 @app.task(base=VipTask, bind=True)
