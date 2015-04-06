@@ -12,6 +12,9 @@ set VIP_EMAIL=andrew.neff@vsi-ri.com
 set VIP_AUTOSTART=0
 set VIP_SERVICES=postgresql rabbitmq celeryd flower httpd notebook
 REM Do I want to automatically start services on boot?
+set VIP_DAEMON_TIMEOUT=20.0
+REM How long should daemons be waited on when starting/stopping before it is
+REM considered a failure and move on.
 
 REM Debug flags
 set VIP_DEBUG=0

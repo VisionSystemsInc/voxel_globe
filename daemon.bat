@@ -12,9 +12,11 @@ if not "%VIP_NARG%"=="2" (
   goto usage
 )
 
+set ELEVATE=%VIP_INSTALL_DIR%/elevate.bat
+
 REM killall needs admin rights
 if /i "killall"=="%2" (
-  call %VIP_INSTALL_DIR%/elevate.bat %~f0 %*
+  call %ELEVATE% %~f0 %*
   if "!errorlevel!" == "1" exit /b
 )
 
@@ -73,11 +75,11 @@ goto usage
 
 :start
 for %%t in (%TASKS%) do (
-  schtasks /run /TN %%t_start_%VIP_DAEMON_POSTFIX%
+  schtasks /run /TN %%t_start_%VIP_DAEMON_POSTFIX% > nul
   
-  call %VIP_INIT_DIR%/%%t waitstart 20.0
+  call %VIP_INIT_DIR%/%%t waitstart %VIP_DAEMON_TIMEOUT%
   if "!errorlevel!" NEQ "0" (
-    echo %%t did not start successfully
+    python -c "import colorama as c; c.init(); print c.Style.BRIGHT+c.Fore.RED+'%%t did not start successfully'"
   ) else (
     echo %%t successfully start
   )
@@ -87,41 +89,18 @@ goto done
 :killall
 for %%t in (%TASKS%) do (
   schtasks /run /TN %%t_stop_%VIP_DAEMON_POSTFIX%
-  if /i "%%t"=="rabbitmq" (
-    for /F "" %%i in ('python -m voxel_globe.tools.find_process erl.exe rabbitmq') do (
-      taskkill /fi "PID eq %%i" /f
-    )
-    taskkill /im %VIP_RABBITMQ_DAEMON% /f
-  )
-  if /i "%%t"=="postgresql" (
-    taskkill /im postgres.exe /f
-  )
-  if /i "%%t"=="celeryd" (
-    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe celery') do (
-      taskkill /fi "PID eq %%i" /f
-    )
-  )
-  if /i "%%t"=="flower" (
-    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe flower') do (
-      taskkill /fi "PID eq %%i" /f
-    )
-  )
-  if /i "%%t"=="notebook" (
-    for /F "" %%i in ('python -m voxel_globe.tools.find_process python.exe notebook') do (
-      taskkill /fi "PID eq %%i" /f
-    )
-  )
+  call %VIP_INIT_DIR%/%%t killall
 )
 goto done
 
 :stop
 for %%t in (%TASKS%) do (
-  schtasks /run /TN %%t_stop_%VIP_DAEMON_POSTFIX%
+  schtasks /run /TN %%t_stop_%VIP_DAEMON_POSTFIX% > nul
   
-  call %VIP_INIT_DIR%/%%t waitstop 20.0
+  call %VIP_INIT_DIR%/%%t waitstop %VIP_DAEMON_TIMEOUT%
   if "!errorlevel!" NEQ "0" (
-    echo %%t did not stop successfully
-    call %VIP_INIT_DIR%/%%t stop /f
+    python -c "import colorama as c; c.init(); print c.Style.BRIGHT+c.Fore.RED+'%%t did not stop successfully'"
+    call %ELEVATE% %VIP_INIT_DIR%/%%t stop /f
     call %VIP_INIT_DIR%/%%t waitstop 2.0
   ) else (
     echo %%t is stopped
