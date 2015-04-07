@@ -5,7 +5,7 @@
 
 import os
 from subprocess import *
-from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW 
 
 if os.name=='nt' and os.environ['VIP_DAEMON_BACKGROUND'] == '1':
-    STARTUPINFO.dwFlags = STARTF_USESHOWWINDOW
+  from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW 
+  STARTUPINFO.dwFlags = STARTF_USESHOWWINDOW

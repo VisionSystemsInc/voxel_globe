@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 from os import environ as env
 from os.path import join as path_join
@@ -13,8 +15,12 @@ if __name__=='__main__':
   else:
     exeExtention = ''
     pydExtention = '.so'
+  
+  zipDir = env['VIP_INSTALL_DIR']
+  if os.name == 'nt':
+    zipDir = path_join(zipDir, 'vxl')
+    #Cause that's how its done in windows... :(
 
-  zipDir = path_join(env['VIP_INSTALL_DIR'], 'vxl')
   vxlBinDir = env['VIP_VXL_BUILD_BIN_DIR']
   vxlLibDir = env['VIP_VXL_BUILD_LIB_DIR']
   
