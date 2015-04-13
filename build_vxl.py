@@ -94,8 +94,9 @@ if __name__=='__main__':
   pid.wait();
 
   if os.name=='nt':
-    args = [os.path.join(env['VIP_INSTALL_DIR'].replace('/','\\'), 'run_vcvarsall.bat'), 'devenv', 'vxl.sln', '/Build']
-    env['VIP_VS_BUILD'] = env['VIP_VXL_BUILD_TYPE']+'|x64' #Stupid batch limitation with |, using "" did NOT work in batch
+    import ntpath
+    args = [ntpath.normpath(os.path.join(env['VIP_INSTALL_DIR']), 'run_vcvarsall.bat'), 'devenv', 'vxl.sln', '/Build', env['VIP_VXL_BUILD_TYPE']+'^^^|x64']
+    #The ^^^ is for Stupid batch escape limitation with |
     print "Loading vxl solution... This may take a few minutes."
     pid = subprocess.Popen(args, cwd=vxlDir);
   else:
