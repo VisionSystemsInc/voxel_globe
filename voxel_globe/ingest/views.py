@@ -153,8 +153,8 @@ def ingestFolder(request):
   #TODO: The following should be a celery task too, and the two should be a 
   #workflow, and this plus ingest_data should be a workflow
 
-  from glob import glob  
-  metadata = glob(sessionDir+'/*/*_adj_tagged_images.txt');
+  from vsi.iglob import glob  
+  metadata = glob(sessionDir+'/*/*_adj_tagged_images.txt', False);
   
   distutils.dir_util.copy_tree(sessionDir, imageDir)
   distutils.dir_util.remove_tree(sessionDir)

@@ -202,14 +202,13 @@ def writeGcpFileEnu(inputs, outputGps, lat_origin, lon_origin, h_origin):
                 (' %0.12g'*3) % enu_xyz +'\n');
 
 def runVisualSfm(sfmArg='sfm', args=[], logger=None):
-  return Popen([runVisualSfm.program, sfmArg] + args, logger=logger, shell=True)
-  #shell=True is IMPORTANT, or else visual sfm crashes becuase of the stdout/stderr redirect
-  #WHY?! I'm pretty sure he's trying to be clever about something, does something non-standard
-  #AND CRASHES!
-
-#  import subprocess
-#  return subprocess.Popen([program, sfmArg] + args)
-  #(stdout, stderr) = pid.communicate(); #Bleed stdout/strerr
+  return Popen([runVisualSfm.program, sfmArg] + args, logger=logger, shell=False)
+  #I thought shell=True was IMPORTANT, or else visual sfm crashes becuase of the stdout/stderr
+  #redirect. I didn't know why, I assumed he was trying to be clever about something, does 
+  #something non-standard AND CRASHES! Now I think it's just an issue of if the program starts
+  #and stdout/stderr aren't being read from right away, it fails. This is probably due to the
+  #fact that one executable is both a CLI and non-CLI, which is not straightforward in windows
+  #like it is in linux. 
 runVisualSfm.program = os.environ['VIP_VISUALSFM_EXE'] 
 
 def generateMatchPoints(inputs, outputNvm, matchArg=None, logger=None):

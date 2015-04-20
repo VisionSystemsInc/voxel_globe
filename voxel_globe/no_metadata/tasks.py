@@ -1,9 +1,10 @@
 from voxel_globe.common_tasks import app, VipTask
 import voxel_globe.meta.models
-from glob import glob
+from vsi.iglob import glob
 import os
 from voxel_globe.tools.subprocessbg import Popen
 from os import environ as env
+import posixpath
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__);
@@ -29,8 +30,8 @@ def ingest_data(self, uploadSession_id, imageDir):
   gpsList = []
   gpsList2 = []
 
-  for d in glob(os.path.join(imageDir, '*\\')):
-    files = glob(os.path.join(d, '*'));
+  for d in glob(os.path.join(imageDir, '*'+os.path.sep), False):
+    files = glob(os.path.join(d, '*'), False);
     files.sort()
     for f in files:
       self.update_state(state='PROCESSING', 
@@ -39,9 +40,9 @@ def ingest_data(self, uploadSession_id, imageDir):
       pid = Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
       pid.wait();
 
-      relFilePath = os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      relFilePath = posixpath.normpath(os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']));
       basename = os.path.split(f)[-1]
-      relZoomPath = os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      relZoomPath = posixpath.normpath(os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']));
 
       with open(f, 'rb') as fid:
         magic = fid.read(4)

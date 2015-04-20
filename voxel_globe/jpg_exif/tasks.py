@@ -1,10 +1,11 @@
 import os
 #import voxel_globe.tasks as tasks
 from voxel_globe.common_tasks import app, VipTask
-from glob import glob
+from vsi.iglob import glob
 import voxel_globe.meta.models
 from os import environ as env
 from os.path import join as path_join
+import posixpath
 
 from django.contrib.gis import geos
 
@@ -35,8 +36,8 @@ def ingest_data(self, uploadSession_id, imageDir):
   gpsList = []
   gpsList2 = []
 
-  for d in glob(os.path.join(imageDir, '*\\')):
-    files = glob(os.path.join(d, '*.jpg'));
+  for d in glob(os.path.join(imageDir, '*'+os.path.sep), False):
+    files = glob(os.path.join(d, '*.jpg'), False);
     files.sort()
     for f in files:
       self.update_state(state='PROCESSING', 
@@ -44,10 +45,10 @@ def ingest_data(self, uploadSession_id, imageDir):
       zoomifyName = f[:-4] + '_zoomify'
       pid = Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
       pid.wait();
-      
-      relFilePath = os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+
+      relFilePath = posixpath.normpath(os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']));
       basename = os.path.split(f)[-1]
-      relZoomPath = os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      relZoomPath = posixpath.normpath(os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']));
       
       image = Image.open(f)
       if image.bits == 8:

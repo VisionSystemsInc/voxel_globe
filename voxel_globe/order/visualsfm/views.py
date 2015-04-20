@@ -79,9 +79,9 @@ def order_status(request, task_id):
   status = {'task': task};
   
   if task.state == 'PROCESSING' and task.result['stage'] == 'generate match points':
-    from glob import glob
-    status['mat'] = len(glob(os.path.join(task.result['processingDir'], '*.mat')))
-    status['sift'] = len(glob(os.path.join(task.result['processingDir'], '*.sift')))
+    from vsi.iglob import glob
+    status['mat'] = len(glob(os.path.join(task.result['processingDir'], '*.mat'), False))
+    status['sift'] = len(glob(os.path.join(task.result['processingDir'], '*.sift'), False))
   
   return render(request, 'order/visualsfm/html/order_status.html',
                 status)

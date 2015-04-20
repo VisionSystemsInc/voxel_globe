@@ -1,10 +1,11 @@
 import os
 #import voxel_globe.tasks as tasks
 from voxel_globe.common_tasks import app, VipTask
-from glob import glob
+from vsi.iglob import glob
 import voxel_globe.meta.models
 from os import environ as env
 from os.path import join as path_join
+import posixpath
 
 from django.contrib.gis import geos
 
@@ -31,7 +32,7 @@ def ingest_data(self, uploadSession_id, imageDir):
   #imageDirectory = directories.filter(name='image')
   #metaDirectory = directories.filter(name='meta')
 
-  metadataFilename = glob(os.path.join(imageDir, '*', '*_adj_tagged_images.txt'));
+  metadataFilename = glob(os.path.join(imageDir, '*', '*_adj_tagged_images.txt'), False);
   if not len(metadataFilename) == 1:
     logger.error('Only one metadatafile should have been found, found %d instead', len(metadataFilename));
 
@@ -47,19 +48,20 @@ def ingest_data(self, uploadSession_id, imageDir):
   imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Arducopter Upload %s %s %s (%s)" % (uploadSession.name, day, timeOfDay, uploadSession_id), service_id = self.request.id);
   imageCollection.save();
   
-  for d in glob(os.path.join(imageDir, '*\\')):
-    files = glob(os.path.join(d, '*.jpg'));
+  for d in glob(os.path.join(imageDir, '*'+os.path.sep), False):
+    files = glob(os.path.join(d, '*.jpg'), False);
     files.sort()
     for f in files:
       self.update_state(state='PROCESSING', 
                         meta={'stage':'File %s of %d' % (f, len(files))})
+      logger.debug('Processing %s of %s', f, len(files))
       zoomifyName = f[:-4] + '_zoomify'
       pid = Popen(['vips', 'dzsave', f, zoomifyName, '--layout', 'zoomify'])
       pid.wait();
       
-      relFilePath = os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      relFilePath = posixpath.normpath(os.path.relpath(f, env['VIP_IMAGE_SERVER_ROOT']));
       basename = os.path.split(f)[-1]
-      relZoomPath = os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']).replace('\\', '/');
+      relZoomPath = posixpath.normpath(os.path.relpath(zoomifyName, env['VIP_IMAGE_SERVER_ROOT']));
       
       image = Image.open(f)
       if image.bits == 8:
@@ -95,7 +97,7 @@ def ingest_data(self, uploadSession_id, imageDir):
   metadata = loadAdjTaggedMetadata(metadataFilename);
   for meta in metadata:
     try:
-      img = imageCollection.images.get(name__endswith='Frame %s'%meta.filename)
+      img = imageCollection.images.get(name__icontains='Frame %s'%meta.filename)
       k = numpy.eye(3);
       k[0,2] = img.imageWidth/2;
       k[1,2] = img.imageHeight/2;      
@@ -103,7 +105,8 @@ def ingest_data(self, uploadSession_id, imageDir):
       t = [0, 0, 0];
       origin = meta.llh_xyz;
       saveKrt(self.request.id, img, k, r, t, origin, srid=7428);
-    except:
+    except Exception as e:
+      logger.warning('%s', e)
       logger.error('Could not match metadata entry for %s' % meta.filename)
   
   averageGps = numpy.mean(numpy.array(map(lambda x:x.llh_xyz, metadata)), 0);
@@ -119,7 +122,7 @@ ingest_data.description = "Arducopter data collect"
 
 @app.task(base=VipTask, bind=True)
 def add_arducopter_images(self, *args, **kwargs):
-  images = glob(path_join(env['VIP_PROJECT_ROOT'], 'images', '1fps*', ''));
+  images = glob(path_join(env['VIP_PROJECT_ROOT'], 'images', '1fps*', ''), False);
   images.sort();
   imageCollection = [];
   for image in images:

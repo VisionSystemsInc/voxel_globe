@@ -36,8 +36,8 @@ class LogPipe(threading.Thread):
     self.level = level
     self.preamble = preamble;
     fdRead, fdWrite = os.pipe()
-    self.pipeReader = os.fdopen(fdRead)
-    self.pipeWriter = os.fdopen(fdWrite)
+    self.pipeReader = os.fdopen(fdRead, 'r')
+    self.pipeWriter = os.fdopen(fdWrite, 'w')
     #self.start()
   
   def fileno(self):
