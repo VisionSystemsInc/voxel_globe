@@ -53,12 +53,12 @@ def runVisualSfm(self, imageCollectionId, sceneId, cleanup=True, history=None):
     image = imageList[x].history(history);
     self.update_state(state='INITIALIZE', meta={'stage':'image fetch', 'i':x, 'total':len(imageList)})
     imageName = image.originalImageUrl;
-    extension = os.path.splitext(imageName)[1]
+    extension = os.path.splitext(imageName)[1].lower()
     localName = path_join(processingDir, 'frame_%05d%s' % (x+1, extension)); 
     wget(imageName, localName, secret=True)
 
     #Convert the image if necessary    
-    if extension not in ['.jpg', '.pgm', '.ppm']:
+    if extension not in ['.jpg', '.jpeg', '.pgm', '.ppm']:
       self.update_state(state='INITIALIZE', meta={'stage':'image convert', 'i':x, 'total':len(imageList)})
       #Add code here to converty to jpg for visual sfm
       if extension=='not implemented':

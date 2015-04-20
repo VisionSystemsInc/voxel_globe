@@ -30,14 +30,14 @@ def ingest_data(self, uploadSession_id, imageDir):
   imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Generic Upload %s (%s)" % (uploadSession.name, uploadSession_id), service_id = self.request.id);
   imageCollection.save();
 
-  r = numpy.eye(3);
+  r = numpy.eye(3);q
   t = [0, 0, 0];
 
   gpsList = []
   gpsList2 = []
 
   for d in glob(os.path.join(imageDir, '*'+os.path.sep), False):
-    files = glob(os.path.join(d, '*.jpg'), False);
+    files = glob(os.path.join(d, '*.jpg'), False) + glob(os.path.join(d, '*.jpeg'), False);
     files.sort()
     for f in files:
       self.update_state(state='PROCESSING', 
