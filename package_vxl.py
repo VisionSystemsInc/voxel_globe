@@ -25,6 +25,7 @@ if __name__=='__main__':
   vxlLibDir = env['VIP_VXL_BUILD_LIB_DIR']
   
   zipBinDir = path_join(zipDir, 'bin')
+  zipRoamDir = path_join(zipDir, 'roam')
   zipPythonDir = path_join(zipDir, 'lib', 'python2.7', 'site-packages', 'vxl')
   zipShareDir = path_join(zipDir, 'share', 'vxl')
   zipClDir = path_join(zipShareDir, 'cl')
@@ -65,4 +66,11 @@ if __name__=='__main__':
     copy_file(path_join(env['VIP_GLEW_BIN_DIR'], 'glew32.dll'), zipBinDir)
     subprocess.Popen(['7z.exe', 'a', path_join('installers', 'vxl.zip'), 'vxl'], cwd=env['VIP_INSTALL_DIR']).wait();
   else:
-    pass
+    mkpath(zipRoamDir)
+    files = glob(path_join(vxlBinDir, '*'+exeExtention))
+    roamFile = path_join(zipRoamDir, 'roam')
+    for file in files:
+      try:
+        os.link(roamFile, path_join(zipRoamDir, os.path.basename(file)))
+      except OSError:
+        pass

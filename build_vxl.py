@@ -1,3 +1,5 @@
+#!/usr/bin/env python 
+
 import os
 from os import environ as env
 from os.path import join as path_join

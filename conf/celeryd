@@ -19,7 +19,10 @@ CELERY_CREATE_DIRS=1
 
 CELERYD_CHDIR=${VIP_CELERY_PROCESSORS}
 CELERY_APP=${VIP_CELERY_APP}
-CELERYD_OPTS="--time-limit=300 --concurrency=${VIP_NUMBER_CORES}"
+CELERYD_OPTS="--concurrency=${VIP_NUMBER_CORES}"
+
+export VIP_DJANGO_DEBUG=${VIP_CELERY_DJANGO_DEBUG}
+#Special override to prevent the celery leak? I hope
 
 if [ "${VIP_CELERY_AUTORELOAD+foo}" == "foo" ]
 then
