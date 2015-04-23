@@ -3,8 +3,8 @@ from django.http import HttpResponse
 
 from uuid import uuid4
 
-from ...meta import models
-from ...meta.tools import getHistory
+from voxel_globe.meta import models
+from voxel_globe.meta.tools import getHistory
 from .models import Session
 
 # Create your views here.
@@ -28,8 +28,32 @@ def make_order_2(request, image_collection_id):
                  'image_collection_id':image_collection_id})
 
 def make_order_3(request, image_collection_id, scene_id):
+  import voxel_globe.tools.enu as enu
+  from voxel_globe.meta.tools import getLlh
+  import numpy as np
+  
+  image_collection = models.ImageCollection.objects.get(id=image_collection_id)
+  image_list = image_collection.images.all()
+  #scene = models.Scene.objects.get(id=scene_id);
+
+  llhs = []
+  
+  for image in image_list:
+    llhs.append(getLlh(image.history()))
+
+  llhs = np.array(llhs)
+  lon_min, lat_min, alt_min = llhs.min(axis=0)
+  lon_max, lat_max, alt_max = llhs.max(axis=0)    
+
+  bbox = {'lon_min':lon_min,
+          'lon_max':lon_max,
+          'lat_min':lat_min,
+          'lat_max':lat_max,
+          'alt_min':alt_min,
+          'alt_max':alt_max}
+  
   return render(request, 'order/build_voxel_world/html/make_order_3.html',
-                {'scene_id':scene_id,
+                {'scene_id':scene_id, 'bbox':bbox,
                  'image_collection_id':image_collection_id})
 
 
@@ -48,7 +72,7 @@ def make_order_4(request, image_collection_id, scene_id):
       return response;
 
   history = getHistory(request.REQUEST.get('history', None))
-  
+
   bbox = {'lat1': request.POST['lat1'], 
           'lon1': request.POST['lon1'], 
           'alt1': request.POST['alt1'], 

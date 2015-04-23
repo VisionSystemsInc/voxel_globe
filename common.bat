@@ -53,6 +53,7 @@ REM set VIP_VXL_CMAKE_OPTIONS='"-D", "var:type=value"'
 set VIP_VXL_CMAKE_ENTRIES='BUILD_VGUI=ON'
 set VIP_VXL_BUILD_TYPE=Release
 set VIP_VXL_SRC_DIR=%VIP_PROJECT_ROOT%/vxl_src
+set VIP_OPENCL_DEVICE=gpu0
 
 REM Must be set in local env for GDAL and vxl if not nvidia default
 REM set VIP_OPENCL_INCLUDE_PATH=/usr/local/cuda/include
@@ -69,7 +70,7 @@ set VIP_NOTEBOOK_PID_DIR=%VIP_PID_DIR%/notebook
 set VIP_NOTEBOOK_LOCK_DIR=%VIP_LOCK_DIR%/notebook
 set VIP_NOTEBOOK_PROFILE_DIR=%VIP_PROJECT_ROOT%/notebooks/profile
 set BOXM2_OPENCL_DIR=%VIP_VXL_SRC_DIR%/contrib/brl/bseg/boxm2/ocl/cl/
-set VOLM_DIR=%VIP_VXL_SRC_DIR%/contrib/brl/bbas/volm3
+set VOLM_DIR=%VIP_VXL_SRC_DIR%/contrib/brl/bbas/volm
 set VIP_PYTHONPATH=%VIP_PROJECT_ROOT%
 REM for voxel_globe package
 

@@ -30,7 +30,7 @@ def ingest_data(self, uploadSession_id, imageDir):
   imageCollection = voxel_globe.meta.models.ImageCollection.create(name="Generic Upload %s (%s)" % (uploadSession.name, uploadSession_id), service_id = self.request.id);
   imageCollection.save();
 
-  r = numpy.eye(3);q
+  r = numpy.eye(3);
   t = [0, 0, 0];
 
   gpsList = []
@@ -114,7 +114,8 @@ def ingest_data(self, uploadSession_id, imageDir):
         
       try:          
         altitude = float(gps[6][0])/gps[6][1]
-        if gps[5] == '\x01':
+        
+        if 5 in gps and gps[5] == '\x01':
           altitude = -altitude;
       except:
         altitude = 0;

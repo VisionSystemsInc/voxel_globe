@@ -25,14 +25,14 @@
 <div id="mainContainer" class="main-content">
   <form action="{% url 'order_build_voxel_world:make_order_4' image_collection_id scene_id %}" method="post">
     {% csrf_token %}
-    Latitude1 (S is negative): <input type=text" name="lat1" value="37.647978"/><br/>
-    Longitude1 (E is negative): <input type=text" name="lon1" value="-92.215533"/><br/>
-    Altitude1 (WGS84): <input type=text" name="alt1" value="300"/><br/>
-    Latitude2 (S is negative): <input type=text" name="lat2" value="37.648663"/><br/>
-    Longitude2 (E is negative): <input type=text" name="lon2" value="-92.214523"/><br/>
-    Altitude2 (WGS84): <input type=text" name="alt2" value="400"/><br/>
-    Voxel Size(meters): <input type=text" name="vox" value="1"/><br/>
-    Skip every <input type=text" name="skip" value="1"/> frames<br/>
+    South Latitude (S is negative): <input type="text" name="lat1" value="{{ bbox.lat_min }}"/><br/>
+    West Longitude (E is negative): <input type="text" name="lon1" value="{{ bbox.lon_min }}"/><br/>
+    Bottom Altitude (WGS84): <input type="text" name="alt1" value="{{ bbox.alt_min }}"/><br/>
+    North Latitude (S is negative): <input type="text" name="lat2" value="{{ bbox.lat_max }}"/><br/>
+    East Longitude (E is negative): <input type="text" name="lon2" value="{{ bbox.lon_max }}"/><br/>
+    Top Altitude (WGS84): <input type="text" name="alt2" value="{{ bbox.alt_max }}"/><br/>
+    Voxel Size(meters): <input type="text" name="vox" value="0.5"/><br/>
+    Use every <input type="text" name="skip" value="1"/> frames<br/>
     <input type="submit" value="Order"/>
   </form>
 </div>

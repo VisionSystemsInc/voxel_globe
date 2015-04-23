@@ -1,4 +1,7 @@
-import json;
+import boxm2_smart_register
+#This need to me imported before other boxm2 because of how it's designed
+
+import json
 
 import voxel_globe.meta.models
 

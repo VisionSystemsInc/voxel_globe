@@ -140,6 +140,20 @@ def getKrt(image, origin=None, history=None, eps=1e-9):
       pass#Convert to different origin. WARNING, less stable
   return (K_i, R, t, llh);
 
+def getLlh(image, history=None):
+  import voxel_globe.tools.enu as enu
+
+  (k,r,t,origin)= getKrt(image, history=history)
+  cameraCenter = -r.T.dot(t)
+  
+  llh =  enu.enu2llh(lon_origin=origin[0], 
+                     lat_origin=origin[1], 
+                     h_origin=origin[2], 
+                     east=cameraCenter[0], 
+                     north=cameraCenter[1], 
+                     up=cameraCenter[2])
+  
+  return (llh['lon'][0], llh['lat'][0], llh['h'][0])
 
 def projectPoint(K, T, llh_xyz, xs, ys, distances=None, zs=None):
   ''' Project a set of points xs, ys (Nx1 numpy array each) through the K (3x3) T (4x4) 

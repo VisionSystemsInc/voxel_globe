@@ -40,3 +40,14 @@ def getAreaLong(self, id):
   sleep(15)
   self.update_state(state='PROGRESS', meta={'current': 3, 'total': 3})
   return country.area;
+
+@app.task(bind=True)
+def printDb(self, id):
+  ''' Useful task for probing the boxm2 database of a worker '''
+  import boxm2_batch
+  from vsi.tools import Redirect, Logger
+  from celery.utils.log import get_task_logger
+  l = get_task_logger(__name__);
+  
+  with Redirect(all=Logger(l)):
+    l.error(boxm2_batch.print_db())

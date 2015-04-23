@@ -9,16 +9,20 @@ import os
 @app.task(base=VipTask, bind=True)
 def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, cleanup=True, history=None):
   from vsi.tools.redirect import Redirect, Logger as LoggerWrapper
-  with Redirect(stdout_c=LoggerWrapper(logger, lvl=logging.DEBUG), stderr_c=LoggerWrapper(logger, lvl=logging.WARNING)):  
+  with Redirect(stdout_c=LoggerWrapper(logger, lvl=logging.INFO), stderr_c=LoggerWrapper(logger, lvl=logging.WARNING)):  
     from voxel_globe.meta import models
     from voxel_globe.meta.tools import getKrt
     import voxel_globe.tools
-    
-    from boxm2_scene_adaptor import create_scene_and_blocks,boxm2_scene_adaptor
-    
+
+    from boxm2_scene_adaptor import boxm2_scene_adaptor
+
     from vil_adaptor import load_image
     from vpgl_adaptor import load_perspective_camera
     from voxel_globe.tools.wget import download as wget
+    
+    from vsi.vxl.create_scene_xml import create_scene_xml 
+    
+    openclDevice = os.environ['VIP_OPENCL_DEVICE']
     
     scene = models.Scene.objects.get(id=sceneId)
     
@@ -27,16 +31,19 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, clean
     
     processingDir = voxel_globe.tools.getTaskDir()
   
-    app_model = "boxm2_mog3_grey"
-    obs_model = "boxm2_num_obs"
-    block_len_xy = 100
-    block_len_z = 40
     logger.warning(bbox)
-    create_scene_and_blocks(processingDir, app_model, obs_model,
-                            scene.origin[0], scene.origin[1], scene.origin[2],
-                            float(bbox['lon1']), float(bbox['lat1']), float(bbox['alt1']),
-                            float(bbox['lon2']), float(bbox['lat2']), float(bbox['alt2']),
-                            float(bbox['vox']), block_len_xy, block_len_z, "utm", 1, 'scene');
+    
+    create_scene_xml(openclDevice, 3, float(bbox['vox']), 
+                     (float(bbox['lon1']), float(bbox['lat1']), float(bbox['alt1'])), 
+                     (float(bbox['lon2']), float(bbox['lat2']), float(bbox['alt2'])),
+                     origin=scene.origin,
+                     output_file=open(os.path.join(processingDir, 'scene.xml'), 'w'), 
+                     model_dir='.', num_bins=1)
+#     create_scene_and_blocks(processingDir, app_model, obs_model,
+#                             scene.origin[0], scene.origin[1], scene.origin[2],
+#                             float(bbox['lon1']), float(bbox['lat1']), float(bbox['alt1']),
+#                             float(bbox['lon2']), float(bbox['lat2']), float(bbox['alt2']),
+#                             float(bbox['vox']), block_len_xy, block_len_z, "utm", 1, 'scene');
     
     counter = 1;
     
@@ -69,7 +76,7 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, clean
       
     variance = 0.06
     
-    scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  "gpu0");
+    scene = boxm2_scene_adaptor(os.path.join(processingDir, "scene.xml"),  openclDevice);
   
     current_level = 0;
   
@@ -89,14 +96,14 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, clean
       for idx, (img, cam) in enumerate(zip(loaded_imgs, loaded_cams)):
         self.update_state(state='PROCESSING', meta={'stage':'update', 'i':rfk+1, 'total':refine_cnt, 'image':idx+1, 'images':len(loaded_imgs)})
         logger.debug("refine_cnt: %d, idx: %d", rfk, idx)
-        scene.update(cam,img,True,True,None,"gpu",variance,tnear = 1000.0, tfar = 100000.0);
+        scene.update(cam,img,True,True,None,openclDevice[0:3],variance,tnear = 1000.0, tfar = 100000.0);
   
       scene.write_cache();
       
       if rfk < refine_cnt-1:
         self.update_state(state='PROCESSING', meta={'stage':'refine', 'i':rfk, 'total':refine_cnt})
         logger.debug("refining %d...", rfk)
-        scene.refine(0.3, "gpu");
+        scene.refine(0.3, openclDevice[0:3]);
         scene.write_cache();
         
     ''' The rest of this is crap preview code '''
