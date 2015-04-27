@@ -70,7 +70,9 @@ if __name__=='__main__':
                  path_join(vxlDir, 'bin')];
 
   cmake_options += ['-D', 'PYTHON_INCLUDE_DIR='+env['VIP_PYTHON_INCLUDE_DIR'],
-                    '-D', 'PYTHON_LIBRARY='+env['VIP_PYTHON_LIBRARY']];
+                    '-D', 'PYTHON_LIBRARY='+env['VIP_PYTHON_LIBRARY'],
+                    '-D', 'PYTHON_INCLUDE_DIR2='+env['VIP_PYTHON_INCLUDE_DIR'],
+                    '-D', 'PYTHON_EXECUTABLE='+env['VIP_PYTHON_EXECUTABLE']];
                     
   tmp = env.pop('VIP_CMAKE_ECLIPSE', None);
   if tmp:
