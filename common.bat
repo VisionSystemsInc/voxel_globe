@@ -15,6 +15,8 @@ REM Do I want to automatically start services on boot?
 set VIP_DAEMON_TIMEOUT=20.0
 REM How long should daemons be waited on when starting/stopping before it is
 REM considered a failure and move on.
+set VIP_FIREWALL_RULE_NAME=NP2R
+set VIP_DAEMON_POSTFIX=np2r_daemon
 
 REM Debug flags
 set VIP_DEBUG=0
@@ -179,6 +181,10 @@ set VIP_WSGI_ACCESS_SCRIPT=%VIP_DJANGO_SITE%/auth.py
 set VIP_UTIL_DIR=%VIP_INSTALL_DIR%/utils
 
 set VIP_VSI_DIR=%VIP_PROJECT_ROOT%/external/vsi
+
+REM ADD this later, to add loops to firewall rules in linux setup/unsetup
+set VIP_TCP_PORTS=""
+set VIP_UDP_PORTS=""
 
 REM *********** NON-VIP Section. There can affect ANYTHING ***********
 REM These parameters are not protected by the VIP Prefix, and thus
