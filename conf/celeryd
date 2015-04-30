@@ -28,3 +28,5 @@ if [ "${VIP_CELERY_AUTORELOAD+foo}" == "foo" ]
 then
   CELERYD_OPTS="${CELERYD_OPTS} --autoreload"
 fi
+
+umask 0002

@@ -16,6 +16,7 @@ class AutoCleanDir(str):
     self.cleanup = cleanup
     super(AutoCleanDir, self).__init__(obj)
 
+#Consider PERMISSIONS for directories that STAY, it's ALWAYS 700, you'll need to change it
 def getTaskDir(cleanup=True):
   ''' Creates and returns a new processing directory for a celery task '''
   if not os.path.exists(env['VIP_TEMP_DIR']):
@@ -28,3 +29,4 @@ def getTaskDir(cleanup=True):
     processingDir = mkdtemp(dir=env['VIP_TEMP_DIR']);
 
   return AutoCleanDir(processingDir, cleanup=cleanup)
+

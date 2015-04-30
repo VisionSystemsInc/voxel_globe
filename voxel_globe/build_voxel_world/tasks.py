@@ -111,6 +111,7 @@ def runBuildVoxelModel(self, imageCollectionId, sceneId, bbox, skipFrames, clean
     from distutils.dir_util import mkpath
     import tempfile
     ingestDir = tempfile.mkdtemp(dir=os.environ['VIP_IMAGE_SERVER_ROOT']);
+    os.chmod(ingestDir, 0775)
     expectedDir = os.path.join(ingestDir, 'preview')
     mkpath(expectedDir)
     renderFlyThrough(scene, expectedDir, 1024, 1024)

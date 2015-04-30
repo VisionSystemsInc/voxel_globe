@@ -168,7 +168,7 @@ set VIP_HTTPD_LOG_DIR=%VIP_LOG_DIR%/httpd
 set VIP_HTTPD_LOCK_DIR=%VIP_LOCK_DIR%/httpd
 set VIP_HTTPD_LOG_LEVEL=info
 set VIP_HTTPD_DEPLOY_ON_START=1
-set VIP_HTTPD_SERVER_NAME=www.vsi-ri.com
+set VIP_HTTPD_SERVER_NAME=vsi-ri.com
 
 set VIP_WSGI_PYTHON_DIR=%VIP_PYTHON_DIR%
 REM THIS was annoying, WSGI auto adds bin in linux, SO my roam isn't used, however

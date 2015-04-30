@@ -26,3 +26,5 @@ if [ $(id -u) -ne 0 ]; then
   PG_USER=`id -u -n`
   PG_GROUP=`id -g -n`
 fi
+
+umask 0002
