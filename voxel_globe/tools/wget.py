@@ -39,7 +39,11 @@ def download(url, filename, chunkSize=2**20, cookie={}, secret=False):
   request.add_header('Accept-encoding', 'gzip');
   if cookie:
     request.add_header('Cookie', _makeCookieString(cookie))
-  response = urllib2.urlopen(request);
+  context=None
+  if url.startswith('https://'):
+    import ssl
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+  response = urllib2.urlopen(request, context=context);
   if response.info().get('Content-Encoding') == 'gzip':
     gzipped = True;
     decompressor = zlib.decompressobj(16+zlib.MAX_WBITS)
