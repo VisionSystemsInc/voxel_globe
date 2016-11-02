@@ -1,5 +1,7 @@
 # Voxel Globe Docker #
 
+[![Join the chat at https://gitter.im/VisionSystemsInc/voxel_globe](https://badges.gitter.im/VisionSystemsInc/voxel_globe.svg)](https://gitter.im/VisionSystemsInc/voxel_globe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ###Overview
 Calibrates aerial camera models and constructs 3D models from video sequences as well applications for 3D models such as change detection. 
 
