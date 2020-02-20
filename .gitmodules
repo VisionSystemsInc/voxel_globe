@@ -3,4 +3,4 @@
 	url = git@github.com:VisionSystemsInc/vxl.git
 [submodule "external/vsi"]
 	path = external/vsi
-	url = git@bitbucket.org:visionsystemsinc/vsi_common.git
+	url = git@github.com:visionsystemsinc/vsi_common.git
